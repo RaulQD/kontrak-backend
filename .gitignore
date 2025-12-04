@@ -1,0 +1,14 @@
+/node_modules
+.env
+package-lock.json
+temp/uploads/*
+temp/pdfs/*
+temp/zips/*
+!temp/uploads/.gitkeep
+!temp/pdfs/.gitkeep
+!temp/zips/.gitkeep
+generated_contracts/
+*.xlsx
+*.xls
+*.zip
+*.pdf
