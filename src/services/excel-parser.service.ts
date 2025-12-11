@@ -60,7 +60,7 @@ export class ExcelParserServices {
 
       const invalidRows = new Set(validation.errors.map((e) => e.row));
       const invalidRecords = invalidRows.size;
-      const validRecords = validation.validEmployee?.length || 0;
+      const validRecords = validation.validEmployees?.length || 0;
 
       logger.info(
         {
@@ -76,7 +76,7 @@ export class ExcelParserServices {
 
       const result: ValidationResult = {
         isValid: validation.isValid,
-        employees: validation.validEmployee || [],
+        employees: validation.validEmployees || [],
         errors: validation.errors,
         totalRecords,
         validRecords,

@@ -118,6 +118,7 @@ export const employeeSchema = z.object({
       },
     )
     .optional(),
+  subDivisionOrParking: z.string({ error: 'sub división requerida' }).trim(),
   contractType: contractTypeSchema,
 });
 

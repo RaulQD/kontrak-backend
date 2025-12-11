@@ -66,6 +66,7 @@ export class ValidationService {
       district: result.data.district,
       department: result.data.department,
       position: result.data.position,
+      subDivisionOrParking: result.data.subDivisionOrParking,
       contractType: this.mapContractType(result.data.contractType),
 
       // Campos opcionales (solo si existen)
@@ -98,26 +99,26 @@ export class ValidationService {
       return 'PART TIME';
     if (lower === 'ape') return 'APE';
 
-    return 'PLANILLA'; // Default
+    return 'PLANILLA';
   }
   validateEmployeeInbatch(employees: Record<string, unknown>[]): {
     isValid: boolean;
     errors: ValidationError[];
-    validEmployee?: EmployeeData[];
+    validEmployees?: EmployeeData[];
   } {
     const errors: ValidationError[] = [];
-    const validEmployee: EmployeeData[] = [];
+    const validEmployees: EmployeeData[] = [];
     const dniSet = new Set<string>();
     employees.forEach((rowData, index) => {
-      const rowNumber = index + 2;
+      const rowNumber = index + 2; // VALIDA DESDE LAS SEGUNDA FILA
       const validation = this.validateEmployee(rowData, rowNumber, dniSet);
       if (validation.isValid && validation.employee) {
-        validEmployee.push(validation.employee);
+        validEmployees.push(validation.employee);
       } else {
         errors.push(...validation.errors);
       }
     });
 
-    return { isValid: errors.length === 0, errors, validEmployee };
+    return { isValid: errors.length === 0, errors, validEmployees };
   }
 }
