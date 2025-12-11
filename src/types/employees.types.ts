@@ -16,12 +16,18 @@ export interface EmployeeData {
   salaryInWords?: string;
   entryDate?: Date | string;
   position: string;
+  subDivisionOrParking: string;
   // Campos específicos de SUBSIDIO
   replacementFor?: string;
   reasonForSubstitution?: string;
   contractType: ContractType;
 }
-
+export interface EmployeeWithStatus extends EmployeeData {
+  pdfGenerated?: boolean;
+  pdfPath?: string;
+  errors?: string[];
+  row?: number;
+}
 export interface AddressData {
   province: string;
   district: string;
@@ -43,7 +49,7 @@ export interface ValidationError {
 }
 export interface ValidationResult {
   isValid: boolean;
-  employees: EmployeeData[];
+  employees: EmployeeWithStatus[];
   errors: ValidationError[];
   totalRecords: number;
   validRecords: number;

@@ -11,11 +11,11 @@ const contractController = new ContractController();
  * Endpoint para subir y procesar archivo Excel
  * Body: multipart/form-data con campo 'excel'
  */
-router.post(
-  '/upload',
-  excelUpload.single('excel'),
-  contractController.uploadAndProcessExcel,
-);
+// router.post(
+//   '/upload',
+//   excelUpload.single('excel'),
+//   contractController.uploadAndProcessExcel,
+// );
 
 /**
  * POST /api/contracts/generate-pdfs
@@ -27,6 +27,13 @@ router.post(
   excelUpload.single('excel'),
   contractController.generateContractPDFs,
 );
+/**
+ * GET /api/contract/generate-pdfs
+ * Endpoint para obtener o previsualizarel pdf de contratos.
+ * @params: DNI,
+ * @query: sessinId, format
+ */
+router.get('/preview/:dni', contractController.previewContractPdf);
 
 router.use(ErrorHandleMulter);
 export default router;
