@@ -82,6 +82,12 @@ export class ValidationService {
             ? result.data.entryDate
             : result.data.entryDate,
       }),
+      ...(result.data.endDate && {
+        endDate:
+          result.data.endDate instanceof Date
+            ? result.data.endDate
+            : result.data.endDate,
+      }),
     };
 
     return { isValid: true, errors: [], employee };
@@ -110,7 +116,7 @@ export class ValidationService {
     const validEmployees: EmployeeData[] = [];
     const dniSet = new Set<string>();
     employees.forEach((rowData, index) => {
-      const rowNumber = index + 2; // VALIDA DESDE LAS SEGUNDA FILA
+      const rowNumber = index + 2;
       const validation = this.validateEmployee(rowData, rowNumber, dniSet);
       if (validation.isValid && validation.employee) {
         validEmployees.push(validation.employee);

@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs';
 import { AppError } from '../utils/app-error';
 import { BAD_REQUEST } from '../constants/http';
 import { AppErrorCode } from '../constants/app-error-code';
-import { logger } from '../validators/logger';
+import { logger } from '../utils/logger';
 import { HeaderValidationResult } from '../types/excel-types/excel.types';
 import { ALL_FIELDS_MAP, BASE_FIELDS } from '../constants/contract-field';
 
@@ -118,7 +118,7 @@ export function validateExcelHeaders(
   const isValid = missingHeaders.length === 0;
   logger.info({
     totalHeaders: validHeader.length,
-    foudnField: Array.from(foundFields),
+    foundField: Array.from(foundFields),
     missingHeaders,
   });
   return { isValid, missingHeaders, headerMapping, foundHeaders: validHeader };
@@ -154,19 +154,3 @@ export function validateAndGetHeaderMapping(
  * Obtiene los nombres sugeridos de encabezados para una plantilla Excel
  * @returns Array con los nombres sugeridos de encabezados
  */
-export function getSuggestedHeaders(): string[] {
-  return [
-    'Nombre',
-    'Apellido Paterno',
-    'Apellido Materno',
-    'DNI',
-    'Provincia',
-    'Distrito',
-    'Departamento',
-    'Dirección',
-    'Salario',
-    'Salario en Letras',
-    'Fecha de Ingreso',
-    'Tipo de Contrato',
-  ];
-}

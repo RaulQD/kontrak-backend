@@ -1,8 +1,4 @@
 import { Request, Response } from 'express';
-import { ExcelParserServices } from '../services/excel-parser.service';
-import { PDFGeneratorService } from '../services/pdf-generator.service';
-import { FileStorageService } from '../services/file-storage.service';
-import { logger } from '../validators/logger';
 import { ContractService } from '../services/contract.service';
 import { catchError } from '../utils/catch-error';
 import { BAD_REQUEST } from '../constants/http';
@@ -29,9 +25,23 @@ export class ContractController {
 
     return res.status(200).json({
       success: true,
-      message: `Se generaron ${result.pdfResults.length} contratos exitosamente`,
       data: result,
     });
+  });
+  downloadZip = catchError(async (req: Request, res: Response) => {
+    const employee = req.body;
+    //formatear fecha
+    const day = String(new Date().getDate()).padStart(2, '0');
+    const month = String(new Date().getMonth() + 1).padStart(2, '0');
+    const year = new Date().getFullYear();
+    const formatDate = `${day}-${month}-${year}`;
+
+    res.setHeader('Content-type', 'application/zip');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename = "contratos-${formatDate}.zip"`,
+    );
+    await this.contractService.downloadZipStream(res, employee);
   });
   previewContractPdf = catchError(async (req: Request, res: Response) => {
     const { dni } = req.params;

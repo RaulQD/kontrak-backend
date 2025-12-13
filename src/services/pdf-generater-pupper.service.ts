@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer';
-import { logger } from '../validators/logger';
+import { logger } from '../utils/logger';
 import { EmployeeData } from '../types/employees.types';
 import { formatCurrency } from '../utils/formatCurrency';
 

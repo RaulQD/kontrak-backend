@@ -1,17 +1,17 @@
 import { EmployeeData, ValidationError } from './employees.types';
 
 export interface ContractProcessingResult {
-  sessionPath: string;
+  // sessionPath: string;
   totalRecords: number;
   validRecords: number;
   invalidRecords: number;
-  generatedPDFs: number;
-  pdfResults: PDFResult[];
-  errors: PDFGenerationError[];
-  summary: Record<string, number>;
+  // generatedPDFs: number;
+  // pdfResults: PDFResult[];
+  // errors: PDFGenerationError[];
+  // summary: Record<string, number>;
   validationErrors?: ValidationError[];
   employees: EmployeeData[]; // NUEVO
-  sessionId: string; // NUEVO (extraído de sessionPath)
+  // sessionId: string; // NUEVO (extraído de sessionPath)
 }
 
 export interface PDFResult {

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
-import { logger } from '../validators/logger';
+import { logger } from '../utils/logger';
 import { AppError } from '../utils/app-error';
 import { INTERNAL_SERVER_ERROR } from '../constants/http';
 

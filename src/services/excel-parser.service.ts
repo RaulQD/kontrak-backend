@@ -1,5 +1,5 @@
 import ExcelJS from 'exceljs';
-import { logger } from '../validators/logger';
+import { logger } from '../utils/logger';
 import { BAD_REQUEST } from '../constants/http';
 import { AppError } from '../utils/app-error';
 import { validateAndGetHeaderMapping } from '../validators/excel-headers.validator';
@@ -69,9 +69,7 @@ export class ExcelParserServices {
           invalidRecords,
           totalErrors: validation.errors.length,
         },
-        validation.isValid
-          ? '✅ Validación exitosa'
-          : '⚠️  Validación con errores',
+        validation.isValid ? 'Validación exitosa' : 'Validación con errores',
       );
 
       const result: ValidationResult = {
@@ -224,24 +222,34 @@ export class ExcelParserServices {
 
             if (field === 'dni' && typeof value === 'number') {
               // Convertir DNI de number a string
-              finalValue = String(Math.floor(value));
+              finalValue = String(value);
+            } else if (field === 'entryDate') {
+              if (value instanceof Date) {
+                const day = String(value.getDate() + 1).padStart(2, '0');
+                const month = String(value.getMonth() + 1).padStart(2, '0');
+                const year = value.getFullYear();
+                finalValue = `${day}/${month}/${year}`;
+              }
+            } else if (field === 'endDate') {
+              if (value instanceof Date) {
+                const day = String(value.getDate() + 1).padStart(2, '0');
+                const month = String(value.getMonth() + 1).padStart(2, '0');
+                const year = value.getFullYear();
+                finalValue = `${day}/${month}/${year}`;
+              }
             } else if (field === 'salary') {
-              // Convertir salario a number manejando formato peruano
               if (typeof value === 'string') {
                 const trimmed = value.trim();
                 if (trimmed === '' || trimmed === 'N/A') {
                   finalValue = null;
                 } else {
-                  // Remover símbolos de moneda (S/, S/., PEN, etc.)
                   let cleanValue = trimmed.replace(/^S\/\.?\s*/i, '').trim();
-                  // Convertir a formato numérico: remover puntos (miles) y cambiar coma por punto (decimal)
                   cleanValue = cleanValue.replace(/\./g, '').replace(',', '.');
 
                   const num = Number(cleanValue);
                   finalValue = isNaN(num) ? null : num;
                 }
               }
-              // Si ya es number, dejarlo como está
             } else if (typeof value === 'string' && value.trim() === '') {
               finalValue = null;
             }
@@ -253,8 +261,6 @@ export class ExcelParserServices {
           }
         }
       });
-
-      // Solo agregar filas que tengan al menos un dato
       if (hasData || !skipEmptyRows) {
         data.push(fila);
       }
@@ -310,5 +316,14 @@ export class ExcelParserServices {
     // Por defecto
     const stringValue = String(value).trim();
     return stringValue === '' ? null : stringValue;
+  }
+  private parseExcelDate(value: Date): string {
+    if (value instanceof Date) {
+      const day = String(value.getDate() + 1).padStart(2, '0');
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const year = value.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+    return value;
   }
 }
