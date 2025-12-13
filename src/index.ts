@@ -1,7 +1,7 @@
 import { createApp } from './app';
 import { config } from './config';
 import { Server } from './server';
-import { logger } from './validators/logger';
+import { logger } from './utils/logger';
 // Ejecutar aplicación
 (async () => {
   await main();

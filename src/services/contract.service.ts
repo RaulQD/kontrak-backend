@@ -13,7 +13,10 @@ import { FileStorageService } from './file-storage.service';
 import { PDFGeneratorService } from './pdf-generator.service';
 import path from 'path';
 import fs from 'fs/promises';
-
+import { logger } from '../utils/logger';
+import archiver from 'archiver';
+import { EmployeeData } from '../types/employees.types';
+import { Response } from 'express';
 export class ContractService {
   private readonly excelParseServices: ExcelParserServices;
   private readonly fileStorageService: FileStorageService;
@@ -44,63 +47,103 @@ export class ContractService {
       );
     }
 
-    //CREAR LA CARPETA DE SESIÓN
-    const sessionPath = await this.fileStorageService.createSessionFolder();
-    const sessionId = path.basename(sessionPath);
-    //GENERAR Y GUARDAR LOS PDFs PARA CADA EMPLEADO VÁLIDO
-    const pdfResults: PDFResult[] = [];
-    const errors: PDFGenerationError[] = [];
+    // //CREAR LA CARPETA DE SESIÓN
+    // const sessionPath = await this.fileStorageService.createSessionFolder();
+    // const sessionId = path.basename(sessionPath);
+    // //GENERAR Y GUARDAR LOS PDFs PARA CADA EMPLEADO VÁLIDO
+    // const pdfResults: PDFResult[] = [];
+    // const errors: PDFGenerationError[] = [];
 
-    for (const employee of validationResult.employees) {
-      try {
-        const { buffer: pdfBuffer, filename: fileName } =
-          await this.pdfGeneratorService.generateContract(
-            employee,
-            employee.contractType,
-          );
-        //GUARDAR EL PDF EN LA CARPETA DE SESIÓN
-        const filePath = await this.fileStorageService.savePDF(
-          sessionPath,
-          employee.contractType,
-          fileName,
-          pdfBuffer,
-        );
-        pdfResults.push({
-          dni: employee.dni,
-          filename: fileName,
-          contractType: employee.contractType,
-          size: pdfBuffer.length,
-          path: filePath,
-        });
-      } catch (error) {
-        errors.push({
-          dni: employee.dni,
-          error: error instanceof Error ? error.message : 'Error desconocido',
-        });
-      }
-      //CALCULAR EL RESUMEN DE LOS CONTARTOS
-    }
-    const summary = pdfResults.reduce(
-      (acc, pdf) => {
-        acc[pdf.contractType] = (acc[pdf.contractType] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
+    // for (const employee of validationResult.employees) {
+    //   try {
+    //     const { buffer: pdfBuffer, filename: fileName } =
+    //       await this.pdfGeneratorService.generateContract(
+    //         employee,
+    //         employee.contractType,
+    //       );
+    //     //GUARDAR EL PDF EN LA CARPETA DE SESIÓN
+    //     const filePath = await this.fileStorageService.savePDF(
+    //       sessionPath,
+    //       employee.contractType,
+    //       fileName,
+    //       pdfBuffer,
+    //     );
+    //     pdfResults.push({
+    //       dni: employee.dni,
+    //       filename: fileName,
+    //       contractType: employee.contractType,
+    //       size: pdfBuffer.length,
+    //       path: filePath,
+    //     });
+    //   } catch (error) {
+    //     errors.push({
+    //       dni: employee.dni,
+    //       error: error instanceof Error ? error.message : 'Error desconocido',
+    //     });
+    //   }
+    // }
+    // //CALCULAR EL RESUMEN DE LOS CONTARTOS
+    // const summary = pdfResults.reduce(
+    //   (acc, pdf) => {
+    //     acc[pdf.contractType] = (acc[pdf.contractType] || 0) + 1;
+    //     return acc;
+    //   },
+    //   {} as Record<string, number>,
+    // );
+    // //pROGRAMACI´NO DE LIMPIEZA : BORRAR LOS ARCHIVOS DESPUES DE 5 MINUTOS.
+    // setTimeout(() => {
+    //   try {
+    //     fs.rm(sessionPath, { recursive: true, force: true });
+    //     logger.info(`Limpieza automatica: Sessión ${sessionId} eliminada`);
+    //   } catch (error) {
+    //     console.info(error);
+    //   }
+    // }, 1800000);
+
     return {
-      sessionPath,
-      sessionId,
+      // sessionPath,
+      // sessionId,
       totalRecords: validationResult.totalRecords,
       validRecords: validationResult.validRecords,
       invalidRecords: validationResult.errors.length,
-      generatedPDFs: pdfResults.length,
-      pdfResults,
-      errors,
-      summary,
+      // generatedPDFs: pdfResults.length,
+      // pdfResults,
+      // errors,
+      // summary,
       employees: validationResult.employees,
       validationErrors: validationResult.errors,
     };
   }
+  async downloadZipStream(response: Response, employee: EmployeeData[]) {
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.on('error', (err) => {
+      throw err;
+    });
+    archive.pipe(response);
+
+    for (const emp of employee) {
+      try {
+        const { buffer, filename } =
+          await this.pdfGeneratorService.generateContract(
+            emp,
+            emp.contractType,
+          );
+        // 2. Definimos el nombre de la carpeta virtual
+        // Usamos la misma lógica que tenías: minúsculas y sin espacios
+        const folderName = emp.contractType
+          .toLocaleLowerCase()
+          .replace(/\s+/g, '');
+
+        archive.append(buffer, { name: `${folderName}/${filename}` });
+      } catch (error) {
+        if (error instanceof Error) {
+          logger.info(`Error con empleado ${emp.dni}: ${error.message}`);
+        }
+      }
+    }
+    await archive.finalize();
+  }
+
   async previewContractPdf(
     sessionId: string,
     dni: string,

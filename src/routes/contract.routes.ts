@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { ContractController } from '../controllers/contract.controller';
 import { excelUpload } from '../middlewares/upload.middleware';
 import { ErrorHandleMulter } from '../middlewares/error-handler-multer.middleware';
+import { schemaValidatorMiddleware } from '../middlewares/schema-validator.middleware';
+import { EmployeeBatchSchema } from '../validators/employee.validator';
 
 const router = Router();
 const contractController = new ContractController();
@@ -23,7 +25,7 @@ const contractController = new ContractController();
  * Body: multipart/form-data con campo 'excel'
  */
 router.post(
-  '/generate-pdfs',
+  '/upload',
   excelUpload.single('excel'),
   contractController.generateContractPDFs,
 );
@@ -33,7 +35,11 @@ router.post(
  * @params: DNI,
  * @query: sessinId, format
  */
+router.post(
+  '/download-zip',
+  schemaValidatorMiddleware(EmployeeBatchSchema),
+  contractController.downloadZip,
+);
 router.get('/preview/:dni', contractController.previewContractPdf);
-
 router.use(ErrorHandleMulter);
 export default router;

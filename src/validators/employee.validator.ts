@@ -1,7 +1,7 @@
 import z from 'zod';
 
 export const CONTRACT_TYPES = [
-  'Planilla',
+  'PLANILLA',
   'PART TIME',
   'SUBSIDIO',
   'APE',
@@ -17,12 +17,7 @@ export const contractTypeSchema = z
     if (lower === 'planilla') return 'Planilla';
     if (lower === 'subsidio' || lower === 'suplencia' || lower === 'reemplazo')
       return 'Subsidio';
-    if (
-      lower === 'part time' ||
-      lower === 'part-time' ||
-      lower === 'parttime' ||
-      lower === 'pt'
-    )
+    if (lower === 'part time' || lower === 'part-time' || lower === 'parttime')
       return 'Part-time';
     if (lower === 'ape') return 'Ape';
     return val;
@@ -118,13 +113,33 @@ export const employeeSchema = z.object({
       },
     )
     .optional(),
+  endDate: z
+    .union(
+      [
+        z
+          .string()
+          .regex(
+            /^\d{2}\/\d{2}\/\d{4}$/,
+            'Fecha debe estar en formato DD/MM/YYYY',
+          ),
+        z.date(),
+      ],
+      {
+        error: 'Fecha de termino es requerida',
+      },
+    )
+    .optional(),
   subDivisionOrParking: z.string({ error: 'sub división requerida' }).trim(),
   contractType: contractTypeSchema,
 });
 
-export const EmployeeBatchSchema = z
-  .array(employeeSchema)
-  .min(1, 'Debe haber al menos un empleado');
+export const EmployeeBatchSchema = z.object({
+  // CAMBIO CLAVE: 'body' ahora es directamente el array de empleados
+  body: z
+    .array(employeeSchema)
+    .min(1, 'La lista de empleados no puede estar vacía')
+    .max(80, 'Máximo 80 empleados por lote'),
+});
 
 export type EmployeeFromExcel = z.infer<typeof employeeSchema>;
 export type EmployeeBatch = z.infer<typeof EmployeeBatchSchema>;

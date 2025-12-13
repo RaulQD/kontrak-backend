@@ -3,7 +3,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import { errorHandler } from './middlewares/error-handle.middleware';
 import { corsConfig } from './config/cors.config';
-import { logger } from './validators/logger';
+import { logger } from './utils/logger';
 import router from './routes';
 
 /**
@@ -11,8 +11,6 @@ import router from './routes';
  */
 
 export const createApp = async (): Promise<Express> => {
-  // Asegurar que la carpeta temp existe
-
   const app = express();
   app.use(morgan('dev'));
   app.use(express.json());

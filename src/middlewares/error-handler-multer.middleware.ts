@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
-import { logger } from '../validators/logger';
+import { logger } from '../utils/logger';
 import { BAD_REQUEST } from '../constants/http';
 
 export const ErrorHandleMulter = (

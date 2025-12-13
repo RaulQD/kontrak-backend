@@ -90,6 +90,20 @@ export const BASE_FIELDS: Record<string, FieldConfig> = {
     ],
     description: 'Fecha de inicio del empleado',
   },
+  endDate: {
+    aliases: [
+      'FIN',
+      'fecha de fin',
+      'fechadefin',
+      'fecha_de_fin',
+      'fecha de termino',
+      'feach_de_termino',
+      'FECHA DE TERMINO',
+      'Fecha de Termino',
+      'Fecha de fin',
+    ],
+    description: 'Fecha de terminode contrato',
+  },
   subDivisionOrParking: {
     aliases: [
       'playa',
@@ -163,7 +177,7 @@ export const ALL_FIELDS_MAP: Record<string, FieldConfig> = {
   ...SUBSIDIO_SPECIFIC_FIELDS,
 } as const;
 
-export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO';
+export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO' | 'APE';
 
 export const CONTRACT_VALIDATION_RULES: Record<
   string,
@@ -234,29 +248,24 @@ export const CONTRACT_VALIDATION_RULES: Record<
       'salaryInWords',
     ],
   },
+  APE: {
+    description: 'Contrato APE',
+    requiredFields: [
+      // Campos base (siempre)
+      'name',
+      'lastNameFather',
+      'lastNameMother',
+      'dni',
+      'entryDate',
+      'position',
+      'subDivisionOrParking',
+      // Campos comunes
+      'province',
+      'district',
+      'department',
+      'address',
+      'salary',
+      'salaryInWords',
+    ],
+  },
 };
-/**
- * ══════════════════════════════════════════════════════════
- * HELPER: Obtener campos requeridos solo BASE
- * ══════════════════════════════════════════════════════════
- */
-export function getBaseRequiredFields(): string[] {
-  return Object.keys(BASE_FIELDS);
-}
-
-/**
- * ══════════════════════════════════════════════════════════
- * HELPER: Obtener campos requeridos por tipo
- * ══════════════════════════════════════════════════════════
- */
-export function getRequiredFieldsByType(contractType: ContractType): string[] {
-  return CONTRACT_VALIDATION_RULES[contractType].requiredFields;
-}
-/**
- * ══════════════════════════════════════════════════════════
- * HELPER: Verificar si un tipo de contrato es válido
- * ══════════════════════════════════════════════════════════
- */
-export function isValidContractType(type: string): type is ContractType {
-  return ['planilla', 'part_time', 'ape', 'subsidio'].includes(type);
-}

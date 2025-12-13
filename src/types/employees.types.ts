@@ -15,6 +15,7 @@ export interface EmployeeData {
   salary?: number;
   salaryInWords?: string;
   entryDate?: Date | string;
+  endDate?: Date | string;
   position: string;
   subDivisionOrParking: string;
   // Campos específicos de SUBSIDIO
