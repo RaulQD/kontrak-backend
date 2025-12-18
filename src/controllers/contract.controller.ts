@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ContractService } from '../services/contract.service';
 import { catchError } from '../utils/catch-error';
-import { BAD_REQUEST } from '../constants/http';
+import { BAD_REQUEST, CREATED, OK } from '../constants/http';
 
 export class ContractController {
   private readonly contractService: ContractService;
@@ -23,7 +23,7 @@ export class ContractController {
       req.file.buffer,
     );
 
-    return res.status(200).json({
+    return res.status(CREATED).json({
       success: true,
       data: result,
     });
@@ -73,7 +73,7 @@ export class ContractController {
       });
       return res.send(fileResult.buffer);
     }
-    return res.status(200).json({
+    return res.status(OK).json({
       success: true,
       data: result, // Aquí va el objeto { dni, pdfBase64, fileName }
     });

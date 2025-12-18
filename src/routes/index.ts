@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import contractRoutes from './contract.routes';
+import excelRoutes from './excel.route';
 
 const router = Router();
 
@@ -17,6 +18,7 @@ router.get('/health', (req, res) => {
 // Rutas de contratos
 console.info('📝 Registrando rutas de contratos...');
 router.use('/contracts', contractRoutes);
+router.use('/excel', excelRoutes);
 console.info('✅ Rutas de contratos registradas');
 
 export default router;

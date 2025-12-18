@@ -5,4 +5,11 @@ export const ALLOWED_EXCEL_MIMES = [
   'application/x-excel',
   'application/x-msexcel',
 ];
-export const ALLOWED_EXTENSIONS = ['.xlsx', '.xls'];
+export const ALLOWED_EXTENSIONS = ['.xlsx', '.xls', '.csv'];
+
+export const MAP_SEX: Record<string, string> = {
+  M: 'MASCULINO',
+  m: 'MASCULINO',
+  F: 'FEMENINO',
+  f: 'FEMENINO',
+};

@@ -1,11 +1,9 @@
 import { config } from '../config';
 import { AppErrorCode } from '../constants/app-error-code';
-import { BAD_REQUEST, NOT_FOUND } from '../constants/http';
+import { NOT_FOUND } from '../constants/http';
 import {
   ContractProcessingResult,
-  PDFGenerationError,
   PDFPreviewBase64,
-  PDFResult,
 } from '../types/contract.types';
 import { AppError } from '../utils/app-error';
 import { ExcelParserServices } from './excel-parser.service';
@@ -30,7 +28,6 @@ export class ContractService {
   async processExcelAndGenerateContracts(
     buffer: Buffer,
   ): Promise<ContractProcessingResult> {
-    //VALIDAR excel
     const validationResult = await this.excelParseServices.validateExcel(
       buffer,
       {
@@ -39,77 +36,12 @@ export class ContractService {
         headerRow: 1,
       },
     );
-    if (!validationResult.isValid) {
-      throw new AppError(
-        'Excel inválido',
-        BAD_REQUEST,
-        AppErrorCode.BAD_REQUEST,
-      );
-    }
-
-    // //CREAR LA CARPETA DE SESIÓN
-    // const sessionPath = await this.fileStorageService.createSessionFolder();
-    // const sessionId = path.basename(sessionPath);
-    // //GENERAR Y GUARDAR LOS PDFs PARA CADA EMPLEADO VÁLIDO
-    // const pdfResults: PDFResult[] = [];
-    // const errors: PDFGenerationError[] = [];
-
-    // for (const employee of validationResult.employees) {
-    //   try {
-    //     const { buffer: pdfBuffer, filename: fileName } =
-    //       await this.pdfGeneratorService.generateContract(
-    //         employee,
-    //         employee.contractType,
-    //       );
-    //     //GUARDAR EL PDF EN LA CARPETA DE SESIÓN
-    //     const filePath = await this.fileStorageService.savePDF(
-    //       sessionPath,
-    //       employee.contractType,
-    //       fileName,
-    //       pdfBuffer,
-    //     );
-    //     pdfResults.push({
-    //       dni: employee.dni,
-    //       filename: fileName,
-    //       contractType: employee.contractType,
-    //       size: pdfBuffer.length,
-    //       path: filePath,
-    //     });
-    //   } catch (error) {
-    //     errors.push({
-    //       dni: employee.dni,
-    //       error: error instanceof Error ? error.message : 'Error desconocido',
-    //     });
-    //   }
-    // }
-    // //CALCULAR EL RESUMEN DE LOS CONTARTOS
-    // const summary = pdfResults.reduce(
-    //   (acc, pdf) => {
-    //     acc[pdf.contractType] = (acc[pdf.contractType] || 0) + 1;
-    //     return acc;
-    //   },
-    //   {} as Record<string, number>,
-    // );
-    // //pROGRAMACI´NO DE LIMPIEZA : BORRAR LOS ARCHIVOS DESPUES DE 5 MINUTOS.
-    // setTimeout(() => {
-    //   try {
-    //     fs.rm(sessionPath, { recursive: true, force: true });
-    //     logger.info(`Limpieza automatica: Sessión ${sessionId} eliminada`);
-    //   } catch (error) {
-    //     console.info(error);
-    //   }
-    // }, 1800000);
 
     return {
-      // sessionPath,
-      // sessionId,
       totalRecords: validationResult.totalRecords,
       validRecords: validationResult.validRecords,
       invalidRecords: validationResult.errors.length,
-      // generatedPDFs: pdfResults.length,
-      // pdfResults,
-      // errors,
-      // summary,
+
       employees: validationResult.employees,
       validationErrors: validationResult.errors,
     };

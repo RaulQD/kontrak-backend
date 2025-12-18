@@ -1,15 +1,13 @@
 import { EmployeeData } from '../types/employees.types';
 import PDFDocument from 'pdfkit';
-import { logger } from '../validators/logger';
-import { format } from 'date-fns';
 import path from 'path';
-import { formatCurrency } from '../utils/formatCurrency';
 import {
   SIGNATURE_EMPLOYEE,
   SIGNATURE_EMPLOYEE_TWO,
 } from '../constants/signatures';
+import { formatCurrency } from '../utils/formatCurrency';
 // FUNCIÓN PARA GENERAR EL HTML DEL CONTRATO
-export const generatePlanillaContract = async (
+export const generatePartTimeContract = async (
   data: EmployeeData,
 ): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
@@ -52,7 +50,7 @@ export const generatePlanillaContract = async (
       .font('Arial Normal')
       .text(contractText, { continued: true })
       .font('Arial Bold')
-      .text('Contrato de Trabajo a Tiempo Parcial, ', {
+      .text('Contrato de Trabajo a Tiempo Parcial,', {
         continued: true,
         align: 'justify',
       })
@@ -1045,7 +1043,7 @@ export const generatePlanillaContract = async (
       .font('Arial Bold')
       .text('EL TRABAJADOR ', { continued: true })
       .font('Arial Normal')
-      .text(' prevista en las normas que resulten aplicables.')
+      .text('prevista en las normas que resulten aplicables.')
       .font('Arial Normal')
       .text('            ', { continued: true })
       .font('Arial Normal')
@@ -2676,8 +2674,8 @@ export const generatePlanillaContract = async (
     doc.end();
   });
 };
-export const generatePartTimeContract = async (
-  _data: EmployeeData,
+export const generatePlanillaContract = async (
+  data: EmployeeData,
 ): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4' });
@@ -2696,6 +2694,2180 @@ export const generatePartTimeContract = async (
 
     doc.registerFont('Arial Bold', arialBold);
     doc.registerFont('Arial Normal', arialNormal);
+    const fullName =
+      `${data.lastNameFather || ' '} ${data.lastNameMother || ' '} ${data.name || ''}`
+        .trim()
+        .replace(/\s+/g, ' ');
+    // Título
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('CONTRATO DE TRABAJO A PLAZO FIJO POR INCREMENTO DE ACTIVIDADES', {
+        align: 'center',
+        underline: true,
+      })
+      .moveDown(1);
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text(
+        'Conste por el presente documento, que se suscribe por duplicado con igual tenor y valor, el ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('Contrato por Incremento de Actividades, ', {
+        continued: true,
+      })
+      .font('Arial Normal')
+      .text(
+        'que, al amparo de lo dispuesto en los Artículos 53 y 57 del Texto Único Ordenado del Decreto Legislativo Nº 728 (Decreto Supremo Nº 003-97- TR, Ley de Productividad y Competitividad Laboral) y el Decreto Supremo N° 002-97-TR, celebran, de una parte, la empresa ',
+        { continued: true, align: 'justify' },
+      )
+      .font('Arial Bold')
+      .text('INVERSIONES URBANÍSTICAS OPERADORA S.A., ', {
+        continued: true,
+        align: 'justify',
+      })
+      .font('Arial Normal')
+      .text(
+        'con R.U.C. Nº 20603381697, con domicilio en Calle Dean Valdivia N°148 Int.1401 Urb. Jardín (Edificio Platinium), Distrito de San Isidro, Provincia y Departamento de Lima, debidamente representada por la Sra. Catherine Susan Chang López identificado con D.N.I. Nº 42933662  y por la Sra. Maria Estela Guillen Cubas, identificada con DNI Nº 10346833, según poderes inscritos en la Partida Electrónica 14130887 del Registro de Personas Jurídicas de Lima, a quien en adelante se le denominará “EL EMPLEADOR”; y de otra parte, el Sr.(a). ',
+        { continued: true, align: 'justify' },
+      )
+      .font('Arial Bold')
+      .text(`${fullName} `, { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('identificado con ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text(`DNI N° ${data.dni || ''}, `, { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('de nacionalidad peruana, con domicilio en ', {
+        continued: true,
+        align: 'justify',
+      })
+      .font('Arial Bold')
+      .text(`${data.address || ''}, `, { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Distrito de ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text(`${data.district || ''}, `, { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Provincia de ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text(`${data.province} `, { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('y Departamento de ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text(`${data.department} `, { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('fijando como correo electrónico personal ', {
+        continued: true,
+        align: 'justify',
+      })
+      .font('Arial Bold')
+      .text(`${data.email} `, { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'a quien en adelante se le denominará “EL TRABAJADOR”; en los términos y condiciones siguientes:',
+      )
+      .moveDown(1);
+    //titulo Nro 1
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('PRIMERO: PARTES DEL CONTRATO', {
+        align: 'left',
+        underline: true,
+      })
+      .moveDown(1);
+
+    //Parrafo 1.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('1.1       ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'es una sociedad anónima debidamente constituida e inscrita en la Partida No. 14130887 del Registro de ',
+        { align: 'justify' },
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Personas Jurídicas de la Ciudad de Lima, cuyo objeto social es la prestación de servicios de administració, promoción,',
+        { align: 'justify' },
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'desarrollo y operación de playas de estacionamiento, sistemas de peaje y actividades conexas.',
+      );
+    //Parrafo 1.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('1.2       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('En ese contexto, ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'ha asumido la administración de una serie de playas de estacionamiento en la ciudad de ',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Lima y provincias, así como la implementación de negocios colaterales en las playas de estacionamiento que ya vienen siendo',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'administradas, situación que generará un incremento considerable de sus actividades – directa o indirectamente vinculadas',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'al giro del negocio de estacionamientos, con la consecuente necesidad de contratar personal para concretar sus',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'operaciones en las referidas playas de estacionamiento, siendo que las áreas involucradas son ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('TIME SURCO.');
+    //Parrafo 1.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('1.3       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Conforme lo detalla el correspondiente Informe del Área de Operaciones, el incremento en sus operaciones relacionadas a',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'la administración de playas de estacionamiento es de tal magnitud que no puede ser satisfecho con su personal actual,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'motivo por el cual requiere contratar a plazo fijo a una persona que tenga la experiencia necesaria para desempeñarse como',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text(`${data.position || ''}.`);
+
+    //Parrafo 1.4
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('1.4       ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('declara tener experiencia como ', { continued: true })
+      .font('Arial Bold')
+      .text(`${data.position || ''},`, { continued: true })
+      .font('Arial Normal')
+      .text('por lo que cuenta con las condiciones necesarias para')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('ocupar el cargo de ', { continued: true })
+      .font('Arial Bold')
+      .text(`${data.position}, `, { continued: true })
+      .font('Arial Normal')
+      .text(
+        'durante el tiempo que ésta lo estime y la naturaleza de las labores así lo exija.',
+      )
+      .moveDown(1);
+    //texto 2
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('SEGUNDO: OBJETO DEL CONTRATO', {
+        align: 'left',
+        underline: true,
+      })
+      .moveDown(1);
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('2.1       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Por el presente documento ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('contrata a plazo fijo a ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('bajo la modalidad de')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('INCREMENTO DE ACTIVIDADES ', { continued: true })
+      .font('Arial Normal')
+      .text('para que ocupe el cargo de ', { continued: true })
+      .font('Arial Bold')
+      .text('ANFITRION(A) PT ', { continued: true })
+      .font('Arial Normal')
+      .text('asumiendo las responsabilidades')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'propias del puesto y de acuerdo a las estipulaciones contenidas en este Contrato.',
+      );
+    //parrafo 2.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('2.2       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Las partes reconocen y declaran que el cargo de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('está ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('SUJETO A CONTROL ', { continued: true })
+      .font('Arial Normal')
+      .text('de acuerdo a lo establecido ')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('en el artículo 43 del Decreto Supremo Nro. 003-97-TR.')
+      .moveDown(1);
+    //texto 3
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('TERCERO: PLAZO', {
+        align: 'left',
+        underline: true,
+      })
+      .moveDown(1);
+    //parrafo 3.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('3.1       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Las labores que desarrollará ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'tendrán una duración de , los cuales se contabilizarán desde el día',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text(`${data.entryDate || ''} `, { continued: true })
+      .font('Arial Normal')
+      .text('y concluirán el día ', { continued: true })
+      .font('Arial Bold')
+      .text(`${data.endDate || ''}.`);
+
+    //Parrafo 3.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('3.2       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Las partes acuerdan que dado que el cargo que desempeñará ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('corresponde a uno ', { continued: true })
+      .font('Arial Bold')
+      .text('SUJETO A CONTROL.')
+      .moveDown(1);
+
+    //parrafo 4
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('CUARTO: PRINCIPALES OBLIGACIONES DE EL TRABAJADOR', {
+        align: 'left',
+        underline: true,
+      })
+      .moveDown(1);
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('Por medio del presente documento, ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('se obliga, referencialmente, a:')
+      .moveDown(1);
+
+    //parrafo 4.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.1       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Prestar sus servicios, cumpliendo con las funciones, órdenes e instrucciones que imparta o señale ',
+        {
+          continued: true,
+        },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('o sus')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'representantes, para realizar las actividades que correspondan a su cargo.',
+      );
+    //párrafor 4.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.2       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'La prestación laboral deberá ser efectuada de manera personal, no pudiendo ',
+        {
+          continued: true,
+        },
+      )
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('ser reemplazado ni')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('asistido por terceros, debiendo ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('cumplir con las funciones inherentes al puesto encomendado y las')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'labores adicionales y/o anexas que fuese necesario ejecutar y sean requeridas y/o determinadas por ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR.');
+    //parrafor 4.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.3       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Prestar sus servicios con responsabilidad, prontitud, esmero y eficiencia, aportando su conocimiento y profesional en el',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('cumplimiento de los objetivos y estrategias de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR.');
+    //parrafor 4.4
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.4       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Cumplir estrictamente la legislación peruana en materia laboral, el Reglamento Interno de Trabajo, el Reglamento de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Seguridad y Salud en el Trabajo, el Reglamento de Hostigamiento Sexual y demás disposiciones, directivas circulares,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('reglamentos, normas, etc., que expida ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR; ', { continued: true })
+      .font('Arial Normal')
+      .text('declarando conocer todas aquellas que se encuentran vigentes.');
+    //parrafor 4.5
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.5       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'No ejecutar por su cuenta o en su beneficio, sea en forma directa o indirecta, actividad o negociaciones dentro de giro de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'en cualquier forma o naturaleza, inclusive fuera de la jornada de trabajo y en días inhábiles o festivos.',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'declara entender que el incumplimiento a lo antes mencionado constituye una infracción de los deberes',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'esenciales que emanan de su vínculo laboral, por lo que en el caso de no cumplir con su compromiso, tal acto será',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('considerado como una falta grave.');
+    //parrafor 4.6
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.6       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Devolver en forma inmediata todos los materiales (documentos, informes, bienes, herramientas, vestimenta, etc.) que se le',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'entreguen con ocasión del trabajo prestado si la relación laboral concluyese por cualquier causa.',
+      );
+    //parrafor 4.7
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.7       ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se obliga a respetar los procedimientos de evaluación de rendimiento y desempeño laboral que tiene',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('establecidos ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('con el objeto de valorar el nivel de eficiencia logrado por', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('en su puesto')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('de trabajo.');
+    //parrafor 4.8
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.8       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Cualquier otra obligación prevista en este contrato, establecida por ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('que se desprenda de su condición')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'de trabajador y aquellas previstas en las normas que resulten aplicables.',
+      );
+    //parrafor 4.9
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.9       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('En caso sea necesario para el cumplimiento de sus labores, ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('deberá trasladarse a las operaciones y/o')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('plazas en los que ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('realiza actividades comerciales.');
+    //parrafor 4.10
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('4.10     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('En caso ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'no cumpla con observar el plazo de preaviso legal de renuncia de treinta (30) días, deberá',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('abonar a favor de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'una penalidad a modo de indemnización equivalente a la remuneración diaria que percibe',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'por cada día que no preste servicios en desconocimiento de dicho preaviso, para lo cual',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('autoriza a ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'a que se le descuente el monto que corresponda de su liquidación de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('beneficios sociales.')
+      .moveDown(1);
+
+    //parrafo 5
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('QUINTO: PERÍODO DE PRUEBA', { align: 'left', underline: true })
+      .moveDown(1);
+    //PARRAFOR 5.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('5.1       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Ambas partes acuerdan en pactar un período de prueba de  de acuerdo con lo que establece el artículo 10 de la Ley de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('Productividad y Competitividad Laboral.')
+      .moveDown(1);
+
+    //TEXTO 6
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('SEXTO: REMUNERACION', { align: 'left', underline: true })
+      .moveDown(1);
+    //parrafo 6.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('6.1       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Las partes dejan expresa constancia que la retribución que perciba ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('estará compuesta por una')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('remuneración fija Mensual ascendente al monto bruto de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text(`${formatCurrency(Number(data.salary)) || ''} `, {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text(`${data.salaryInWords || ''}. `);
+    //parrafo 6.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('6.2       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Asimismo,', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'podrá percibir una remuneración variable sobre la base de condiciones de venta y/o en',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'función al cumplimiento de indicadores de gestión y resultados, bajo los términos y condiciones establecidos en las',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('políticas que determine ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'de forma unilateral, las mismas que podrán ser modificadas o suprimidas',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('en cualquier momento y a sola decisión de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('lo cual es aceptado por ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR.')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'El pago de dicha remuneración variable se encuentra sujeto a la vigencia de la relación laboral, es decir,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'sólo se abonarán las comisiones a los trabajadores con vínculo laboral vigente a la fecha de pago de las mismas.',
+      );
+    //parrafo 6.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('6.3       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('A la remuneración mensual de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se agregará la Asignación Familiar correspondiente de ser el caso,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'deduciéndose  las  aportaciones  y  descuentos  por  tributos  establecidos  en  la  ley  que  resulten aplicables.',
+      );
+    //parrafo 6.5
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('6.4       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Adicionalmente, ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'tendrá derecho al pago de beneficios tales como las gratificaciones legales en los',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'meses de julio y diciembre, la compensación por tiempo de servicios y demás que pudieran corresponderle, de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'acuerdo a la legislación laboral vigente y sus respectivas modificaciones.',
+      );
+    //parrafor 6.5
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('6.5       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Será de cargo de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'el pago del Impuesto a la Renta y los aportes al Sistema Nacional o Privado de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('Pensiones, los que serán retenidos por ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('así como cualquier otro tributo o carga social que grave las')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('remuneraciones del personal dependiente en el país.');
+    //parrafo 6.6
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('6.6       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Ambas partes acuerdan que la forma y fecha de pago de la remuneración será determinada por ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('y')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('podrá ser modificada de acuerdo con sus necesidades operativas')
+      .moveDown(1);
+
+    //texto 7
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('SÉTIMO: OBLIGACIONES DEL EMPLEADOR', {
+        align: 'left',
+        underline: true,
+      })
+      .moveDown(1);
+    //parrafo 7.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('7.1       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Pagar a ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'todos los derechos y beneficios que le correspondan de acuerdo a lo dispuesto en la',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'legislación laboral vigente al momento del pago. Registrar los pagos realizados a ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('en el Libro')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'de Planillas de Remuneraciones de la Empresa y hacer entrega oportuna de la boleta de pago.',
+      );
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('7.2       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Poner en conocimiento de la Autoridad Administrativa de Trabajo el presente Contrato, para su conocimiento y registro,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'en cumplimiento de lo dispuesto en el Texto Único Ordenado del Decreto Legislativo Nº 728 (Decreto Supremo',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('Nº 003-97-TR, Ley de Productividad y Competitividad Laboral).');
+    //parrafo 7.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('7.3       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Retener de la remuneración bruta mensual de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('las sumas correspondientes al aporte al Seguro')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('Privado o Público de Pensiones, así como el Impuesto a la Renta.');
+    //parrafo 7.4
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('7.4       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Las otras contenidas en la legislación laboral vigente y en cualquier norma de carácter interno, incluyendo el ',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Reglamento Interno de Trabajo, el Reglamento de Seguridad y Salud en el Trabajo y el Reglamento de Hostigamiento ',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('Sexual.')
+      .moveDown(1);
+
+    //texto 8
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('OCTAVO: JORNADA DE TRABAJO', {
+        align: 'left',
+        underline: true,
+      })
+      .moveDown(1);
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('En relación a la Jornada de Trabajo, ', {
+        continued: true,
+        align: 'justify',
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR y EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('acuerdan lo siguiente:');
+    //parrafo 8.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('8.1       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'La jornada de trabajo es de 48 horas semanales flexible, teniendo ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('la facultad de establecer el horario')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'de trabajo y modificarlo de acuerdo a sus necesidades, con las limitaciones establecidas por la ley.',
+      );
+    //parrafo 8.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('8.2       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('El tiempo de Refrigerio no forma parte de la jornada de trabajo.');
+    //parrafo 8.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('8.3       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Las partes acuerdan que podrán acumularse y compensarse las horas de trabajo diarias o semanales con períodos de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'descanso dentro de la semana, diferentes semanas o ciclos de trabajo, según sea el caso; también se podrán',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'compensar con las horas que no se completen con trabajo efectivo durante la jornada hasta el límite de 48 horas',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('semanales en promedio. Asimismo, acuerdan que ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('podrá introducir modificaciones al horario y')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'jornada de trabajo, establecer jornadas acumulativas, alternativas, flexibles, compensatorias y horarios diferenciados,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('respetando la jornada máxima establecida por Ley.');
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('8.4       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('El trabajo en sobretiempo de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('es estrictamente voluntario y, a solicitud de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('debiendo ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('contar con autorización escrita de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('para realizar horas extras,')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'según lo establecido en el Reglamento Interno de Trabajo.El trabajo en sobretiempo debe ser prestado de manera',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'efectiva, no considerándose como tal la sola permanencia en las instalaciones de ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('de EL EMPLEADOR.');
+    //parrafo 8.5
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('8.5       ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR y EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'acuerdan que durante la vigencia de la relación laboral podrán compensar el',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'trabajo prestado en sobretiempo con el otorgamiento de períodos equivalentes de descanso; debiendo realizarse',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'tal compensación, dentro del mes calendario siguiente a aquel en que se realizó dicho trabajo, salvo pacto en contrario.',
+      );
+
+    // parrafor 8.6
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('8.6       ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'por su cargo y la naturaleza de su prestación de servicios se encuentra ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('SUJETO A CONTROL.', { continued: true });
+    // parrafor 8.7
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('8.7       ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'declara conocer que, debido al objeto social de la empresa, cuando ésta lo requiera y siempre y',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'cuando le avise con un mínimo de 48 horas de anticipación, el trabajador deberá cumplir con laborar en días feriados',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'o no laborables, sin perjuicio de la compensación o pago de la sobretasa a la que tenga derecho.',
+      )
+      .moveDown(1);
+
+    //texto 9
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('NOVENO: DECLARACIONES DE LAS PARTES', {
+        align: 'left',
+        underline: true,
+      })
+      .moveDown(1);
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('Las partes reconocen, acuerdan y declaran lo siguiente:');
+
+    //parrafo 9.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('9.1       ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se encuentra sujeto al régimen laboral de la actividad privada y le son aplicables los derechos y',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('beneficios previstos en él.');
+    //parrafo 9.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('9.2       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'De acuerdo a la facultad establecida en el párrafo segundo del artículo 9 del Texto Único Ordenado de la Ley de',
+        { continued: true },
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('Productividad y Competitividad Laboral, ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('se reserva la facultad de modificar en lugar de la prestación')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'de los servicios, de acuerdo a las necesidades del negocio y observando el criterio de razonabilidad.',
+      );
+    //parrafo 9.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('9.3       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Sin perjuicio de las labores para las cuales ha sido contratado, las partes declaran que ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('prestará')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'todas aquellas actividades conexas o complementarias a las propias del cargo que ocupará, que razonablemente',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('correspondan.');
+    //parrafo 9.4
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('9.4       ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Las partes convienen que ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'tiene facultades para organizar, fiscalizar, suprimir, modificar, reemplazar y',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'sancionar, de modo radical o no sustancial, la prestación de servicios (tiempo, lugar, forma, funcionesy modalidad) de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR.');
+    //parrafo 9.5
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('9.5       ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR y EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'acuerdan que las Boletas de Pago de remuneraciones podrán ser selladas y',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('firmadas por el (los) representante(s) legal(es) de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('con firma(s) digitalizada(s), una vez que la(s)')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'firma(s) sea(n) inscrita(s) en el Registro de Firmas a cargo del Ministerio de Trabajado que se implementará una vez',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'que se aprueben las disposiciones para la implementación del registro de firmas. Al respecto, ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL TRABAJADOR')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'presta su consentimiento expreso para que su(s) Boleta(s) de Pago sea(n) suscritas por el (los) representante(s) de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR  ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'a través de firma(s) digital(es), una vez que ello sea implementado por el Ministerio de Trabajo.',
+        { continued: true },
+      );
+    //parrafo 9.6
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('9.6       ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR y EL EMPLEADOR ', {
+        continued: true,
+        align: 'justify',
+      })
+      .font('Arial Normal')
+      .text(
+        'acuerdan que la entrega de la Boleta de Pago y demás documentos derivados',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'de la relación laboral podrán efectuarse a través del empleo de tecnologías de la información y comunicación, tales',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'como Intranet, Correo Electrónico u otro de similar naturaleza que implemente ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('o el correo')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('electrónico personal de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'indicado en el exordio del presente contrato de trabajo, prestando',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('su consentimiento expreso para ello. Asimismo, ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('declara como su dirección')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('electrónico ', { continued: true })
+      .font('Arial Bold')
+      .text(`${data.email || ''}, `, { continued: true })
+      .font('Arial Normal')
+      .text('en caso se implemente la entrega de Boletas de Pago, a través de')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('dicho medio; obligándose ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('a informar por escrito a ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('cualquier cambio de su')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('dirección electrónica.')
+      .moveDown(1);
+
+    //TEXTO 10
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('DÉCIMO: TÉRMINO DEL CONTRATO', { align: 'left', underline: true })
+      .moveDown(1);
+
+    //parrafo 10.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('10.1     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Queda entendido que la extinción del presente contrato operará indefectiblemente en la fecha de vencimiento prevista',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'en la cláusula tercera, salvo que las necesidades operativas exijan lo contrario, escenario en el que ',
+        {
+          continued: true,
+        },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR,')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('propondrá a ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('suscribir una renovación por escrito. Por lo tanto, ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('no está obligado')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'a dar ningún aviso adicional referente al término del presente contrato. En dicho momento, se abonará a',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'los beneficios sociales que le pudieran corresponder de acuerdo a ley. ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('podrá')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'resolver el contrato cuando medien los supuestos establecidos en el Texto Único Ordenado del Decreto Legislativo Nº',
+        { continued: true },
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('728, Decreto Supremo Nº 003-97-TR.');
+
+    //parrafo 10.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('10.2     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Además, son causales de resolución del presente contrato las siguientes:',
+      )
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text('a)         ', { continued: true })
+      .font('Arial Normal')
+      .text('La voluntad concertada de las partes')
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text('b)         ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'El incumplimiento de las obligaciones estipuladas en el presente documento. ',
+      )
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text('c)         ', { continued: true })
+      .font('Arial Normal')
+      .text('La comisión de falta grave por parte de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('prevista en las normas que resulten aplicables.')
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text('d)         ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Cualquier otra causal prevista en este contrato o que se encuentre establecida en las normas aplicables. ',
+      )
+      .moveDown(1);
+    //TEXTO 11
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('DÉCIMO PRIMERA: PROPIEDAD INTELECTUAL', {
+        align: 'left',
+        underline: true,
+      })
+      .moveDown(1);
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('11.1     ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('cede y transfiere a', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR', { continued: true })
+      .font('Arial Normal')
+      .text('en forma total, íntegra y exclusiva, los derechos')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'patrimoniales derivados de los trabajos e informes que sean realizados en cumplimiento del presente contrato,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('quedando', { continued: true })
+      .font('Arial Bold')
+      .text(' EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'facultado para publicar o reproducir en forma íntegra o parcial dicha información.',
+      );
+    //parrafor 11.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('11.2     ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('en virtud del presente contrato laboral, cede en exclusiva a ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', {
+        continued: true,
+      })
+      .font('Arial Normal')
+      .text('todos los')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'derechos alienables sobre las creaciones de propiedad intelectual de las obras que sean creadas por él en el',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('ejercicio de sus funciones y cumplimiento de sus obligaciones.');
+    //parrafor 11.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('11.3     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Por lo tanto, toda información creada u originada es de propiedad exclusiva de ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('quedando')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'prohibido de reproducirla, venderla o suministrarla a cualquier persona natural o jurídica, salvo',
+        { continued: true },
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('autorización escrita de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR. ', { continued: true })
+      .font('Arial Normal')
+      .text('Se deja constancia que la información comprende inclusive las ')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('investigaciones, los borradores y los trabajos preliminares.');
+
+    //parrafor 11.4
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('11.4     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('En ese sentido, ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('acepta que ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('tiene plenas facultades para acceder, revisar y leer,')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'sin previa notificación, el íntegro del contenido de la información que se encuentre en cualquiera de los medios y/o',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('herramientas proporcionados por ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR a EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('para el cumplimiento de sus funciones.');
+    //parrafor 11.5
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('11.5     ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'declara que la remuneración acordada en el presente contrato comprende cualquier compensación',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'correspondiente a los compromisos asumidos en la presente cláusula.',
+      )
+      .moveDown(1);
+    //texto 12
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('DÉCIMO SEGUNDA: USO DE CORREO ELECTRÓNICO', {
+        underline: true,
+        align: 'left',
+      })
+      .moveDown(1);
+
+    //parrafor 12.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('12.1     ', { continued: true, align: 'left' })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'facilitará a EL TRABAJADOR un nombre de usuario y una contraseña dentro del dominio:',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('@apparka.pe y/o cualquier dominio ')
+      .font('Arial Bold')
+      .text('INVERSIONES URBANÍSTICAS OPERADORA S.A ', { continued: true })
+      .font('Arial Normal')
+      .text('que pueda crear a futuro.')
+      .moveDown(0.5);
+    //parrafor 12.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('12.2     ', { continued: true, align: 'left' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'no podrá revelar su contraseña a otro personal o algún tercero, siendo plenamente responsable',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('por el uso de dicha herramienta de trabajo.', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('reconoce y acepta que se encuentra prohibido el uso de')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'los recursos informáticos proporcionados por la empresa para fines particulares, no autorizado, tanto en horario laboral,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('como fuera de él.')
+      .moveDown(0.5);
+    //Parrafor 12.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('12.3     ', { continued: true, align: 'left' })
+      .font('Arial Normal')
+      .text('En ese sentido, ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('acepta que ', { continued: true })
+      .font('Arial Bold')
+      .text('LA EMPRESA ', { continued: true })
+      .font('Arial Normal')
+      .text('tiene plenas facultades para revisar y leer, sin previa')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'notificación, el contenido de la información almacenada, enviada o recibida mediante el uso de los sistemas de correo',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'electrónico. Al respecto, mediante la suscripción del presente contrato, se otorga a ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('copia de la')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        '“Política para el uso del correo electrónico y páginas web”, debiendo cumplir con los establecido en la misma, bajo',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('responsabilidad.')
+      .moveDown(1);
+
+    //texto 13
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('DÉCIMO TERCERA: EXCLUSIVIDAD', {
+        underline: true,
+        align: 'left',
+      })
+      .moveDown(1);
+
+    //parrafo 13.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('13.1     ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('es contratado de forma exclusiva por', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('por lo que no podrá dedicarse a')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'otra actividad distinta de la que emana del presente contrato, salvo autorización previa, expresa y por escrito de',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR.')
+      .moveDown(1);
+
+    if (doc.y + 150 > doc.page.height - doc.page.margins.bottom) {
+      doc.addPage();
+    }
+    //texto 14
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('DÉCIMO CUARTA: NO COMPETENCIA', {
+        underline: true,
+        align: 'left',
+      })
+      .moveDown(1);
+
+    //parrafo 14.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('14.1     ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('se compromete a no competir con ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('en los términos y condiciones que se')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('acuerdan a continuación:')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('a.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'A no realizar ningún tipo de inversión en empresas o instituciones de cualquier tipo cuyas actividades puedan',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('estar en conflicto con los intereses de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR.')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('b.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'A no prestar servicios en forma dependiente o independiente para personas, instituciones o empresas que',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('compiten, directa o indirectamente, con', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR.')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('c.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'A no utilizar la información de carácter reservado que le fue proporcionada por ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('para')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'desarrollar por cuenta propia o de terceros, actividades que compitan con las que realiza o planeara realizar',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR.')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('d.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'A no inducir o intentar influenciar, ni directa ni indirectamente, a ningún trabajador de ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('a que')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'termine su empleo con el mismo, para que trabaje, dependiente o independientemente, para ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL TRABAJADOR')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'o para cualquier otra persona, entidad, institución o empresa, que compita con ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR.');
+    //parrafo 14.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('14.2     ', { continued: true })
+      .font('Arial Normal')
+      .text('Las obligaciones que ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'asume en virtud al literal c) de la presente cláusula, regirán indefinidamente, ',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('independientemente de la vigencia del presente contrato.');
+    //parrafo 14.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('14.3     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('El incumplimiento por parte de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('de cualquiera de las obligaciones contenidas en la presente ')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('cláusula, facultará a ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'a iniciar las acciones legales que pudieran corresponder en defensa de sus',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'derechos y a obtener la indemnización por daños y perjuicios a que hubiera lugar.',
+      );
+    //parrafo 14.4
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('14.4     ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'declara que la remuneración acordada en la cláusula sétima comprende cualquier compensación',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'correspondiente a los compromisos asumidos en la presente cláusula.',
+      )
+      .moveDown(1);
+
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('DÉCIMO QUINTA:	RESERVA Y CONFIDENCIALIDAD', {
+        underline: true,
+        align: 'left',
+      })
+      .moveDown(1);
+
+    //parrafo 14.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('15.1     ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se compromete a mantener reserva y confidencialidad absoluta con relación a la información y',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('documentación obtenida con ocasión de su trabajo para ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('en los términos y condiciones que se')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('acuerdan a continuación:')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('a.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'A observar ante cualquier persona, entidad o empresa una discreción absoluta sobre cualquier actividad o',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('información sobre ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'y/o sus representantes, a las que hubiera tenido acceso con motivo',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('de la prestación de sus servicios para ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR.')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('b.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'A no revelar a ninguna persona, entidad o empresa, ni usar para ningún propósito, en provecho propio o de',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('terceros, cualquier información vinculada a ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('de cualquier naturaleza.')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('c.        ', { continued: true })
+      .font('Arial Normal')
+      .text('A no revelar a ninguna persona que preste servicios a ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('ningún tipo de información')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('confidencial o de propiedad de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('salvo que dicha persona necesite conocer tal información')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'por razón de sus funciones. Si hubiese cualquier duda sobre lo que constituye información confidencial, o sobre',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('si la información debe ser revelada y a quién, ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('se obliga a solicitar autorización de sus')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('superiores.')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('d.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'A no usar de forma inapropiada ni revelar información confidencial alguna o de propiedad de la persona, entidad',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'o empresa para la cual laboró con anterioridad a ser contratado por ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('así como a no introducir')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('en las instalaciones de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text('ningún documento que no haya sido publicado ni ninguna clase de')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'bien que pertenezca a cualquiera de dichas personas, entidades o empresas,  sin su consentimiento previo.',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Bold')
+      .text('TRABAJADOR', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se obliga igualmente a no violar ningún convenio de confidencialidad o sobre  derechos de',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'propiedad que haya firmado en conexión con tales personas, entidades o empresas.',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('d.        ', { continued: true })
+      .font('Arial Normal')
+      .text('A devolver a ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR, ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'al concluir su prestación de servicios, sea cual fuere la causa, archivos,',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'correspondencia, registros o cualquier documento o material contenido o fijado en cualquier medio o soporte,',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'que se le hubiese proporcionado o que hubiesen sido creados en virtud de su relación de trabajo (incluyendo',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'copias de los mismos), así como todo bien que se le hubiese entregado, incluyendo (sin limitación) todo',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'distintivo de identificación, tarjetas de ingreso, uniforme, herramientas de trabajo y cualquier otro material',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('otorgado.');
+    //parrafor 14.2
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('15.2     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('Las obligaciones que ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'asume en los literales a), b), c) y d) de la presente cláusula, regirán',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'indefinidamente, independientemente de la vigencia del presente contrato.',
+      );
+    //parrafo 15.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('15.3     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('El incumplimiento por parte de ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('de cualquiera de las obligaciones contenidas en la presente')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('cláusula, facultará a ', { continued: true })
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'a iniciar las acciones legales que pudieran corresponder en defensa de sus',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'derechos y a obtener la indemnización por daños y perjuicios a que hubiera lugar.',
+      );
+    //parrafo 15.4
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('15.4     ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'declara que la remuneración acordada en la cláusula tercera comprende cualquier compensación',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'correspondiente a los compromisos asumidos en la presente cláusula.',
+      )
+      .moveDown(1);
+    doc.end();
   });
 };
 export const genarateSubsidioContract = async () => {};

@@ -97,10 +97,14 @@ export const BASE_FIELDS: Record<string, FieldConfig> = {
       'fechadefin',
       'fecha_de_fin',
       'fecha de termino',
-      'feach_de_termino',
+      'fecha_de_termino',
       'FECHA DE TERMINO',
       'Fecha de Termino',
       'Fecha de fin',
+      'Fecha Fin',
+      'Fecha Termino',
+      'Termino',
+      'Fin Contrato',
     ],
     description: 'Fecha de terminode contrato',
   },
@@ -139,6 +143,19 @@ export const COMMON_CONTRACT_FIELDS: Record<string, FieldConfig> = {
   phone: {
     aliases: ['telefono', 'Nº teléfono', 'teléfono', 'celular', 'phone'],
     description: 'Teléfono del empleado',
+  },
+  birthDate: {
+    aliases: [
+      'Fecha Nac.',
+      'fecha de nacimiento',
+      ' FECHA DE NACIMIENTO',
+      'Fecha de Nac.',
+    ],
+    description: 'Fecha de nacimiento del empleado',
+  },
+  sex: {
+    aliases: ['GENERO', 'genero', 'sexo', 'SEXO', 'sex'],
+    description: 'Genero del empleado',
   },
 };
 export const SUBSIDIO_SPECIFIC_FIELDS: Record<string, FieldConfig> = {
@@ -195,6 +212,7 @@ export const CONTRACT_VALIDATION_RULES: Record<
       'lastNameMother',
       'dni',
       'entryDate',
+      'endDate',
       'position',
       'subDivisionOrParking',
       // Campos comunes
@@ -215,6 +233,7 @@ export const CONTRACT_VALIDATION_RULES: Record<
       'lastNameMother',
       'dni',
       'entryDate',
+      'endDate',
       'position',
       'subDivisionOrParking',
       // Campos comunes
@@ -237,6 +256,7 @@ export const CONTRACT_VALIDATION_RULES: Record<
       'lastNameMother',
       'dni',
       'entryDate',
+      'endDate',
       'position',
       'subDivisionOrParking',
       // Campos comunes
@@ -257,6 +277,7 @@ export const CONTRACT_VALIDATION_RULES: Record<
       'lastNameMother',
       'dni',
       'entryDate',
+      'endDate',
       'position',
       'subDivisionOrParking',
       // Campos comunes
