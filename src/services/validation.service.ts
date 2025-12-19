@@ -68,7 +68,9 @@ export class ValidationService {
       position: result.data.position,
       subDivisionOrParking: result.data.subDivisionOrParking,
       contractType: this.mapContractType(result.data.contractType),
-
+      ...(result.data.sex !== undefined && {
+        sex: result.data.sex,
+      }),
       // Campos opcionales (solo si existen)
       ...(result.data.salary !== undefined && {
         salary: result.data.salary,
@@ -87,6 +89,12 @@ export class ValidationService {
           result.data.endDate instanceof Date
             ? result.data.endDate
             : result.data.endDate,
+      }),
+      ...(result.data.birthDate && {
+        birthDate:
+          result.data.endDate instanceof Date
+            ? result.data.birthDate
+            : result.data.birthDate,
       }),
     };
 

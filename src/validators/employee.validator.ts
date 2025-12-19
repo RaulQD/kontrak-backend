@@ -62,6 +62,23 @@ export const employeeSchema = z.object({
       'Apellido paterno solo puede contener letras.',
     )
     .transform((val) => val.trim()),
+  birthDate: z
+    .union(
+      [
+        z
+          .string()
+          .regex(
+            /^\d{2}\/\d{2}\/\d{4}$/,
+            'Fecha debe estar en formato DD/MM/YYYY',
+          ),
+        z.date(),
+      ],
+      {
+        error: 'Fecha de ingreso es requerida',
+      },
+    )
+    .optional(),
+  sex: z.string().optional(),
   dni: z
     .string({ error: 'DNI es requerido.' })
     .regex(/^\d{8}$/, 'DNI debe tener exactamente 8 dígitos numéricos.')
