@@ -6,7 +6,7 @@ import {
   SIGNATURE_EMPLOYEE_TWO,
 } from '../constants/signatures';
 import { formatCurrency } from '../utils/formatCurrency';
-// FUNCIÓN PARA GENERAR EL HTML DEL CONTRATO
+
 export const generatePartTimeContract = async (
   data: EmployeeData,
 ): Promise<Buffer> => {
@@ -4967,5 +4967,33 @@ export const generateDataTreatmentPDF = async (data: EmployeeData) => {
           align: 'justify',
         },
       );
+  });
+};
+export const generateTemplateAdenda = async (_data: EmployeeData) => {
+  return new Promise((reject, resolve) => {
+    const doc = new PDFDocument({ size: 'A4' });
+    doc.page.margins.top = 30.12; // 2.05 cm
+    doc.page.margins.bottom = 33.89; // 0.49 cm
+    doc.page.margins.left = 45.69; // 1.23 cm
+    doc.page.margins.right = 45.69; // 1.55 cm
+
+    const chunks: Buffer[] = [];
+
+    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+    const arialNormal = path.join(__dirname, '../fonts/ARIAL.TTF');
+    const arialBold = path.join(__dirname, '../fonts/ARIALBD.TTF');
+
+    doc.registerFont('Arial Bold', arialBold);
+    doc.registerFont('Arial Normal', arialNormal);
+
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('ADENDA AL CONTRATO POR INCREMENTO ACTIVIDADES', {
+        underline: true,
+        align: 'center',
+      });
   });
 };

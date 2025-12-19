@@ -103,12 +103,6 @@ export class ContractService {
         AppErrorCode.NOT_FOUND,
       );
     }
-    if (result) {
-      console.info('Archivo:', result.fileName);
-      console.info('Tamaño:', result.buffer.length);
-    } else {
-      console.info('PDF no encontrado');
-    }
     if (format === 'base64') {
       const base64String = result.buffer.toString('base64');
       const response: PDFPreviewBase64 = {
