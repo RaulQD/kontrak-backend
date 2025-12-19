@@ -16,8 +16,10 @@ export interface EmployeeData {
   salaryInWords?: string;
   entryDate?: Date | string;
   endDate?: Date | string;
+  sex?: string;
   position: string;
   subDivisionOrParking: string;
+  birthDate?: Date | string;
   // Campos específicos de SUBSIDIO
   replacementFor?: string;
   reasonForSubstitution?: string;

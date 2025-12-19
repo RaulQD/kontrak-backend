@@ -223,18 +223,15 @@ export class ExcelParserServices {
             if (field === 'dni' && typeof value === 'number') {
               // Convertir DNI de number a string
               finalValue = String(value);
-            } else if (field === 'entryDate') {
+            } else if (
+              field === 'entryDate' ||
+              field === 'endDate' ||
+              field === 'birthDate'
+            ) {
               if (value instanceof Date) {
-                const day = String(value.getDate() + 1).padStart(2, '0');
-                const month = String(value.getMonth() + 1).padStart(2, '0');
-                const year = value.getFullYear();
-                finalValue = `${day}/${month}/${year}`;
-              }
-            } else if (field === 'endDate') {
-              if (value instanceof Date) {
-                const day = String(value.getDate() + 1).padStart(2, '0');
-                const month = String(value.getMonth() + 1).padStart(2, '0');
-                const year = value.getFullYear();
+                const day = String(value.getUTCDate()).padStart(2, '0');
+                const month = String(value.getUTCMonth() + 1).padStart(2, '0');
+                const year = value.getUTCFullYear();
                 finalValue = `${day}/${month}/${year}`;
               }
             } else if (field === 'salary') {

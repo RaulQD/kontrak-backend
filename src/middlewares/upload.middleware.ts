@@ -23,7 +23,7 @@ export const excelUpload = multer({
     if (!isValidExtension) {
       return cb(
         new AppError(
-          `Tipo de archivo no permitidos ${fileExtension}. solo se permiten archivos Excel( .xlsx, .xls)`,
+          `Tipo de archivo no permitidos ${fileExtension}. solo se permiten archivos Excel( .xlsx, .xls,.csv)`,
           BAD_REQUEST,
           AppErrorCode.BAD_REQUEST,
         ),
