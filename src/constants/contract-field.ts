@@ -2,6 +2,32 @@ export interface FieldConfig {
   aliases: string[];
   description: string;
 }
+export const LOCATION_FIELDS: Record<string, FieldConfig> = {
+  address: {
+    aliases: [
+      'dirección',
+      'direccion',
+      'address',
+      'direccion completa',
+      'DOMICILIO',
+      'domicilio',
+      'Dirección',
+    ],
+    description: 'Dirección del empleado o Domicilio',
+  },
+  province: {
+    aliases: ['provincia', 'province'],
+    description: 'Provincia donde residedel empleado',
+  },
+  district: {
+    aliases: ['distrito', 'district', 'Distrito'],
+    description: 'Distrito donde reside el emeplado',
+  },
+  department: {
+    aliases: ['departamento', 'department', 'division', 'Departamento'],
+    description: 'Departamenteo donde reside el empleado',
+  },
+};
 export const BASE_FIELDS: Record<string, FieldConfig> = {
   name: {
     aliases: [
@@ -61,22 +87,7 @@ export const BASE_FIELDS: Record<string, FieldConfig> = {
     ],
     description: 'Salario o sueldo del empleado en letras',
   },
-  address: {
-    aliases: ['dirección', 'direccion', 'address', 'direccion completa'],
-    description: 'Dirección del empleado',
-  },
-  province: {
-    aliases: ['provincia', 'province'],
-    description: 'Provincia donde residedel empleado',
-  },
-  district: {
-    aliases: ['distrito', 'district'],
-    description: 'Distrito donde reside el emeplado',
-  },
-  department: {
-    aliases: ['departamento', 'department', 'division'],
-    description: 'Departamenteo donde reside el empleado',
-  },
+
   entryDate: {
     aliases: [
       'INICIO',
@@ -133,8 +144,7 @@ export const BASE_FIELDS: Record<string, FieldConfig> = {
     ],
     description: 'Tipo de contrato del empleado',
   },
-} as const;
-
+};
 export const COMMON_CONTRACT_FIELDS: Record<string, FieldConfig> = {
   email: {
     aliases: ['email', 'Email', 'EMAIL', 'correo', 'Correo'],
@@ -188,11 +198,110 @@ export const SUBSIDIO_SPECIFIC_FIELDS: Record<string, FieldConfig> = {
   },
 };
 
-export const ALL_FIELDS_MAP: Record<string, FieldConfig> = {
+export const ADDENDUM_FIELDS: Record<string, FieldConfig> = {
+  division: {
+    aliases: ['DIVISION', 'división', 'division', 'area', 'AREA', 'Division'],
+    description: 'División o área de trabajo',
+  },
+  documentNumber: {
+    aliases: [
+      'Numero Documento',
+      'dni',
+      'documento',
+      'NÚMERO DE DOCUMENTO',
+      'Num. Documento',
+    ],
+    description: 'Número de documento de identidad',
+  },
+  worker: {
+    aliases: [
+      'TRABAJADOR',
+      'trabajador',
+      'nombres y apellidos',
+      'empleado',
+      'colaborador',
+      'Trabajador',
+    ],
+    description: 'Nombre completo del trabajador',
+  },
+  entryDate: {
+    aliases: [
+      'fecha de ingreso',
+      'fechadeingreso',
+      'fecha_de_ingreso',
+      'entrydate',
+      'entry_date',
+      'fecha ingreso',
+      'Fecha Ingreso',
+    ],
+    description: 'Fecha de inicio del empleado',
+  },
+  start: {
+    aliases: ['INICIO', 'inicio', 'Inicio'],
+    description: 'Fecha de inicio del contrato original',
+  },
+  end: {
+    aliases: [
+      'FECHA FIN',
+      'fecha fin',
+      'fin contrato',
+      'termino',
+      'Fin',
+      'FIN',
+      'fin',
+    ],
+    description: 'Fecha de fin del contrato original',
+  },
+  salary: {
+    aliases: [
+      'salario',
+      'salary',
+      'sueldo',
+      'remuneracion',
+      'remuneración',
+      'Sueldo',
+      'SUELDO',
+    ],
+    description: 'Salario o Sueldo del empleado',
+  },
+  salaryInWords: {
+    aliases: [
+      'salario en letras',
+      'salarioenletras',
+      'salario_en_letras',
+      'salaryinwords',
+      'salary_in_words',
+      'sueldo en letras',
+      'Sueldo en Letras',
+    ],
+    description: 'Salario o sueldo del empleado en letras',
+  },
+  // Fechas específicas de la adenda
+  startAddendum: {
+    aliases: [
+      'INICIO ADENDA',
+      'inicio adenda',
+      'fecha inicio adenda',
+      'vigencia desde',
+      'Inicio Adenda',
+    ],
+    description: 'Fecha donde inicia la vigencia de la adenda',
+  },
+  endAddendum: {
+    aliases: ['FIN ADENDA', 'fin adenda', 'fecha fin adenda', 'vigencia hasta'],
+    description: 'Fecha donde termina la vigencia de la adenda',
+  },
+};
+export const CONTRACT_FIELDS_MAP: Record<string, FieldConfig> = {
   ...BASE_FIELDS,
   ...COMMON_CONTRACT_FIELDS,
   ...SUBSIDIO_SPECIFIC_FIELDS,
-} as const;
+  ...LOCATION_FIELDS,
+};
+export const ADDENDUM_FIELDS_MAP: Record<string, FieldConfig> = {
+  ...ADDENDUM_FIELDS,
+  ...LOCATION_FIELDS,
+};
 
 export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO' | 'APE';
 

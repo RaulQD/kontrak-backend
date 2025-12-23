@@ -1,10 +1,10 @@
 import { config } from '../config';
 import { AppErrorCode } from '../constants/app-error-code';
-import { NOT_FOUND } from '../constants/http';
+import { BAD_REQUEST, NOT_FOUND } from '../constants/http';
 import {
-  ContractProcessingResult,
+  excelProcessingResult,
   PDFPreviewBase64,
-} from '../types/contract.types';
+} from '../types/contract.interface';
 import { AppError } from '../utils/app-error';
 import { ExcelParserServices } from './excel-parser.service';
 import { FileStorageService } from './file-storage.service';
@@ -13,8 +13,12 @@ import path from 'path';
 import fs from 'fs/promises';
 import { logger } from '../utils/logger';
 import archiver from 'archiver';
-import { EmployeeData } from '../types/employees.types';
+import { EmployeeData } from '../types/employees.interface';
 import { Response } from 'express';
+import {
+  ADDENDUM_FIELDS_MAP,
+  CONTRACT_FIELDS_MAP,
+} from '../constants/contract-field';
 export class ContractService {
   private readonly excelParseServices: ExcelParserServices;
   private readonly fileStorageService: FileStorageService;
@@ -27,22 +31,55 @@ export class ContractService {
 
   async processExcelAndGenerateContracts(
     buffer: Buffer,
-  ): Promise<ContractProcessingResult> {
+  ): Promise<excelProcessingResult> {
     const validationResult = await this.excelParseServices.validateExcel(
       buffer,
+      CONTRACT_FIELDS_MAP,
       {
         sheetIndex: 0,
         skipEmptyRows: true,
         headerRow: 1,
       },
     );
+    if (
+      validationResult.totalRecords > 0 &&
+      validationResult.validRecords === 0
+    ) {
+      const primerError = validationResult.errors[0];
+      const mensajePista = primerError
+        ? ` (Ej: Fila ${primerError.row}: ${primerError.error.message})`
+        : '';
+
+      throw new AppError(
+        `El archivo contiene ${validationResult.totalRecords} registros, pero ninguno es válido. Por favor revisa el formato de las columnas.${mensajePista}`,
+        BAD_REQUEST,
+      );
+    }
+    return {
+      totalRecords: validationResult.totalRecords,
+      validRecords: validationResult.validRecords,
+      invalidRecords: validationResult.errors.length,
+      employees: validationResult.employees,
+      validationErrors: validationResult.errors,
+    };
+  }
+  async processAddendumExcel(buffer: Buffer) {
+    const validationResult =
+      await this.excelParseServices.validateAddendumExcel(
+        buffer,
+        ADDENDUM_FIELDS_MAP,
+        {
+          sheetIndex: 0,
+          skipEmptyRows: true,
+          headerRow: 1,
+        },
+      );
 
     return {
       totalRecords: validationResult.totalRecords,
       validRecords: validationResult.validRecords,
       invalidRecords: validationResult.errors.length,
-
-      employees: validationResult.employees,
+      employees: validationResult.employeesAddendum,
       validationErrors: validationResult.errors,
     };
   }

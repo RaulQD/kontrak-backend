@@ -12,10 +12,10 @@ export interface EmployeeData {
   district: string;
   department: string;
   address: string;
-  salary?: number;
+  salary: number;
   salaryInWords?: string;
-  entryDate?: Date | string;
-  endDate?: Date | string;
+  entryDate: Date | string;
+  endDate: Date | string;
   sex?: string;
   position: string;
   subDivisionOrParking: string;
@@ -51,7 +51,6 @@ export interface ValidationError {
   field: string;
 }
 export interface ValidationResult {
-  isValid: boolean;
   employees: EmployeeWithStatus[];
   errors: ValidationError[];
   totalRecords: number;

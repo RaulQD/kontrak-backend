@@ -19,13 +19,14 @@ export class ContractController {
         message: 'No se recibió ningún archivo. Envía un campo "excel"',
       });
     }
-    const result = await this.contractService.processExcelAndGenerateContracts(
-      req.file.buffer,
-    );
+    const response =
+      await this.contractService.processExcelAndGenerateContracts(
+        req.file.buffer,
+      );
 
     return res.status(CREATED).json({
       success: true,
-      data: result,
+      data: response,
     });
   });
   downloadZip = catchError(async (req: Request, res: Response) => {

@@ -3,8 +3,8 @@ import { AppError } from '../utils/app-error';
 import { BAD_REQUEST } from '../constants/http';
 import { AppErrorCode } from '../constants/app-error-code';
 import { logger } from '../utils/logger';
-import { HeaderValidationResult } from '../types/excel-types/excel.types';
-import { ALL_FIELDS_MAP, BASE_FIELDS } from '../constants/contract-field';
+import { HeaderValidationResult } from '../types/excel-types/excel.interface';
+import { FieldConfig } from '../constants/contract-field';
 
 /**
  * Normaliza un encabezado para comparación (minúsculas, sin espacios, sin acentos)
@@ -21,10 +21,13 @@ function normalizeHeader(header: string): string {
 /**
  * Encuentra el campo correspondiente a un encabezado del Excel
  */
-function findFieldForHeader(excelHeader: string): string | null {
+function findFieldForHeader(
+  excelHeader: string,
+  fields: Record<string, FieldConfig>,
+): string | null {
   const normalized = normalizeHeader(excelHeader);
   // Recorrer TODOS los campos posibles
-  for (const [field, config] of Object.entries(ALL_FIELDS_MAP)) {
+  for (const [field, config] of Object.entries(fields)) {
     // Verificar si algún alias coincide
     const commonAlias = config.aliases.some(
       (alias) => normalizeHeader(alias) === normalized,
@@ -63,6 +66,7 @@ function findFieldForHeader(excelHeader: string): string | null {
  */
 export function validateExcelHeaders(
   worksheet: ExcelJS.Worksheet,
+  fields: Record<string, FieldConfig>,
   headerRow: number = 1,
 ): HeaderValidationResult {
   const headers: string[] = [];
@@ -89,7 +93,7 @@ export function validateExcelHeaders(
   const validHeader = headers.filter((h) => h.length > 0);
   if (validHeader.length === 0) {
     throw new AppError(
-      'No se encontraton encabezados validos en el archivo.',
+      'No se encontraron encabezados validos en el archivo.',
       BAD_REQUEST,
       AppErrorCode.VALIDATION_ERROR,
     );
@@ -99,14 +103,14 @@ export function validateExcelHeaders(
   const foundFields = new Set<string>();
 
   validHeader.forEach((excelHeader) => {
-    const field = findFieldForHeader(excelHeader);
+    const field = findFieldForHeader(excelHeader, fields);
     if (field) {
       headerMapping.set(field, excelHeader);
       foundFields.add(field);
     }
   });
   // Verificar qué campos requeridos faltan
-  const requiredField = Object.entries(BASE_FIELDS);
+  const requiredField = Object.entries(fields);
   const missingHeaders: string[] = [];
   requiredField.forEach(([field, config]) => {
     if (!foundFields.has(field)) {
@@ -133,9 +137,10 @@ export function validateExcelHeaders(
  */
 export function validateAndGetHeaderMapping(
   worksheet: ExcelJS.Worksheet,
+  fields: Record<string, FieldConfig>,
   headerRow: number = 1,
 ): Map<string, string> {
-  const result = validateExcelHeaders(worksheet, headerRow);
+  const result = validateExcelHeaders(worksheet, fields, headerRow);
   if (!result.isValid) {
     const missingList = result.missingHeaders.map((h) => `${h}`).join(', ');
     throw new AppError(
