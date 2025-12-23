@@ -1,4 +1,4 @@
-import { EmployeeData } from '../types/employees.types';
+import { EmployeeData } from '../types/employees.interface';
 import ExcelJS from 'exceljs';
 import { logger } from '../utils/logger';
 import { formatCurrency } from '../utils/formatCurrency';

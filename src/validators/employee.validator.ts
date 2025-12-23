@@ -62,23 +62,21 @@ export const employeeSchema = z.object({
       'Apellido paterno solo puede contener letras.',
     )
     .transform((val) => val.trim()),
-  birthDate: z
-    .union(
-      [
-        z
-          .string()
-          .regex(
-            /^\d{2}\/\d{2}\/\d{4}$/,
-            'Fecha debe estar en formato DD/MM/YYYY',
-          ),
-        z.date(),
-      ],
-      {
-        error: 'Fecha de ingreso es requerida',
-      },
-    )
-    .optional(),
-  sex: z.string().optional(),
+  birthDate: z.union(
+    [
+      z
+        .string()
+        .regex(
+          /^\d{2}\/\d{2}\/\d{4}$/,
+          'Fecha debe estar en formato DD/MM/YYYY',
+        ),
+      z.date(),
+    ],
+    {
+      error: 'Fecha de ingreso es requerida',
+    },
+  ),
+  sex: z.string({ error: 'El genero es requerido.' }),
   dni: z
     .string({ error: 'DNI es requerido.' })
     .regex(/^\d{8}$/, 'DNI debe tener exactamente 8 dígitos numéricos.')
@@ -105,47 +103,41 @@ export const employeeSchema = z.object({
     .number({ error: 'El salario debe ser un número válido' })
     .refine((value) => value > 0, {
       message: 'El sueldo debe ser mayor a 0',
-    })
-    .optional(),
+    }),
   salaryInWords: z
     .string({ error: 'El sueldo en letras es requerido' })
     .trim()
     .min(5, 'El sueldo en letras debe tener al menos 5 caracteres')
-    .max(100, 'El sueldo en letras no puede exceder 100 caracteres')
-    .optional(),
+    .max(100, 'El sueldo en letras no puede exceder 100 caracteres'),
   position: z.string({ error: 'El cargo es requerido.' }).trim(),
-  entryDate: z
-    .union(
-      [
-        z
-          .string()
-          .regex(
-            /^\d{2}\/\d{2}\/\d{4}$/,
-            'Fecha debe estar en formato DD/MM/YYYY',
-          ),
-        z.date(),
-      ],
-      {
-        error: 'Fecha de ingreso es requerida',
-      },
-    )
-    .optional(),
-  endDate: z
-    .union(
-      [
-        z
-          .string()
-          .regex(
-            /^\d{2}\/\d{2}\/\d{4}$/,
-            'Fecha debe estar en formato DD/MM/YYYY',
-          ),
-        z.date(),
-      ],
-      {
-        error: 'Fecha de termino es requerida',
-      },
-    )
-    .optional(),
+  entryDate: z.union(
+    [
+      z
+        .string()
+        .regex(
+          /^\d{2}\/\d{2}\/\d{4}$/,
+          'Fecha debe estar en formato DD/MM/YYYY',
+        ),
+      z.date(),
+    ],
+    {
+      error: 'Fecha de ingreso es requerida',
+    },
+  ),
+  endDate: z.union(
+    [
+      z
+        .string()
+        .regex(
+          /^\d{2}\/\d{2}\/\d{4}$/,
+          'Fecha debe estar en formato DD/MM/YYYY',
+        ),
+      z.date(),
+    ],
+    {
+      error: 'Fecha de termino es requerida',
+    },
+  ),
   subDivisionOrParking: z.string({ error: 'sub división requerida' }).trim(),
   contractType: contractTypeSchema,
 });
