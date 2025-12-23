@@ -1,4 +1,4 @@
-import { EmployeeData } from '../types/employees.types';
+import { EmployeeData } from '../types/employees.interface';
 import PDFDocument from 'pdfkit';
 import path from 'path';
 import {
@@ -1970,20 +1970,13 @@ export const generatePartTimeContract = async (
       .fontSize(8)
       .font('Arial Bold')
       .text(
-        'DÉCIMO SEXTA: CUMPLIMIENTO DE LAS NORMAS DE CONDUCTA ÉTICA, RESPONSABILIDAD ADMINISTRATIVA DE',
+        'DÉCIMO SEXTA: CUMPLIMIENTO DE LAS NORMAS DE CONDUCTA ÉTICA, RESPONSABILIDAD ADMINISTRATIVA DE LAS PERSONAS JURÍDICAS, PREVENCIÓN DE LAVADO DE ACTIVOS Y FINANCIAMIENTO DEL TERRORISMO Y NORMAS QUE SANCIONAN DELITOS DE CORRUPCIÓN COMETIDOS ENTRE PRIVADOS QUE AFECTEN EL NORMAL DESARROLLO DE LAS RELACIONES COMERCIALES Y LA COMPETENCIA LEAL ENTRE EMPRESAS',
         {
           underline: true,
           align: 'left',
         },
       )
-      .font('Arial Bold')
-      .text(
-        'LAS PERSONAS JURÍDICAS, PREVENCIÓN DE LAVADO DE ACTIVOS Y FINANCIAMIENTO DEL TERRORISMO Y NORMAS QUE',
-        {
-          underline: true,
-          align: 'left',
-        },
-      )
+
       .moveDown(1);
 
     //parrafo 16.1
@@ -2348,7 +2341,7 @@ export const generatePartTimeContract = async (
         { continued: true, align: 'justify' },
       )
       .font('Arial Bold')
-      .text('EL TRABAJADOR ', { continued: true, align: 'justify' })
+      .text('EL EMPLEADOR ', { continued: true, align: 'justify' })
       .font('Arial Normal')
       .text(
         'y/o la ley, con la finalidad de verificar si éste se encuentra apto para desarrollar los servicios y funciones propios de su cargo. En este sentido, ambas Partes declaran que la conservación de la salud de EL TRABAJADOR es motivo determinante de la relación contractual.',
@@ -2511,7 +2504,7 @@ export const generatePartTimeContract = async (
       .fontSize(8)
       .font('Arial Normal')
       .text(
-        'En señal de conformidad, las partes suscriben dos (02) ejemplares del presente contrato en la ciudad de LIMA, el día 24 julio 2025, quedando un ejemplar en poder del empleador y otro en poder del trabajador, quien declara haber recibido una copia del contrato y estar de acuerdo con su contenido.',
+        `En señal de conformidad, las partes suscriben dos (02) ejemplares del presente contrato en la ciudad de ${data.province}, el día ${data.entryDate}, quedando un ejemplar en poder del empleador y otro en poder del trabajador, quien declara haber recibido una copia del contrato y estar de acuerdo con su contenido.`,
         { align: 'justify' },
       )
       .moveDown(8);
@@ -4593,7 +4586,7 @@ export const generatePlanillaContract = async (
         'correspondiente a los compromisos asumidos en la presente cláusula.',
       )
       .moveDown(1);
-
+    //TEXTO 15
     doc
       .fontSize(8)
       .font('Arial Bold')
@@ -4603,7 +4596,7 @@ export const generatePlanillaContract = async (
       })
       .moveDown(1);
 
-    //parrafo 14.1
+    //parrafo 15.1
     doc
       .fontSize(8)
       .font('Arial Normal')
@@ -4867,6 +4860,843 @@ export const generatePlanillaContract = async (
         'correspondiente a los compromisos asumidos en la presente cláusula.',
       )
       .moveDown(1);
+
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text(
+        'DÉCIMO SEXTA: SEGURIDAD Y CONFIDENCIALIDAD EN EL TRATAMIENTO DE DATOS PERSONALES ',
+        {
+          underline: true,
+          align: 'left',
+        },
+      )
+      .moveDown(1);
+
+    //parrafo 16.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('16.1     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('En caso ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'accediera a datos personales de cualquier índole como consecuencia de desarrollo de sus',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('labores, éste deberá cumplir la normativa interna aprobada por ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('INVERSIONES URBANÍSTICAS OPERADORA S.A.')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'referida a La Protección de Datos Personales, que incluye la Ley N° 29733, y su Reglamento, aprobado por el',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('Decreto Supremo N° 003-2013-JUS.')
+      .moveDown(0.5);
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('            ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('En cualquier caso, corresponde a ', { continued: true })
+      .font('Arial Bold')
+      .text('INVERSIONES URBANÍSTICAS OPERADORA S.A. ', { continued: true })
+      .font('Arial Normal')
+      .text('decidir sobre la finalidad y ')
+      .font('Arial Normal')
+      .text('            ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('contenido del tratamiento de datos personales, limitándose ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('a utilizar éstos única y exclusivamente')
+      .font('Arial Normal')
+      .text('            ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'para el cumplimiento de sus funciones y conforme a las indicaciones de ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('INVERSIONES URBANÍSTICAS')
+      .font('Arial Normal')
+      .text('            ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('OPERADORA S.A.')
+      .moveDown(0.5);
+    //parrafo 16.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('16.2     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('De esta forma, ', { continued: true })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('queda obligado a:')
+      .moveDown(0.5);
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('a.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Tratar, custodiar y proteger los datos personales a los que pudiese acceder como consecuencia del ejercicio de',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'sus funciones, cumpliendo con las medidas de índole jurídica, técnica y organizativas establecidas en la Ley',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('N° 29733, y su Reglamento, así como en la normativa interna de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('INVERSIONES URBANÍSTICAS')
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Bold')
+      .text('OPERADORA S.A..')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('b.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Utilizar o aplicar los datos personales, exclusivamente, para la realización de sus funciones y, en su caso, de',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text('acuerdo con las instrucciones impartidas por ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('INVERSIONES URBANÍSTICAS OPERADORA S.A..')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('c.        ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Mantener el deber de secreto y confidencialidad de los datos personales de manera indefinida; es decir, durante',
+      )
+      .font('Arial Normal')
+      .text('                       ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'la vigencia del presente contrato, así como una vez concluido éste.',
+      )
+      .moveDown(0.5);
+    //parrafo 16.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('16.3     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text('El incumplimiento de ', {
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'respecto de sus obligaciones vinculadas al tratamiento de datos personales, ',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'constituye incumplimiento de obligaciones laborales que dará lugar a la imposición de sanciones disciplinarias, sin',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'perjuicio de las responsabilidades penales, civiles y administrativas que su incumplimiento genere.',
+      )
+      .moveDown(1);
+    //text 17
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text(
+        'DÉCIMO SETIMA: CUMPLIMIENTO DE LAS NORMAS DE CONDUCTA ÉTICA, RESPONSABILIDAD ADMINISTRATIVA DE LAS PERSONAS JURÍDICAS, PREVENCIÓN DE LAVADO DE ACTIVOS Y FINANCIAMIENTO DEL TERRORISMO Y NORMAS QUE SANCIONAN DELITOS DE CORRUPCIÓN COMETIDOS ENTRE PRIVADOS QUE AFECTEN EL NORMAL DESARROLLO DE LAS RELACIONES COMERCIALES Y LA COMPETENCIA LEAL ENTRE EMPRESAS',
+        {
+          underline: true,
+          align: 'left',
+        },
+      )
+
+      .moveDown(1);
+
+    //parrafo 16.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('17.1     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Lo establecido en la presente cláusula seguirá las disposiciones contenidas en la normativa de Responsabilidad',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Administrativa de las Personas Jurídicas, aprobada por la Ley N° 30424, con las modificaciones incorporadas por el',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Decreto Legislativo N° 1352, Ley N° 31740 y la Ley 30835, y de las normas sobre Prevención del Lavado de Activos',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'y Financiamiento del Terrorismo, aprobadas por la Ley N° 27693, y su reglamento, aprobado por el Decreto Supremo',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'N° 018-2006-JUS (en adelante, PLAFT), así como el correcto cumplimiento de la legislación peruana vigente en ',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'general, incluyendo reglamentos, directivas, regulaciones, jurisprudencia vinculante, decisiones, decretos, órdenes,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'instrumentos y cualquier otra medida legislativa o decisión con fuerza de ley en el Perú de obligatorio cumplimiento',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('para el EMPLEADOR o el TRABAJADOR o cualquiera de ellas.')
+      .moveDown(0.5);
+    //parrafo 16.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('17.2     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'El TRABAJADOR declara que no ha incumplido las normas anticorrupción vigentes, ni ofrecido, pagado o',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'comprometido a pagar, autorizado el pago de cualquier dinero directa o indirectamente, u ofrecido, entregado o',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'comprometido a entregar, autorizado a entregar directa o indirectamente, cualquier objeto de valor, a cualquier',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'funcionario gubernamental o a cualquier persona que busque el beneficio de un funcionario gubernamental. Asimismo,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'declara que no ha sido sancionado ni investigado por la comisión de los delitos de lavado de activos, financiamiento ',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'del terrorismo, corrupción de funcionarios, apropiación ilícita, fraude financiero, defraudación tributaria. EL',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'TRABAJADOR se compromete a no  incurrir en ninguno de los delitos mencionados ni ningún otro ilícito penal en el',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'desarrollo de sus labores, ni siquiera cuando sea o pueda ser en beneficio del EMPLEADOR.',
+      )
+      .moveDown(0.5);
+    //PARRAFOR 16.3
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('17.3     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Asimismo, mediante Decreto Legislativo N° 1385 ha sido modificado el Código Penal, a fin de sancionar penalmente',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'los actos de corrupción cometidos entre privados que afectan el normal desarrollo de las relaciones comerciales',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('y la competencia leal entre empresas.')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Al respecto, EL TRABAJADOR declara conocer que está impedido de, directa o indirectamente, aceptar, recibir o',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'solicitar donativo, promesa o cualquier otra ventaja o beneficio indebido de cualquier naturaleza, para sí o para un',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'tercero para realizar u omitir un acto que permita favorecer a otro en la adquisición o comercialización de bienes o',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'mercancías, en la contratación de servicios comerciales o en las relaciones comerciales de su EMPLEADOR. ',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Asimismo, EL TRABAJADOR declara conocer que está impedido de, directa o indirectamente, prometer, ofrecer o',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'conceder a accionistas, gerentes, directores, administradores, representantes legales, apoderados, empleados o',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'asesores de una persona jurídica de derecho privado, organización no gubernamental, asociación, fundación, comité,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'incluidos los entes no inscritos o sociedades irregulares, una ventaja o beneficio indebido de cualquier naturaleza, para',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'ellos o para un tercero, como contraprestación para realizar u omitir un acto que permita favorecer a éste u otro en la',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'comercialización o adquisición de bienes o mercancías, en la contratación de servicios comerciales o en las relaciones',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('comerciales de su EMPLEADOR.')
+      .moveDown(0.5);
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'Asimismo, EL TRABAJADOR declara conocer que está impedido de, directa o indirectamente, aceptar, recibir o',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'solicitar donativo, promesa o cualquier otra ventaja o beneficio indebido de cualquier naturaleza para sí o para un',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'tercero para realizar u omitir un acto en perjuicio de su EMPLEADOR. Asimismo, EL TRABAJADOR declara conocer',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'que está impedido de, directa o indirectamente, prometer, ofrecer o conceder a accionistas, gerentes, directores,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'administradores, representantes legales, apoderados, empleados o asesores de una persona jurídica de derecho',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'privado, organización no gubernamental, asociación, fundación, comité, incluidos los entes no inscritos o sociedades',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'irregulares, una ventaja o beneficio indebido de cualquier naturaleza, para ellos o para un tercero, como',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'contraprestación para realizar u omitir realizar u omitir un acto en perjuicio de su EMPLEADOR.',
+      )
+      .moveDown(0.5);
+
+    //PARRAFOR 17.4
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('17.4     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Las Partes acuerdan que, durante el periodo de vigencia del Contrato, estarán obligadas a actuar en estricto',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'cumplimiento de la legislación vigente, quedando completamente prohibido, bajo cualquier circunstancia, realizar',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('actos que impliquen la vulneración de la ley penal.')
+      .moveDown(0.5);
+
+    //PARRAFOR 17.5
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('17.5     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Adicionalmente, EL TRABAJADOR se compromete a no cometer delitos estipulados en la Ley N°31740, los cuales se',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('encuentran relacionadas con las siguientes leyes:')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('•         ', { continued: true })
+      .font('Arial Normal')
+      .text('DL N°1106: Lavado de Activos')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('•         ', { continued: true })
+      .font('Arial Normal')
+      .text('Ley N°25475: Terrorismo')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('•         ', { continued: true })
+      .font('Arial Normal')
+      .text('Código Penal Peruano: Fraude en las Personas Jurídicas')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('•         ', { continued: true })
+      .font('Arial Normal')
+      .text('Código Penal Peruano: Delitos Contra El Patrimonio Cultural')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('•         ', { continued: true })
+      .font('Arial Normal')
+      .text('Decreto Legislativo N°813: Ley Penal Tributaria')
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('•         ', { continued: true })
+      .font('Arial Normal')
+      .text('Ley N°28008: Delitos Aduaneros')
+      .moveDown(1);
+    //TEXTO 17
+
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('DÉCIMO OCTAVA: VALIDEZ', {
+        underline: true,
+        align: 'left',
+      })
+      .moveDown(1);
+
+    //parrafo 17.1
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text(
+        'Las partes ratifican que el presente contrato constituye un acto jurídico válido que no se encuentra afectado por causal de invalidez o ineficacia alguna y se presentará al Ministerio de Trabajo y Promoción del Empleo dentro de los primeros quince (15) días de celebrado.',
+      )
+      .moveDown(1);
+
+    //TEXTO 18
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('DÉCIMO NOVENA: DE LOS EXÁMENES MÉDICOS', {
+        underline: true,
+        align: 'left',
+      })
+      .moveDown(1);
+    //parrafo 18.1
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'se someterá obligatoriamente a los exámenes médicos que dispongan ',
+        { continued: true, align: 'justify' },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'y/o la ley, con la finalidad de verificar si éste se encuentra apto para desarrollar los servicios y funciones propios de su cargo. En este sentido, ambas Partes declaran que la conservación de la salud de EL TRABAJADOR es motivo determinante de la relación contractual.',
+        { align: 'justify' },
+      )
+      .moveDown(1);
+
+    //TEXTO 20
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('VIGESIMO:', {
+        underline: true,
+        align: 'left',
+        continued: true,
+      })
+      .font('Arial Bold')
+      .text(
+        'DE LAS RECOMENDACIONES EN MATERIA DE SEGURIDAD Y SALUD EN EL TRABAJO',
+        {
+          underline: false,
+          align: 'left',
+        },
+      )
+      .moveDown(1);
+    //PARRAFO 20.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text(
+        'De conformidad con lo establecido en el artículo 35° de la Ley N° 29783 – Ley de Seguridad y Salud en el Trabajo y, en calidad de anexo al presente contrato ',
+        { continued: true, align: 'justify' },
+      )
+      .font('Arial Bold')
+      .text('(ANEXO – 1), ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se incorpora la descripción de las recomendaciones de seguridad y salud en el trabajo, las mismas que ',
+        { continued: true, align: 'justify' },
+      )
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'deberá seguir y tomar en consideración de forma rigurosa durante la prestación de sus servicios.',
+        { align: 'justify' },
+      )
+      .moveDown(1);
+    //TEXTO 21
+    doc.fontSize(8).font('Arial Bold').text('VIGÉSIMO PRIMERA: DOMICILIO', {
+      underline: true,
+      align: 'left',
+    });
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text(
+        'Para todos los efectos legales del presente Contrato, las partes fijan como sus domicilios, los señalados en la introducción de este contrato. Cualquier cambio de domicilio deberá ser comunicado por escrito a la otra parte, mediante comunicación escrita, de lo contrario se entenderá que todas las notificaciones se han realizado válidamente.',
+      )
+      .moveDown(1);
+    //TEXTO 19
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('VIGÉSIMA SEGUNDO: SOLUCIÓN DE DISPUTAS', {
+        underline: true,
+        align: 'left',
+      })
+      .moveDown(1);
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('22.1     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'En el improbable caso de que lleguen a existir discrepancias, controversias o reclamaciones derivadas de la validez,',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'alcance, interpretación o aplicación del presente contrato, las partes se comprometen a poner el mejor de sus con el',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('fin de lograr una solución armoniosa a sus diferencias.');
+
+    //parrafo 19.2
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('22.2     ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        'Si lo señalado en el párrafo anterior resulta infructuoso para resolver el conflicto surgido, las partes convienen',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'renunciar al fuero judicial de sus domicilios o centros de trabajo, y se someten a la jurisdicción de los jueces del Distrito',
+      )
+      .font('Arial Normal')
+      .text('            ', { continued: true })
+      .font('Arial Normal')
+      .text('del Distrito Judicial de Lima - Cercado.')
+      .moveDown(1);
+    //texto 20
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('VIGÉSIMA TERCERA: APLICACIÓN SUPLETORIA', {
+        underline: true,
+        align: 'left',
+      })
+      .moveDown(1);
+    //parrfo 20.1
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text(
+        'En todo lo no previsto por el presente contrato, el vínculo laboral se regirá por las disposiciones laborales vigentes que regulan a los contratos de trabajo sujetos a modalidad, contenidas actualmente en el Texto único Ordenado del Decreto Legislativo Nº 728(Decreto Supremo Nº 003-97-TR, Ley de Productividad y Competitividad Laboral) y su Reglamento y por las disposiciones complementarias o modificatorias que pudieran darse en el futuro.',
+        { align: 'justify' },
+      )
+      .moveDown(0.5);
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text(
+        `En señal de conformidad, las partes suscriben dos (02) ejemplares del presente contrato en la ciudad de ${data.province}, el día ${data.entryDate}, quedando un ejemplar en poder del empleador y otro en poder del trabajador, quien declara haber recibido una copia del contrato y estar de acuerdo con su contenido.`,
+        { align: 'justify' },
+      )
+      .moveDown(8);
+
+    // Firmas - Tres columnas en una sola línea
+    const pageWidth = doc.page.width;
+    const marginLeft = doc.page.margins.left;
+    const marginRight = doc.page.margins.right;
+    const availableWidth = pageWidth - marginLeft - marginRight;
+    const columnWidth = availableWidth / 3;
+
+    // Reducir el espacio antes de las firmas
+    const signatureY = doc.y + 5; // Reducido de 40 a 20
+
+    // Configuración de líneas
+    const lineWidth = 150;
+    const lineY = signatureY;
+
+    // Posiciones X para cada columna
+    const col1X = marginLeft;
+    const col2X = marginLeft + columnWidth;
+    const col3X = marginLeft + 2 * columnWidth;
+    // Configuración de imágenes
+    const imageWidth = 120;
+    const imageHeight = 60;
+    const imageY = lineY - imageHeight - 5; // Imagen arriba de la línea
+
+    // Agregar imagen de firma si existe
+    try {
+      doc.image(SIGNATURE_EMPLOYEE, col1X + 25, imageY, {
+        width: imageWidth,
+        height: imageHeight,
+        fit: [imageWidth, imageHeight],
+        align: 'center',
+      });
+    } catch (error) {
+      // Si no hay imagen, solo mostrar línea
+      console.info('No hay imagen de firma para empleador 1');
+    }
+    // COLUMNA 1 - EL EMPLEADOR
+    doc
+      .moveTo(col1X, lineY)
+      .lineTo(col1X + lineWidth, lineY)
+      .stroke();
+    doc
+      .fontSize(7)
+      .font('Helvetica-Bold')
+      .text('EL EMPLEADOR', col1X, lineY + 5, {
+        width: lineWidth,
+        align: 'center',
+        continued: false,
+      });
+
+    doc
+      .fontSize(7)
+      .font('Helvetica')
+      .text('NOMBRE: CATHERINE SUSAN CHANG', col1X, lineY + 18, {
+        width: lineWidth,
+        align: 'left',
+        continued: false,
+      });
+
+    doc.text('LÓPEZ', col1X, lineY + 28, {
+      width: lineWidth,
+      align: 'left',
+      continued: false,
+    });
+
+    doc.text('DNI N° 42933662', col1X, lineY + 38, {
+      width: lineWidth,
+      align: 'left',
+      continued: false,
+    });
+
+    //AGREGAR IMAGEN 2
+    try {
+      doc.image(SIGNATURE_EMPLOYEE_TWO, col2X + 25, imageY, {
+        width: imageWidth,
+        height: imageHeight,
+        fit: [imageWidth, imageHeight],
+        align: 'center',
+      });
+    } catch (error) {
+      // Si no hay imagen, solo mostrar línea
+      console.info('No hay imagen de firma para empleador 2');
+    }
+    // COLUMNA 2 - EL EMPLEADOR
+    doc
+      .moveTo(col2X, lineY)
+      .lineTo(col2X + lineWidth, lineY)
+      .stroke();
+
+    doc
+      .fontSize(7)
+      .font('Helvetica-Bold')
+      .text('EL EMPLEADOR', col2X, lineY + 5, {
+        width: lineWidth,
+        align: 'center',
+        continued: false,
+      });
+
+    doc
+      .fontSize(7)
+      .font('Helvetica')
+      .text('NOMBRE: MARIA ESTELA GUILLEN', col2X, lineY + 18, {
+        width: lineWidth,
+        align: 'left',
+        continued: false,
+      });
+
+    doc.text('CUBAS', col2X, lineY + 28, {
+      width: lineWidth,
+      align: 'left',
+      continued: false,
+    });
+
+    doc.text('DNI N° 10346833', col2X, lineY + 38, {
+      width: lineWidth,
+      align: 'left',
+      continued: false,
+    });
+
+    // COLUMNA 3 - EL TRABAJADOR
+    doc
+      .moveTo(col3X, lineY)
+      .lineTo(col3X + lineWidth, lineY)
+      .stroke();
+
+    doc
+      .fontSize(7)
+      .font('Helvetica-Bold')
+      .text('EL TRABAJADOR', col3X, lineY + 5, {
+        width: lineWidth,
+        align: 'center',
+        continued: false,
+      });
+    doc
+      .fontSize(7)
+      .font('Helvetica')
+      .text(`NOMBRE: ${fullName}`, col3X, lineY + 18, {
+        width: lineWidth,
+        align: 'left',
+        continued: false,
+      });
+
+    doc.text(`DNI.: ${data.dni}`, col3X, lineY + 38, {
+      width: lineWidth,
+      align: 'left',
+      continued: false,
+    });
+
+    doc.text(`DIVISION: ${data.subDivisionOrParking}`, col3X, lineY + 48, {
+      width: lineWidth,
+      align: 'left',
+      continued: false,
+    });
+
+    // Mover el cursor Y al final de las firmas
+    doc.y = lineY + 55;
     doc.end();
   });
 };

@@ -1,7 +1,7 @@
 import PDFDocument from 'pdfkit';
 import { logger } from '../utils/logger';
 import { format } from 'date-fns';
-import { EmployeeData } from '../types/employees.types';
+import { EmployeeData } from '../types/employees.interface';
 import { formatCurrency } from '../utils/formatCurrency';
 import {
   generatePartTimeContract,
@@ -203,125 +203,125 @@ export class PDFGeneratorService {
   /**
    * Genera contrato Part-time
    */
-  private async generatePlanillaContract(data: EmployeeData): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ size: 'A4', margin: 50 });
-      const chunks: Buffer[] = [];
+  // private async generatePlanillaContract(data: EmployeeData): Promise<Buffer> {
+  //   return new Promise((resolve, reject) => {
+  //     const doc = new PDFDocument({ size: 'A4', margin: 50 });
+  //     const chunks: Buffer[] = [];
 
-      doc.on('data', (chunk) => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
+  //     doc.on('data', (chunk) => chunks.push(chunk));
+  //     doc.on('end', () => resolve(Buffer.concat(chunks)));
+  //     doc.on('error', reject);
 
-      // Título
-      doc
-        .fontSize(16)
-        .font('Helvetica-Bold')
-        .text('CONTRATO DE TRABAJO A TIEMPO PARCIAL', { align: 'center' })
-        .moveDown(1.5);
+  //     // Título
+  //     doc
+  //       .fontSize(16)
+  //       .font('Helvetica-Bold')
+  //       .text('CONTRATO DE TRABAJO A TIEMPO PARCIAL', { align: 'center' })
+  //       .moveDown(1.5);
 
-      // Fecha
-      const currentDate = format(new Date(), 'dd/MM/yyyy');
-      doc
-        .fontSize(11)
-        .font('Helvetica')
-        .text(`Fecha: ${currentDate}`, { align: 'right' })
-        .moveDown(1);
+  //     // Fecha
+  //     const currentDate = format(new Date(), 'dd/MM/yyyy');
+  //     doc
+  //       .fontSize(11)
+  //       .font('Helvetica')
+  //       .text(`Fecha: ${currentDate}`, { align: 'right' })
+  //       .moveDown(1);
 
-      // Datos del empleado
-      doc
-        .fontSize(13)
-        .font('Helvetica-Bold')
-        .text('DATOS DEL EMPLEADO')
-        .moveDown(0.5);
+  //     // Datos del empleado
+  //     doc
+  //       .fontSize(13)
+  //       .font('Helvetica-Bold')
+  //       .text('DATOS DEL EMPLEADO')
+  //       .moveDown(0.5);
 
-      doc.fontSize(11).font('Helvetica');
+  //     doc.fontSize(11).font('Helvetica');
 
-      const fullNameComplete =
-        `${data.name || ''} ${data.lastNameFather || ''} ${data.lastNameMother || ''}`
-          .trim()
-          .replace(/\s+/g, ' ');
+  //     const fullNameComplete =
+  //       `${data.name || ''} ${data.lastNameFather || ''} ${data.lastNameMother || ''}`
+  //         .trim()
+  //         .replace(/\s+/g, ' ');
 
-      doc
-        .text(`Nombre completo: ${fullNameComplete}`)
-        .text(`DNI: ${data.dni || ''}`)
-        .text(`Dirección: ${data.address || ''}`)
-        .text(`Distrito: ${data.district || ''}`)
-        .moveDown(1);
+  //     doc
+  //       .text(`Nombre completo: ${fullNameComplete}`)
+  //       .text(`DNI: ${data.dni || ''}`)
+  //       .text(`Dirección: ${data.address || ''}`)
+  //       .text(`Distrito: ${data.district || ''}`)
+  //       .moveDown(1);
 
-      // Condiciones laborales
-      doc
-        .fontSize(13)
-        .font('Helvetica-Bold')
-        .text('CONDICIONES LABORALES')
-        .moveDown(0.5);
+  //     // Condiciones laborales
+  //     doc
+  //       .fontSize(13)
+  //       .font('Helvetica-Bold')
+  //       .text('CONDICIONES LABORALES')
+  //       .moveDown(0.5);
 
-      doc.fontSize(11).font('Helvetica');
+  //     doc.fontSize(11).font('Helvetica');
 
-      const fullName =
-        `${data.name || ''} ${data.lastNameFather || ''} ${data.lastNameMother || ''}`
-          .trim()
-          .replace(/\s+/g, ' ');
+  //     const fullName =
+  //       `${data.name || ''} ${data.lastNameFather || ''} ${data.lastNameMother || ''}`
+  //         .trim()
+  //         .replace(/\s+/g, ' ');
 
-      const salary = data.salary
-        ? formatCurrency(Number(data.salary))
-        : 'S/ 0.00';
+  //     const salary = data.salary
+  //       ? formatCurrency(Number(data.salary))
+  //       : 'S/ 0.00';
 
-      doc
-        .text(`Fecha de ingreso: ${data.entryDate}`)
-        .text(`Remuneración: ${salary}`)
-        .text('Tipo de contrato: Tiempo Parcial')
-        .text('Jornada: 4 horas diarias')
-        .text('Horario: Según programación semanal')
-        .moveDown(1);
+  //     doc
+  //       .text(`Fecha de ingreso: ${data.entryDate}`)
+  //       .text(`Remuneración: ${salary}`)
+  //       .text('Tipo de contrato: Tiempo Parcial')
+  //       .text('Jornada: 4 horas diarias')
+  //       .text('Horario: Según programación semanal')
+  //       .moveDown(1);
 
-      // Cláusulas
-      doc.fontSize(13).font('Helvetica-Bold').text('CLÁUSULAS').moveDown(0.5);
+  //     // Cláusulas
+  //     doc.fontSize(13).font('Helvetica-Bold').text('CLÁUSULAS').moveDown(0.5);
 
-      doc.fontSize(11).font('Helvetica');
+  //     doc.fontSize(11).font('Helvetica');
 
-      const clauses = [
-        '1. El trabajador laborará en jornada parcial según horario establecido.',
-        '2. La remuneración es proporcional a las horas trabajadas.',
-        '3. El trabajador gozará de beneficios proporcionales según la legislación vigente.',
-        '4. Los horarios podrán ser ajustados previo acuerdo entre las partes.',
-      ];
+  //     const clauses = [
+  //       '1. El trabajador laborará en jornada parcial según horario establecido.',
+  //       '2. La remuneración es proporcional a las horas trabajadas.',
+  //       '3. El trabajador gozará de beneficios proporcionales según la legislación vigente.',
+  //       '4. Los horarios podrán ser ajustados previo acuerdo entre las partes.',
+  //     ];
 
-      clauses.forEach((clause) => {
-        doc.text(clause, { align: 'justify' }).moveDown(0.3);
-      });
+  //     clauses.forEach((clause) => {
+  //       doc.text(clause, { align: 'justify' }).moveDown(0.3);
+  //     });
 
-      doc.moveDown(2);
+  //     doc.moveDown(2);
 
-      // Firmas
-      const pageWidth = doc.page.width;
-      const margin = doc.page.margins.left;
-      const signatureWidth = 150;
-      const signatureY = doc.y;
+  //     // Firmas
+  //     const pageWidth = doc.page.width;
+  //     const margin = doc.page.margins.left;
+  //     const signatureWidth = 150;
+  //     const signatureY = doc.y;
 
-      doc
-        .fontSize(11)
-        .text('_____________________', margin + 50, signatureY)
-        .text('Firma del Empleado', margin + 50, signatureY + 20, {
-          width: signatureWidth,
-          align: 'center',
-        });
+  //     doc
+  //       .fontSize(11)
+  //       .text('_____________________', margin + 50, signatureY)
+  //       .text('Firma del Empleado', margin + 50, signatureY + 20, {
+  //         width: signatureWidth,
+  //         align: 'center',
+  //       });
 
-      doc
-        .text(
-          '_____________________',
-          pageWidth - margin - signatureWidth - 50,
-          signatureY,
-        )
-        .text(
-          'Firma del Empleador',
-          pageWidth - margin - signatureWidth - 50,
-          signatureY + 20,
-          { width: signatureWidth, align: 'center' },
-        );
+  //     doc
+  //       .text(
+  //         '_____________________',
+  //         pageWidth - margin - signatureWidth - 50,
+  //         signatureY,
+  //       )
+  //       .text(
+  //         'Firma del Empleador',
+  //         pageWidth - margin - signatureWidth - 50,
+  //         signatureY + 20,
+  //         { width: signatureWidth, align: 'center' },
+  //       );
 
-      doc.end();
-    });
-  }
+  //     doc.end();
+  //   });
+  // }
 
   /**
    * Genera contrato APE

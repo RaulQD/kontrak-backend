@@ -3,9 +3,11 @@ import { logger } from '../utils/logger';
 import { BAD_REQUEST } from '../constants/http';
 import { AppError } from '../utils/app-error';
 import { validateAndGetHeaderMapping } from '../validators/excel-headers.validator';
-import { ExcelRowData } from '../types/excel-types/excel.types';
+import { ExcelRowData } from '../types/excel-types/excel.interface';
 import { ValidationService } from './validation.service';
-import { ValidationResult } from '../types/employees.types';
+import { ValidationResult } from '../types/employees.interface';
+import { FieldConfig } from '../constants/contract-field';
+import { ValidateAddendumResult } from '../types/addendum.interface';
 
 /**
  * Opciones para importar Excel
@@ -17,15 +19,6 @@ export interface ImportOptions {
   skipEmptyCells?: boolean; // Saltar celdas vacías
   headerRow?: number; // Número de fila donde están los encabezados
 }
-/**
- * Información de una hoja de Excel
- */
-export interface SheetInfo {
-  name: string;
-  index: number;
-  rowCount: number;
-  columnCount: number;
-}
 
 export class ExcelParserServices {
   private readonly validationService: ValidationService;
@@ -34,6 +27,7 @@ export class ExcelParserServices {
   }
   async validateExcel(
     buffer: Buffer,
+    fields: Record<string, FieldConfig>,
     options: ImportOptions,
   ): Promise<ValidationResult> {
     logger.info(
@@ -42,38 +36,34 @@ export class ExcelParserServices {
     );
 
     try {
-      const rawData = await this.importExcelFromBuffer(buffer, options);
+      const rowData = await this.importExcelFromBuffer(buffer, fields, options);
 
-      if (!rawData || rawData.length === 0) {
+      if (!rowData || rowData.length === 0) {
         throw new AppError(
           'El archivo Excel no contiene datos válidos',
           BAD_REQUEST,
         );
       }
 
-      const totalRecords = rawData.length;
+      const totalRecords = rowData.length;
 
       logger.info({ totalRecords }, '📄 Registros extraídos del Excel');
 
       const validation =
-        this.validationService.validateEmployeeInbatch(rawData);
+        this.validationService.validateEmployeeInbatch(rowData);
 
       const invalidRows = new Set(validation.errors.map((e) => e.row));
       const invalidRecords = invalidRows.size;
       const validRecords = validation.validEmployees?.length || 0;
 
-      logger.info(
-        {
-          totalRecords,
-          validRecords,
-          invalidRecords,
-          totalErrors: validation.errors.length,
-        },
-        validation.isValid ? 'Validación exitosa' : 'Validación con errores',
-      );
+      logger.info({
+        totalRecords,
+        validRecords,
+        invalidRecords,
+        totalErrors: validation.errors.length,
+      });
 
       const result: ValidationResult = {
-        isValid: validation.isValid,
         employees: validation.validEmployees || [],
         errors: validation.errors,
         totalRecords,
@@ -90,6 +80,7 @@ export class ExcelParserServices {
 
   async importExcelFromBuffer(
     buffer: Buffer,
+    fields: Record<string, FieldConfig>,
     options: ImportOptions,
   ): Promise<ExcelRowData[]> {
     logger.info(
@@ -110,7 +101,11 @@ export class ExcelParserServices {
 
       // Validar encabezados antes de procesar
       const headerRow = options.headerRow ?? 1;
-      const headerMapping = validateAndGetHeaderMapping(worksheet, headerRow);
+      const headerMapping = validateAndGetHeaderMapping(
+        worksheet,
+        fields,
+        headerRow,
+      );
 
       // Extraer datos usando el mapeo de encabezados
       const data = this.extractDataFromWorksheet(
@@ -220,13 +215,20 @@ export class ExcelParserServices {
             const value = this.extractCellValue(cell);
             let finalValue = value;
 
-            if (field === 'dni' && typeof value === 'number') {
+            if (
+              (field === 'dni' || field === 'documentNumber') &&
+              typeof value === 'number'
+            ) {
               // Convertir DNI de number a string
               finalValue = String(value);
             } else if (
               field === 'entryDate' ||
               field === 'endDate' ||
-              field === 'birthDate'
+              field === 'birthDate' ||
+              field === 'startAddendum' ||
+              field === 'endAddendum' ||
+              field === 'start' ||
+              field === 'end'
             ) {
               if (value instanceof Date) {
                 const day = String(value.getUTCDate()).padStart(2, '0');
@@ -314,13 +316,48 @@ export class ExcelParserServices {
     const stringValue = String(value).trim();
     return stringValue === '' ? null : stringValue;
   }
-  private parseExcelDate(value: Date): string {
-    if (value instanceof Date) {
-      const day = String(value.getDate() + 1).padStart(2, '0');
-      const month = String(value.getMonth() + 1).padStart(2, '0');
-      const year = value.getFullYear();
-      return `${day}/${month}/${year}`;
+  async validateAddendumExcel(
+    buffer: Buffer,
+    fields: Record<string, FieldConfig>,
+    options: ImportOptions,
+  ): Promise<ValidateAddendumResult> {
+    logger.info(
+      { bufferSize: buffer.length },
+      '🚀 Iniciando procesamiento de Excel',
+    );
+    try {
+      const rowData = await this.importExcelFromBuffer(buffer, fields, options);
+      if (!rowData || rowData.length === 0) {
+        throw new AppError(
+          'El archivo Excel no contiene datos válidos',
+          BAD_REQUEST,
+        );
+      }
+      const totalRecords = rowData.length;
+      logger.info({ totalRecords }, '📄 Registros extraídos del Excel');
+      const validation =
+        this.validationService.validateEmployeeAddendumInBatch(rowData);
+      const invalidRows = new Set(validation.errors.map((e) => e.row));
+      const invalidRecords = invalidRows.size;
+      const validRecords = validation.validEmployeesAddendum?.length || 0;
+      logger.info({
+        totalRecords,
+        validRecords,
+        invalidRecords,
+        totalErrors: validation.errors.length,
+      });
+
+      const result: ValidateAddendumResult = {
+        employeesAddendum: validation.validEmployeesAddendum || [],
+        errors: validation.errors,
+        totalRecords,
+        validRecords,
+        invalidRecords,
+      };
+      return result;
+    } catch (error) {
+      logger.error({ error }, '❌ Error al procesar Excel');
+      throw error;
     }
-    return value;
   }
 }
