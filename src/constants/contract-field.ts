@@ -177,9 +177,9 @@ export const SUBSIDIO_SPECIFIC_FIELDS: Record<string, FieldConfig> = {
       'suplencia de',
       'SUPLENCIA DE:',
       'SUPLENCIA DE',
-      'Reemplazo',
-      'REEMPLAZO',
-      'reemplazo',
+      'Reemplazo:',
+      'REEMPLAZO:',
+      'reemplazo:',
     ],
     description: 'Empelado que sera reemplazado',
   },
@@ -195,6 +195,23 @@ export const SUBSIDIO_SPECIFIC_FIELDS: Record<string, FieldConfig> = {
       'razón de suplencia',
     ],
     description: 'Motivo de suplencia',
+  },
+  timeForCompany: {
+    aliases: ['tiempo en empresa', 'Tiempo en Empresa', 'Tiempo en empresa'],
+    description: 'Cuanto tiempo tiene en la empresa.',
+  },
+  workingCondition: {
+    aliases: ['CONDICION LABORAL', 'condición laboral', 'Condicion Loboral'],
+    description: 'Condición laboral del empleado',
+  },
+  probationaryPeriod: {
+    aliases: [
+      'PERIODO DE PRUEBA',
+      'Periodo de prueba',
+      'Periodo de Prueba',
+      'periodo de prueba',
+    ],
+    description: 'Periodo de prueba del empleado',
   },
 };
 
