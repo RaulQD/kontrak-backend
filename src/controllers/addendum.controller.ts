@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { catchError } from '../utils/catch-error';
-import { BAD_REQUEST, CREATED, OK } from '../constants/http';
+import { CREATED } from '../constants/http';
 import { AddendumServices } from '../services/addendum.service';
 
 export class AddendumController {

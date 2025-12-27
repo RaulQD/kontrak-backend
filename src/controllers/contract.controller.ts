@@ -1,34 +1,14 @@
 import { Request, Response } from 'express';
 import { ContractService } from '../services/contract.service';
 import { catchError } from '../utils/catch-error';
-import { BAD_REQUEST, CREATED, OK } from '../constants/http';
+import { BAD_REQUEST, OK } from '../constants/http';
 
 export class ContractController {
   private readonly contractService: ContractService;
   constructor() {
     this.contractService = new ContractService();
   }
-  /**
-   * Genera PDFs de contratos desde un archivo Excel validado
-   */
-  generateContractPDFs = catchError(async (req: Request, res: Response) => {
-    // Verificar que llegó el archivo
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'No se recibió ningún archivo. Envía un campo "excel"',
-      });
-    }
-    const response =
-      await this.contractService.processExcelAndGenerateContracts(
-        req.file.buffer,
-      );
 
-    return res.status(CREATED).json({
-      success: true,
-      data: response,
-    });
-  });
   downloadZip = catchError(async (req: Request, res: Response) => {
     const employee = req.body;
     //formatear fecha

@@ -21,8 +21,11 @@ export interface EmployeeData {
   subDivisionOrParking: string;
   birthDate?: Date | string;
   // Campos específicos de SUBSIDIO
+  timeForCompany?: string;
   replacementFor?: string;
   reasonForSubstitution?: string;
+  workingCondition?: string;
+  probationaryPeriod?: string;
   contractType: ContractType;
 }
 export interface EmployeeWithStatus extends EmployeeData {

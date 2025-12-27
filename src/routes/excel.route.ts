@@ -3,10 +3,16 @@ import { ErrorHandleMulter } from '../middlewares/error-handler-multer.middlewar
 import { schemaValidatorMiddleware } from '../middlewares/schema-validator.middleware';
 import { EmployeeBatchSchema } from '../validators/employee.validator';
 import { ExcelController } from '../controllers/excel.controller';
+import { excelUpload } from '../middlewares/upload.middleware';
 
 const router = Router();
 const excelController = new ExcelController();
 
+router.post(
+  '/upload',
+  excelUpload.single('excel'),
+  excelController.readDataFromExcel,
+);
 router.post(
   '/download-lawlife',
   schemaValidatorMiddleware(EmployeeBatchSchema),

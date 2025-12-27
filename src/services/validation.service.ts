@@ -75,6 +75,21 @@ export class ValidationService {
       entryDate: result.data.entryDate,
       endDate: result.data.endDate,
       birthDate: result.data.birthDate,
+      ...(result.data.replacementFor && {
+        replacementFor: result.data.replacementFor,
+      }),
+      ...(result.data.reasonForSubstitution && {
+        reasonForSubstitution: result.data.reasonForSubstitution,
+      }),
+      ...(result.data.timeForCompany && {
+        timeForCompany: result.data.timeForCompany,
+      }),
+      ...(result.data.workingCondition && {
+        workingCondition: result.data.workingCondition,
+      }),
+      ...(result.data.probationaryPeriod && {
+        probationaryPeriod: result.data.probationaryPeriod,
+      }),
     };
 
     return { errors: [], employee };
