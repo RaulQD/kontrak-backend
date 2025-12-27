@@ -1,6 +1,6 @@
 import { AppError } from '../utils/app-error';
 
-export type ContractType = 'PLANILLA' | 'SUBSIDIO' | 'PART TIME' | 'APE';
+export type ContractType = 'PLANILLA' | 'SUBSIDIO' | 'PART TIME';
 
 export interface EmployeeData {
   name: string;

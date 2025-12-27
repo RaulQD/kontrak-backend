@@ -33,8 +33,6 @@ export class ContractService {
 
     for (const emp of employee) {
       try {
-        // 2. Definimos el nombre de la carpeta virtual
-        // Usamos la misma lógica que tenías: minúsculas y sin espacios
         const rootFolder = emp.contractType
           .toLocaleLowerCase()
           .replace(/\s+/g, '');

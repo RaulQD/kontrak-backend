@@ -105,7 +105,6 @@ export class ValidationService {
     if (lower === 'subsidio') return 'SUBSIDIO';
     if (lower === 'part-time' || lower === 'part_time' || lower === 'part time')
       return 'PART TIME';
-    if (lower === 'ape') return 'APE';
 
     return 'PLANILLA';
   }

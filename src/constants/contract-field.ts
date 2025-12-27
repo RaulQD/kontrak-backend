@@ -320,7 +320,7 @@ export const ADDENDUM_FIELDS_MAP: Record<string, FieldConfig> = {
   ...LOCATION_FIELDS,
 };
 
-export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO' | 'APE';
+export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO';
 
 export const CONTRACT_VALIDATION_RULES: Record<
   string,
@@ -375,27 +375,6 @@ export const CONTRACT_VALIDATION_RULES: Record<
   },
   PART_TIME: {
     description: 'Contrato Part-Time',
-    requiredFields: [
-      // Campos base (siempre)
-      'name',
-      'lastNameFather',
-      'lastNameMother',
-      'dni',
-      'entryDate',
-      'endDate',
-      'position',
-      'subDivisionOrParking',
-      // Campos comunes
-      'province',
-      'district',
-      'department',
-      'address',
-      'salary',
-      'salaryInWords',
-    ],
-  },
-  APE: {
-    description: 'Contrato APE',
     requiredFields: [
       // Campos base (siempre)
       'name',

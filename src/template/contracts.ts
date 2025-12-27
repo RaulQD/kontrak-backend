@@ -6,6 +6,7 @@ import {
   SIGNATURE_EMPLOYEE_TWO,
 } from '../constants/signatures';
 import { formatCurrency } from '../utils/formatCurrency';
+import fs from 'fs';
 import {
   DNI_EMPLOYEE_PRIMARY,
   DNI_EMPLOYEE_SECOND,
@@ -13,8 +14,8 @@ import {
   FULL_NAME_SECOND_EMPLOYEE,
 } from './constants';
 
-const arialNormal = path.join(__dirname, '../fonts/ARIAL.TTF');
-const arialBold = path.join(__dirname, '../fonts/ARIALBD.TTF');
+const arialNormal = fs.readFileSync(path.join(__dirname, '../fonts/ARIAL.TTF'));
+const arialBold = fs.readFileSync(path.join(__dirname, '../fonts/ARIALBD.TTF'));
 
 export const generatePartTimeContract = (
   data: EmployeeData,
@@ -8639,10 +8640,10 @@ export const generateProcessingOfPresonalDataPDF = async (
 ): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4' });
-    doc.page.margins.top = 30.12; // 2.05 cm
-    doc.page.margins.bottom = 33.89; // 0.49 cm
-    doc.page.margins.left = 60.69; // 1.23 cm
-    doc.page.margins.right = 55.69; // 1.55 cm
+    doc.page.margins.top = 50; // 2.05 cm
+    doc.page.margins.bottom = 50; // 0.49 cm
+    doc.page.margins.left = 50; // 1.23 cm
+    doc.page.margins.right = 60; // 1.55 cm
 
     const chunks: Buffer[] = [];
 
@@ -8699,7 +8700,7 @@ export const generateProcessingOfPresonalDataPDF = async (
       })
       .font('Arial Normal')
       .text(
-        'declara conocer que sus datos personales entregados o que se entreguen a',
+        'declara conocer que sus datos personales entregados o que se entreguen a ',
         { continued: true, align: 'justify' },
       )
       .font('Arial Bold')
@@ -8877,14 +8878,8 @@ export const generateProcessingOfPresonalDataPDF = async (
       .text('INVERSIONES URBANÍSTICAS OPERADORA, ', { continued: true })
       .font('Arial Normal')
       .text(
-        'ubicada en Calle Dean Valdivia N°148 Int.1401 Urb. Jardín (Edificio Platinium), Distrito de San Isidro. Asimismo, ',
+        'ubicada en Calle Dean Valdivia N°148 Int.1401 Urb. Jardín (Edificio Platinium), Distrito de San Isidro. Asimismo, “INVERSIONES URBANÍSTICAS OPERADORA” le informa que podrá establecer otros canales para tramitar estas solicitudes, lo que será informado oportunamente en la página web.”',
         { continued: true },
-      )
-      .font('Arial Normal')
-      .text('“INVERSIONES URBANÍSTICAS OPERADORA”', { continued: true })
-      .font('Arial Normal')
-      .text(
-        'le informa que podrá establecer otros canales para tramitar estas solicitudes, lo que será informado oportunamente en la página web.”',
       )
       .moveDown(8);
 
@@ -9094,14 +9089,14 @@ export const generateDocAnexo = async (data: EmployeeData): Promise<Buffer> => {
     doc.registerFont('Arial Bold', arialBold);
     doc.registerFont('Arial Normal', arialNormal);
 
-    doc.fontSize(8).font('Arial Bold').text('ANEXO 1', { align: 'center' });
-
     doc
       .fontSize(8)
       .font('Arial Bold')
       .text('ANEXO 1', { align: 'center' })
       .font('Arial Bold')
-      .text('RECOMENDACIONES EN MATERIA DE SEGURIDAD Y SALUD EN EL TRABAJO')
+      .text('RECOMENDACIONES EN MATERIA DE SEGURIDAD Y SALUD EN EL TRABAJO', {
+        align: 'center',
+      })
       .font('Arial Bold')
       .text('(Ley Nº 29783, Art. 35º, inc. c))', {
         align: 'center',
@@ -9113,44 +9108,710 @@ export const generateDocAnexo = async (data: EmployeeData): Promise<Buffer> => {
       .font('Arial Normal')
       .text(
         'De acuerdo a lo establecido en el artículo 35 de la Ley N° 29783, Ley de Seguridad y Salud en el Trabajo, y el artículo 30 de su Reglamento aprobado por Decreto Supremo N° 005-2012-TR, por medio del presente documento ',
-        { continued: true },
+        { continued: true, align: 'justify' },
       )
       .font('Arial Bold')
-      .text('EL EMPLEADOR ', { continued: true })
+      .text('EL EMPLEADOR ', { continued: true, align: 'justify' })
       .font('Arial Normal')
       .text(
         'cumple con describir las recomendaciones de seguridad y salud en el trabajo que deberá tener presente y cumplir ',
-        { continued: true },
+        { continued: true, align: 'justify' },
       )
       .font('Arial Bold')
-      .text('EL TRABAJADOR, ', { continued: true })
+      .text('EL TRABAJADOR, ', { continued: true, align: 'justify' })
       .font('Arial Normal')
-      .text('en la ejecución de sus funciones para ', { continued: true })
+      .text('en la ejecución de sus funciones para ', {
+        continued: true,
+        align: 'justify',
+      })
       .font('Arial Normal')
-      .text('EL EMPLEADOR ', { continued: true })
+      .text('EL EMPLEADOR ', { continued: true, align: 'justify' })
       .font('Arial Normal')
-      .text('en el puesto de ', { continued: true })
+      .text('en el puesto de ', { continued: true, align: 'justify' })
       .font('Arial Bold')
       .text(`${data.position}`);
 
     doc
       .fontSize(8)
       .font('Arial Bold')
-      .text('EL TRABAJADOR ', { continued: true })
+      .text('EL TRABAJADOR ', { continued: true, align: 'justify' })
       .font('Arial Normal')
       .text(
         'deberá tener presente los siguientes riesgos propios del centro de trabajo donde prestará sus servicios, así como las medidas de protección y prevención en relación con tales riesgos:',
       )
       .moveDown(2);
 
-    doc.table({
-      columnStyles: [100, 200],
-      data: [
-        ['Riesgos asociados', 'Medidas de protección y prevención'],
-        ['One value goes here', 'Another one here'],
-      ],
+    doc
+      .table({
+        defaultStyle: { border: 1 },
+        columnStyles: [150, 330],
+        rowStyles: [30],
+        data: [
+          [
+            {
+              backgroundColor: '#93c5fd',
+              text: 'Riesgos asociados ',
+              align: 'center',
+            },
+            {
+              backgroundColor: '#93c5fd',
+              text: 'Medidas de protección y prevención',
+              align: 'center',
+            },
+          ],
+          [
+            {
+              text: 'Caídas al mismo nivel',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Mantener el orden y limpieza en las zonas de trabajo.\n - Mantener las zonas de tránsito libre de obstáculos (cajas, papeleras, cables, etc.).\n - Extremar las precauciones con el suelo mojado y especialmente resbaladizo \n - Respetar las señales de advertencia.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Caídas a distinto nivel',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar los pasamanos al bajar o subir las escaleras.\n - Respetar las señales de advertencia.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Riesgo eléctrico',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - No sobrecargar los enchufes.\n - Respetar las señales de advertencia.\n - No manipular los cuadros eléctricos, excepto personal debidamente autorizado y \n   capacitado para ello.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Quemaduras, incendios, explosiones',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Revisar periódicamente la instalación de combustible y el correcto funcionamiento de \n   los medios de protección contra incendios.\n - Conocer y respetar las vías de evacuación y salidas de emergencia existentes en el\n   área de trabajo.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+        ],
+      })
+      .moveDown(1);
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text(
+        '1. Asimismo, EL TRABAJADOR deberá tener presente los siguientes riesgos propios del puesto de trabajo de [*] que desempeñará en EL EMPLEADOR, así como las medidas de protección y prevención relacionadas con tales riesgos:',
+      )
+      .moveDown(1);
+    doc
+      .table({
+        defaultStyle: { border: 1 },
+        columnStyles: [150, 330],
+        rowStyles: [30],
+        data: [
+          [
+            {
+              backgroundColor: '#93c5fd',
+              text: 'Riesgos asociados ',
+              align: 'center',
+            },
+            {
+              backgroundColor: '#93c5fd',
+              text: 'Medidas de protección y prevención',
+              align: 'center',
+            },
+          ],
+          [
+            {
+              text: 'Lesiones por la espalda por sobreesfuerzos',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar, si es posible, medios mecánicos para transportar objetos, sobre todo si las \n   cargas son pesadas, voluminosas o si la frecuencia con que estas se manipulan son \n   elevadas.\n - Solicitar ayuda a otra persona.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Lesiones por movimientos forzados',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar sillas ergonómicas y ajustar la altura de la pantalla del computador a la altura \n   de los ojos.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Lesiones en dedos o muñecas por la incorrecta colocación de la mano combinada con la frecuencia de pulsación',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Evitar hacer presión sobre las muñecas.\n - Utilizar almohadilla de apoyo para mejorar la posición de las muñecas al utilizar el \n   teclado y mouse.\n - El antebrazo, la muñeca y la mano deben formar una línea recta.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Molestias / lesiones lumbares por posturas inadecuadas',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Cambios de posturas de forma periódica.\n - Pausas activas. \n - Verificar altura de mesa de trabajo. \n - Sentarse correctamente sobre sillas ergonómicas.\n - Ajustar la altura de la silla; al apoyar las manos en el teclado, el brazo y antebrazo \n   debe formar un ángulo de 90°.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Daños al sistema músculo esquelético por posturas estáticas prolongadas',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar el asiento colocado de tal forma que los movimientos se realicen sin forzar la\n   postura.\n - Adecuar el escritorio, silla y computador para evitar posturas forzadas.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Caídas de objetos en manipulación',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar escalerillas o plataformas para alcanzar objetos situados a una altura por \n   encima de los hombros para evitar golpes por caída de los mismos durante la \n   manipulación.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Caídas al mismo nivel',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Mantener el orden y limpieza en las zonas de trabajo.\n - Mantener las zonas de tránsito libre de obstáculos (cajas, papeleras, cables, etc.).\n - Extremar las precauciones con el suelo mojado y especialmente resbaladizo.\n - Respetar las señales de advertencia.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Caídas a distinto nivel',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar los pasamanos al bajar o subir las escaleras.\n - Respetar las señales de advertencia.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Golpes contra objetos y por objetos',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Realizar orden y limpieza en el puesto de trabajo. \n - Mantener los objetos, piezas, elementos en su lugar.\n - Comprobar que el recorrido esté libre de obstáculos.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Golpes contra muebles u objetos inmóviles (cajones abiertos u otros)',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Mantener cajones y puertas cerradas, de esta manera se evitarán posibles golpes o \n   caídas. \n - No colocar mobiliario o almacenar material de oficina en zonas de paso habitual.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Golpes por uso inadecuado de herramientas',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar la herramienta de diseño adecuado para el trabajo a realizar.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Cortes en la mano por contacto con elementos y herramientas cortantes',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar equipos de protección personal (EPP). \n - Los mangos de las herramientas deben conservarse en perfectas condiciones.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Micro traumatismos en procesos de corte repetitivos',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Hacer uso de las herramientas de forma adecuada y haciendo uso del manual del\n   fabricante.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Sobreesfuerzo por manipulación de objetos pesados',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' En las operaciones de manipulación manual de cargas se deben adoptar las posturas y\n  movimientos adecuados:\n - Aproximarse a la carga lo máximo posible. \n - Asegurar un buen apoyo de los pies, manteniéndolos ligeramente separados. En caso \n   el objeto esté sobre una base elevada,aproximarlo al tronco, consiguiendo una base y \n   agarre firme y estable.\n - Agacharse flexionando las rodillas, manteniendo la espalda recta.\n - Levantar la carga utilizando los músculos de las piernas y no con la espalda.\n - Tomar firmemente la carga con las dos manos.\n - Mantener la carga próxima al cuerpo durante todo el trayecto y andar dando pasos\n   cortos.\n - En elevaciones con giro, procurar mover los pies en vez de girar la cintura. \n - Evitar los movimientos bruscos en la espalda, en especial los giros, incluso cuando se\n   maneja carga ligera.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Sobreesfuerzos por manipulación manual de cargas y movimientos repetitivos',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Evitar los movimientos repetitivos frecuentes.\n - Alternar dichos movimientos con los de otras operaciones que, aunque también \n   supongan movimientos repetitivos, sean producidos por otros grupos\n   musculares (cambiar de mano y de postura de forma periódica)',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Contacto eléctrico con uniones defectuosas sin aislaciones',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - No disponer cables en zonas de paso.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Contactos eléctricos indirectos, con partes o elementos metálicos accidentalmente puestos bajo tensión',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Revisar los equipos eléctricos antes de utilizarlos.\n - No utilizar / manipular herramientas eléctricas que se encuentran húmedas o mojadas, \n   ni equipos en mal estado.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Contactos eléctricos por usar extensiones subestándar en los enchufes',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar enchufes correctamente. \n - No sobrecargar los enchufes. \n - No tirar de los cables. \n - Apagar los equipos (computadoras, impresoras, fotocopiadoras, etc.) cuando finalice la \n   jornada.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Quemaduras por cortocircuitos',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - No utilizar herramientas eléctricas con las manos o los pies húmedos.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Quemaduras por trabajar con hornos y manejar objetos calientes',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar los equipos de protección personal (EPP).',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Sobrecarga mental por estrés por atención al público',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Mantener disponible la información más frecuente y necesaria solicitada por los\n   usuarios. \n - Liberar el escritorio de documentación. \n - Crear un grado de autonomía adecuado en el ritmo y organización básica del trabajo. \n - Hacer pausas para los cambios de postura y reducción de fatiga física y mental.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Fatiga visual: aumento del parpadeo, lagrimeo, pesadez en parpados u ojos',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Verificar que l apantalle esté entre 10° y 60° por debajo de la horizontal de los ojos del\n   operador.\n - Establecer pausas de 10 minutos cada 90 o 60 minutos de trabajo.\n - Alternar la visualización de la pantalla con impresos para descansar la vista.\n - Utilizar la iluminación adecuada en el lugar de trabajo.\n - Eliminar los reflejos originados por las ventanas, colocando cortinas.\n - Realizar hábitos saludables: descanso adecuado y alimentación saludable.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Fatiga física: dolor habitual en región cervical, dorsal o lumbar, tensión en hombros, cuello o espalda, molestias en las piernas (adormecimiento)',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Utilizar un espacio de trabajo con dimensiones adecuadas.\n - Utilizar sillas con base estable y regulación en altura. El respaldo lumbar debe ser\n   ajustable en inclinación.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Fatiga auditiva',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Aislar impresoras, ventiladores y fotocopiadoras de la zona de trabajo de las personas\n   que realizan trabajo intelectual.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+          [
+            {
+              text: 'Estrés por sobrecarga de trabajo y falta de control de las actividades',
+              align: { x: 'left', y: 'center' },
+            },
+            {
+              text: ' - Delegar las responsabilidades al personal.\n - Mantener la calma en situaciones conflictivas. \n - Trabajar coordinadamente. \n - Reorganizar el tiempo de trabajo por cada actividad.',
+              align: { x: 'left', y: 'center' },
+            },
+          ],
+        ],
+      })
+      .moveDown(1);
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('Adicionalmente, ', { continued: true })
+      .font('Arial Normal')
+      .text('EL TRABAJADOR  ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se obliga a cumplir rigurosamente las disposiciones que a continuación se indican a título enunciativo, más no limitativo:',
+      )
+      .moveDown(1);
+
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text('         ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        '-   Leer y practicar estrictamente las obligaciones contenidas en el Reglamento Interno de Seguridad y Salud en el Trabajo (“RISST”).',
+      )
+      .moveDown(1)
+      .font('Arial Normal')
+      .text('         ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        '-   Respetar y aplicar las medidas de prevención de riesgos señaladas en el mapa de riesgos.',
+      )
+      .moveDown(1)
+      .font('Arial Normal')
+      .text('         ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('-   EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se obliga a aplicar las instrucciones impartidas en las capacitaciones dictadas por ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('en materia')
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'de Seguridad y Salud en el Trabajo. La inobservancia de dichas disposiciones podrá ser sancionada por ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR.')
+      .moveDown(1)
+      .font('Arial Normal')
+      .text('         ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('-   EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'tiene la obligación de comunicar al área SSOMA todo evento o situación que ponga o pueda poner en riesgo ',
+      )
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'su seguridad y salud, o la de sus compañeros, siempre que éstas se produzcan dentro de las instalaciones de',
+      )
+      .moveDown(1)
+      .font('Arial Normal')
+      .text('         ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('-   EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se compromete a someterse a los exámenes médicos a los que, en función al cargo y funciones',
+      )
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text('desempeñadas, se encuentren obligados.')
+      .moveDown(1)
+      .font('Arial Normal')
+      .text('         ', { continued: true, align: 'justify' })
+      .font('Arial Bold')
+      .text('-   EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'se compromete a respetar y aplicar los estándares de seguridad y salud establecidos para el puesto que',
+      )
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text('desarrolla.')
+      .moveDown(1)
+      .font('Arial Normal')
+      .text('         ', { continued: true, align: 'justify' })
+      .font('Arial Normal')
+      .text(
+        '-   Constituye falta grave sancionable, el uso indebido o no uso por parte de ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL TRABAJADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('de los instrumentos y materiales de')
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'trabajo, así como de los equipos de protección personal y colectiva que proporcione ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text('EL EMPLEADOR ', { continued: true })
+      .font('Arial Normal')
+      .text('o el')
+      .font('Arial Normal')
+      .text('             ', { continued: true })
+      .font('Arial Normal')
+      .text(
+        'o el incumplimiento de cualquier otra medida de prevención o protección.',
+      )
+      .moveDown(1);
+    doc
+      .fontSize(8)
+      .font('Arial Normal')
+      .text(
+        'Las presentes medidas son de obligatorio cumplimiento en tanto que no se desarrollen otras que puedan modificarlas.',
+      )
+      .moveDown(1)
+      .font('Arial Normal')
+      .text(
+        'En señal de conformidad, las partes suscriben dos (02) ejemplares del presente contrato en la ciudad de ',
+        { continued: true },
+      )
+      .font('Arial Bold')
+      .text(`${data.department}, `, { continued: true })
+      .font('Arial Normal')
+      .text('el día ', { continued: true })
+      .font('Arial Bold')
+      .text(`${data.entryDate}`)
+      .font('Arial Normal')
+      .text(
+        'quedando un ejemplar en poder del empleador y otro en poder del trabajador, quien declara haber recibido una copia del contrato y estar de acuerdo con su contenido.',
+      )
+      .moveDown(4);
+    // CONFIGURACIÓN DE ESPACIO
+    const imageWidth = 85; // Reducido ligeramente para evitar choques
+    const imageHeight = 50;
+    const signatureGap = 10; // Espacio entre texto y firmas
+
+    // Altura estimada del bloque completo (Imagen + Linea + 4 lineas de texto)
+    const estimatedBlockHeight = imageHeight + 80;
+    const pageHeight = doc.page.height;
+    // Margen de seguridad inferior (el margen del doc es muy pequeño, damos un poco más)
+    const safeMarginBottom = doc.page.margins.bottom + 20;
+
+    // 1. CONTROL DE SALTO DE PÁGINA
+    // Si no cabe todo el bloque, pasamos a la siguiente hoja
+    if (doc.y + estimatedBlockHeight > pageHeight - safeMarginBottom) {
+      doc.addPage();
+    } else {
+      // Si cabe, bajamos el cursor para dejar espacio a la imagen (que va "hacia arriba")
+      doc.y += imageHeight + signatureGap;
+    }
+
+    // Guardamos la posición Y base para las LÍNEAS (el suelo de la firma)
+    const lineY = doc.y;
+    const imageY = lineY - imageHeight - 5;
+
+    // 2. CÁLCULO DE COLUMNAS (Matemática exacta)
+    const marginLeft = doc.page.margins.left;
+    const marginRight = doc.page.margins.right;
+    const availableWidth = doc.page.width - marginLeft - marginRight;
+
+    // Dividimos en 3 columnas iguales
+    const colWidth = availableWidth / 3;
+
+    // Definimos un ancho máximo para el texto y la línea (dejando aire a los lados)
+    // Dejamos 10px de margen a la derecha de cada columna para que no se toquen
+    const contentWidth = colWidth - 10;
+
+    // Coordenadas X de inicio para cada columna
+    const col1X = marginLeft;
+    const col2X = marginLeft + colWidth;
+    const col3X = marginLeft + colWidth * 2;
+
+    // Centrado de la línea dentro de su columna
+    // Calculamos cuánto mover la línea para que quede al medio de su caja
+    const paddingX = (colWidth - contentWidth) / 2;
+
+    const line1X = col1X + paddingX;
+    const line2X = col2X + paddingX;
+    const line3X = col3X + paddingX;
+
+    // Coordenadas para centrar las imágenes
+    const img1X = line1X + (contentWidth - imageWidth) / 2;
+    const img2X = line2X + (contentWidth - imageWidth) / 2;
+
+    // --- COLUMNA 1: EMPLEADOR 1 ---
+    try {
+      if (typeof SIGNATURE_EMPLOYEE !== 'undefined') {
+        doc.image(SIGNATURE_EMPLOYEE, img1X, imageY, {
+          width: imageWidth,
+          height: imageHeight,
+          fit: [imageWidth, imageHeight],
+          align: 'center',
+        });
+      }
+    } catch (e) {}
+
+    // Línea
+    doc
+      .moveTo(line1X, lineY)
+      .lineTo(line1X + contentWidth, lineY)
+      .stroke();
+
+    // Texto (Usamos layout dinámico, no coordenadas fijas Y)
+    // 1. Título
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('EL EMPLEADOR', line1X, lineY + 5, {
+        width: contentWidth,
+        align: 'center',
+      });
+
+    // 2. Datos (Reseteamos posición X, dejamos que Y fluya)
+    const signer1Name =
+      typeof FULL_NAME_PRIMARY_EMPLOYEE !== 'undefined'
+        ? FULL_NAME_PRIMARY_EMPLOYEE
+        : '';
+    const signer1DNI =
+      typeof DNI_EMPLOYEE_PRIMARY !== 'undefined' ? DNI_EMPLOYEE_PRIMARY : '';
+
+    doc.font('Arial Normal').text(`NOMBRE: ${signer1Name}`, line1X, doc.y, {
+      width: contentWidth,
+      align: 'left',
     });
 
+    doc.text(`DNI N° ${signer1DNI}`, line1X, doc.y, {
+      width: contentWidth,
+      align: 'left',
+    });
+
+    // --- COLUMNA 2: EMPLEADOR 2 ---
+    // IMPORTANTE: Reseteamos Y a la posición inicial debajo de la línea para empezar esta columna
+    // Pero primero calculamos donde terminó la columna 1 para saber cuál es el punto más bajo
+    let maxY = doc.y;
+
+    try {
+      if (typeof SIGNATURE_EMPLOYEE_TWO !== 'undefined') {
+        doc.image(SIGNATURE_EMPLOYEE_TWO, img2X, imageY, {
+          width: imageWidth,
+          height: imageHeight,
+          fit: [imageWidth, imageHeight],
+          align: 'center',
+        });
+      }
+    } catch (e) {}
+
+    doc
+      .moveTo(line2X, lineY)
+      .lineTo(line2X + contentWidth, lineY)
+      .stroke();
+
+    // Título
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('EL EMPLEADOR', line2X, lineY + 5, {
+        width: contentWidth,
+        align: 'center',
+      });
+
+    // Datos
+    const signer2Name = FULL_NAME_SECOND_EMPLOYEE;
+    const signer2DNI =
+      typeof DNI_EMPLOYEE_SECOND !== 'undefined' ? DNI_EMPLOYEE_SECOND : '';
+
+    doc.font('Arial Normal').text(`NOMBRE: ${signer2Name}`, line2X, doc.y, {
+      width: contentWidth,
+      align: 'left',
+    });
+
+    doc.text(`DNI N° ${signer2DNI}`, line2X, doc.y, {
+      width: contentWidth,
+      align: 'left',
+    });
+
+    if (doc.y > maxY) maxY = doc.y; // Actualizamos el punto más bajo
+
+    // --- COLUMNA 3: TRABAJADOR ---
+    doc
+      .moveTo(line3X, lineY)
+      .lineTo(line3X + contentWidth, lineY)
+      .stroke();
+
+    // Título
+    doc
+      .fontSize(8)
+      .font('Arial Bold')
+      .text('EL TRABAJADOR', line3X, lineY + 5, {
+        width: contentWidth,
+        align: 'center',
+      });
+
+    // Datos
+    // Aquí es donde solía haber problemas si el nombre es largo
+    doc.font('Arial Normal');
+
+    // Nombre
+    doc.text(
+      `NOMBRE: ${data.name} ${data.lastNameFather} ${data.lastNameMother}`,
+      line3X,
+      doc.y,
+      {
+        width: contentWidth, // Esto obliga al texto a bajar de línea si no cabe
+        align: 'left',
+      },
+    );
+
+    // DNI (Se escribirá justo debajo de donde termine el nombre, aunque el nombre ocupe 2 o 3 líneas)
+    doc.text(`DNI: ${data.dni}`, line3X, doc.y, {
+      width: contentWidth,
+      align: 'left',
+    });
+
+    // División
+    doc.text(`DIVISIÓN: ${data.subDivisionOrParking}`, line3X, doc.y, {
+      width: contentWidth,
+      align: 'left',
+    });
     doc.end();
   });
 };

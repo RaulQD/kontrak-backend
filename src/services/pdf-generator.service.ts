@@ -1,8 +1,5 @@
-import PDFDocument from 'pdfkit';
 import { logger } from '../utils/logger';
-import { format } from 'date-fns';
 import { ContractType, EmployeeData } from '../types/employees.interface';
-import { formatCurrency } from '../utils/formatCurrency';
 import {
   genarateSubsidioContract,
   generatePartTimeContract,
@@ -40,9 +37,6 @@ export class PDFGeneratorService {
         case 'parttime':
           buffer = await generatePartTimeContract(employeeData);
           break;
-        case 'ape':
-          buffer = await this.generateApeContract(employeeData);
-          break;
         default:
           throw new Error(`Tipo de contrato desconocido: ${contractType}`);
       }
@@ -66,128 +60,5 @@ export class PDFGeneratorService {
       }
       throw error;
     }
-  }
-
-  /**
-   * Genera contrato APE
-   */
-  private async generateApeContract(data: EmployeeData): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ size: 'A4', margin: 50 });
-      const chunks: Buffer[] = [];
-
-      doc.on('data', (chunk) => chunks.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(chunks)));
-      doc.on('error', reject);
-
-      // Título
-      doc
-        .fontSize(16)
-        .font('Helvetica-Bold')
-        .text('CONTRATO APE', { align: 'center' })
-        .fontSize(14)
-        .text('(ACTIVIDAD PROFESIONAL ESPECÍFICA)', { align: 'center' })
-        .moveDown(1.5);
-
-      // Fecha
-      const currentDate = format(new Date(), 'dd/MM/yyyy');
-      doc
-        .fontSize(11)
-        .font('Helvetica')
-        .text(`Fecha: ${currentDate}`, { align: 'right' })
-        .moveDown(1);
-
-      // Datos del profesional
-      doc
-        .fontSize(13)
-        .font('Helvetica-Bold')
-        .text('DATOS DEL PROFESIONAL')
-        .moveDown(0.5);
-
-      doc.fontSize(11).font('Helvetica');
-
-      const fullName =
-        `${data.name || ''} ${data.lastNameFather || ''} ${data.lastNameMother || ''}`
-          .trim()
-          .replace(/\s+/g, ' ');
-
-      doc
-        .text(`Nombre completo: ${fullName}`)
-        .text(`DNI: ${data.dni || ''}`)
-        .text(`Dirección: ${data.address || ''}`)
-        .moveDown(1);
-
-      // Condiciones del contrato
-      doc
-        .fontSize(13)
-        .font('Helvetica-Bold')
-        .text('CONDICIONES DEL CONTRATO')
-        .moveDown(0.5);
-
-      doc.fontSize(11).font('Helvetica');
-
-      const startDate = data.entryDate || '';
-      const salary = data.salary
-        ? formatCurrency(Number(data.salary))
-        : 'S/ 0.00';
-
-      doc
-        .text(`Fecha de inicio: ${startDate}`)
-        .text(`Honorarios: ${salary}`)
-        .text('Modalidad: Actividad Profesional Específica')
-        .text('Régimen: Independiente')
-        .moveDown(1);
-
-      // Obligaciones
-      doc
-        .fontSize(13)
-        .font('Helvetica-Bold')
-        .text('OBLIGACIONES')
-        .moveDown(0.5);
-
-      doc.fontSize(11).font('Helvetica');
-
-      const obligations = [
-        '1. El profesional se compromete a realizar las actividades específicas acordadas.',
-        '2. Los honorarios serán cancelados según lo establecido en el cronograma de pagos.',
-        '3. El profesional es responsable de sus propios impuestos y contribuciones.',
-        '4. No existe relación de dependencia laboral.',
-      ];
-
-      obligations.forEach((obligation) => {
-        doc.text(obligation, { align: 'justify' }).moveDown(0.3);
-      });
-
-      doc.moveDown(2);
-
-      // Firmas
-      const pageWidth = doc.page.width;
-      const margin = doc.page.margins.left;
-      const signatureWidth = 150;
-      const signatureY = doc.y;
-
-      doc
-        .fontSize(11)
-        .text('_____________________', margin + 50, signatureY)
-        .text('Firma del Profesional', margin + 50, signatureY + 20, {
-          width: signatureWidth,
-          align: 'center',
-        });
-
-      doc
-        .text(
-          '_____________________',
-          pageWidth - margin - signatureWidth - 50,
-          signatureY,
-        )
-        .text(
-          'Firma del Contratante',
-          pageWidth - margin - signatureWidth - 50,
-          signatureY + 20,
-          { width: signatureWidth, align: 'center' },
-        );
-
-      doc.end();
-    });
   }
 }

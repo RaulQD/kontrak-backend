@@ -1,11 +1,6 @@
 import z from 'zod';
 
-export const CONTRACT_TYPES = [
-  'PLANILLA',
-  'PART TIME',
-  'SUBSIDIO',
-  'APE',
-] as const;
+export const CONTRACT_TYPES = ['PLANILLA', 'PART TIME', 'SUBSIDIO'] as const;
 export type ContractType = (typeof CONTRACT_TYPES)[number];
 // Esquema para normalizar y validar tipo de contrato
 export const contractTypeSchema = z
@@ -19,7 +14,6 @@ export const contractTypeSchema = z
       return 'Subsidio';
     if (lower === 'part time' || lower === 'part-time' || lower === 'parttime')
       return 'Part-time';
-    if (lower === 'ape') return 'Ape';
     return val;
   })
   .refine((val) => ['Planilla', 'Subsidio', 'Part-time', 'Ape'].includes(val), {
