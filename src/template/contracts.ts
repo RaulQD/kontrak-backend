@@ -14,8 +14,12 @@ import {
   FULL_NAME_SECOND_EMPLOYEE,
 } from './constants';
 
-const arialNormal = fs.readFileSync(path.join(__dirname, '../fonts/ARIAL.TTF'));
-const arialBold = fs.readFileSync(path.join(__dirname, '../fonts/ARIALBD.TTF'));
+const arialNormal = fs.readFileSync(
+  path.join(__dirname, '../../src/assets/fonts/ARIAL.TTF'),
+);
+const arialBold = fs.readFileSync(
+  path.join(__dirname, '../../src/assets/fonts/ARIALBD.TTF'),
+);
 
 export const generatePartTimeContract = (
   data: EmployeeData,

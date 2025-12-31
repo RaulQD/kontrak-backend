@@ -6,10 +6,6 @@ import { corsConfig } from './config/cors.config';
 import { logger } from './utils/logger';
 import router from './routes';
 
-/**
- * Asegura que la carpeta temporal existe
- */
-
 export const createApp = async (): Promise<Express> => {
   const app = express();
   app.use(morgan('dev'));

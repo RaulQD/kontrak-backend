@@ -17,21 +17,13 @@ export const config = {
 
   // Configuración de CORS
   cors: {
-    origins: process.env.CORS_ORIGINS?.split(',') || [
-      'http://localhost:3000',
-      'http://localhost:5173',
-    ],
+    origins: process.env.CORS_ORIGINS || ['http://localhost:5173'],
   },
 
   // Límites de archivos
   limits: {
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760', 10), // 10MB por defecto
     maxEmployees: parseInt(process.env.MAX_EMPLOYEES || '1000', 10),
-  },
-
-  // Timeouts
-  timeouts: {
-    fileCleanup: parseInt(process.env.FILE_CLEANUP_TIMEOUT || '3600000', 10), // 1 hora
   },
 
   // Directorios
