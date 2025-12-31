@@ -24,6 +24,6 @@ router.post(
   schemaValidatorMiddleware(EmployeeBatchSchema),
   contractController.downloadZip,
 );
-router.get('/preview/:dni', contractController.previewContractPdf);
+router.post('/preview', contractController.previewContractPdf);
 router.use(ErrorHandleMulter);
 export default router;

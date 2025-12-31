@@ -1,30 +1,23 @@
 import z from 'zod';
 
-export const CONTRACT_TYPES = [
-  'PLANILLA',
-  'PART TIME',
-  'SUBSIDIO',
-  'APE',
-] as const;
+export const CONTRACT_TYPES = ['PLANILLA', 'PART TIME', 'SUBSIDIO'] as const;
 export type ContractType = (typeof CONTRACT_TYPES)[number];
 // Esquema para normalizar y validar tipo de contrato
 export const contractTypeSchema = z
-  .string('El tipo de contrato es obligatorio')
+  .string({ error: 'El tipo de contrato es obligatorio' })
   .trim()
   .transform((val) => {
-    // Normalizar tipo de contrato
     const lower = val.toLowerCase();
     if (lower === 'planilla') return 'Planilla';
     if (lower === 'subsidio' || lower === 'suplencia' || lower === 'reemplazo')
       return 'Subsidio';
-    if (lower === 'part time' || lower === 'part-time' || lower === 'parttime')
-      return 'Part-time';
-    if (lower === 'ape') return 'Ape';
-    return val;
+    // CORRECCIÓN: Normalizamos siempre a "Part Time" (o como prefieras, pero consistente)
+    if (lower.includes('part') && lower.includes('time')) return 'Part Time';
+
+    return val; // Devolvemos el valor original si no matchea para que falle en el refine
   })
-  .refine((val) => ['Planilla', 'Subsidio', 'Part-time', 'Ape'].includes(val), {
-    message:
-      'El tipo de contrato debe ser: Planilla, Subsidio, Part-time o Ape',
+  .refine((val) => ['Planilla', 'Subsidio', 'Part Time'].includes(val), {
+    message: 'El tipo de contrato debe ser: Planilla, Subsidio, Part Time',
   });
 export const AddressSchema = z.object({
   province: z.string({ error: 'Provincia es requerida.' }),
@@ -85,7 +78,6 @@ export const employeeSchema = z
     email: z.email('El correo es requerido').trim(),
     address: z
       .string({ error: 'Dirección es requerida.' })
-      .min(10, 'Dirección debe tener al menos 10 caracteres')
       .max(200, 'Dirección no puede exceder 200 caracteres')
       .transform((val) => val.trim()),
     province: z

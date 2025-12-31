@@ -1,5 +1,4 @@
 import { config } from '../config';
-import { AppErrorCode } from '../constants/app-error-code';
 import { NOT_FOUND } from '../constants/http';
 import { PDFPreviewBase64 } from '../types/contract.interface';
 import { AppError } from '../utils/app-error';
@@ -15,13 +14,16 @@ import {
   generateDocAnexo,
   generateProcessingOfPresonalDataPDF,
 } from '../template/contracts';
+import { ValidationService } from './validation.service';
 
 export class ContractService {
   private readonly fileStorageService: FileStorageService;
   private readonly pdfGeneratorService: PDFGeneratorService;
+  private readonly validationService: ValidationService;
   constructor() {
     this.fileStorageService = new FileStorageService();
     this.pdfGeneratorService = new PDFGeneratorService();
+    this.validationService = new ValidationService();
   }
 
   async downloadZipStream(response: Response, employee: EmployeeData[]) {
@@ -33,8 +35,6 @@ export class ContractService {
 
     for (const emp of employee) {
       try {
-        // 2. Definimos el nombre de la carpeta virtual
-        // Usamos la misma lógica que tenías: minúsculas y sin espacios
         const rootFolder = emp.contractType
           .toLocaleLowerCase()
           .replace(/\s+/g, '');
@@ -74,21 +74,13 @@ export class ContractService {
       await fs.access(sessionPath);
     } catch (error) {
       if (error instanceof AppError) {
-        throw new AppError(
-          `Sesión no encontrada: ${sessionId}`,
-          NOT_FOUND,
-          AppErrorCode.NOT_FOUND,
-        );
+        throw new AppError(`Sesión no encontrada: ${sessionId}`, NOT_FOUND);
       }
     }
     //BUSCAR EL  PDF DEL EMPLEADO EN LA CARPETA DE SESIÓN
     const result = await this.fileStorageService.getPdfByDNI(sessionPath, dni);
     if (!result) {
-      throw new AppError(
-        `PDF no encontrado para el DNI: ${dni}`,
-        NOT_FOUND,
-        AppErrorCode.NOT_FOUND,
-      );
+      throw new AppError(`PDF no encontrado para el DNI: ${dni}`, NOT_FOUND);
     }
     if (format === 'base64') {
       const base64String = result.buffer.toString('base64');

@@ -5,8 +5,9 @@ import { INTERNAL_SERVER_ERROR } from '../constants/http';
 
 const handlerAppError = (res: Response, error: AppError) => {
   res.status(error.statusCode).json({
+    success: false,
     message: error.message,
-    errorCode: error.errorCode,
+    data: error.data || null,
   });
 };
 
@@ -23,6 +24,7 @@ export const errorHandler: ErrorRequestHandler = (
   }
   logger.error(`${error.stack || error.message}`);
   res.status(INTERNAL_SERVER_ERROR).json({
+    success: false,
     message: 'Internal Server Error',
     errors: error.message,
   });

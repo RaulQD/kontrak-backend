@@ -1,6 +1,6 @@
 import { AppError } from '../utils/app-error';
 
-export type ContractType = 'PLANILLA' | 'SUBSIDIO' | 'PART TIME' | 'APE';
+export type ContractType = 'PLANILLA' | 'SUBSIDIO' | 'PART TIME';
 
 export interface EmployeeData {
   name: string;
@@ -53,10 +53,18 @@ export interface ValidationError {
   row: number;
   field: string;
 }
+export interface SimpleValidationError {
+  message: string; // Aquí es solo texto
+  row: number;
+  field: string;
+}
+
+// 3. Actualiza el contexto para usar la SIMPLE
+export interface AppErrorContext {
+  // Aquí decimos: "Lo que viaja en el error es la versión simple"
+  validationErrors?: SimpleValidationError[];
+}
 export interface ValidationResult {
   employees: EmployeeWithStatus[];
-  errors: ValidationError[];
   totalRecords: number;
-  validRecords: number;
-  invalidRecords: number;
 }

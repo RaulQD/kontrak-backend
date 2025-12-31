@@ -16,15 +16,21 @@ export const LOCATION_FIELDS: Record<string, FieldConfig> = {
     description: 'Dirección del empleado o Domicilio',
   },
   province: {
-    aliases: ['provincia', 'province'],
+    aliases: ['provincia', 'province', 'PROVINCIA', 'Provincia'],
     description: 'Provincia donde residedel empleado',
   },
   district: {
-    aliases: ['distrito', 'district', 'Distrito'],
+    aliases: ['distrito', 'district', 'Distrito', 'DISTRITO'],
     description: 'Distrito donde reside el emeplado',
   },
   department: {
-    aliases: ['departamento', 'department', 'division', 'Departamento'],
+    aliases: [
+      'departamento',
+      'department',
+      'division',
+      'Departamento',
+      'DEPARTAMENTO',
+    ],
     description: 'Departamenteo donde reside el empleado',
   },
 };
@@ -320,7 +326,7 @@ export const ADDENDUM_FIELDS_MAP: Record<string, FieldConfig> = {
   ...LOCATION_FIELDS,
 };
 
-export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO' | 'APE';
+export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO';
 
 export const CONTRACT_VALIDATION_RULES: Record<
   string,
@@ -375,27 +381,6 @@ export const CONTRACT_VALIDATION_RULES: Record<
   },
   PART_TIME: {
     description: 'Contrato Part-Time',
-    requiredFields: [
-      // Campos base (siempre)
-      'name',
-      'lastNameFather',
-      'lastNameMother',
-      'dni',
-      'entryDate',
-      'endDate',
-      'position',
-      'subDivisionOrParking',
-      // Campos comunes
-      'province',
-      'district',
-      'department',
-      'address',
-      'salary',
-      'salaryInWords',
-    ],
-  },
-  APE: {
-    description: 'Contrato APE',
     requiredFields: [
       // Campos base (siempre)
       'name',

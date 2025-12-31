@@ -1,12 +1,15 @@
 import { Request, Response } from 'express';
 import { ContractService } from '../services/contract.service';
 import { catchError } from '../utils/catch-error';
-import { BAD_REQUEST, OK } from '../constants/http';
+import { PDFGeneratorService } from '../services/pdf-generator.service';
+import { EmployeeData } from '../types/employees.interface';
 
 export class ContractController {
   private readonly contractService: ContractService;
+  private readonly pdfGeneratorService: PDFGeneratorService;
   constructor() {
     this.contractService = new ContractService();
+    this.pdfGeneratorService = new PDFGeneratorService();
   }
 
   downloadZip = catchError(async (req: Request, res: Response) => {
@@ -25,38 +28,17 @@ export class ContractController {
     await this.contractService.downloadZipStream(res, employee);
   });
   previewContractPdf = catchError(async (req: Request, res: Response) => {
-    const { dni } = req.params;
-    const { sessionId, format } = req.query;
-    if (!sessionId || typeof sessionId !== 'string') {
-      return res.status(BAD_REQUEST).json({
-        success: false,
-        message: 'sessionId es requerido como query parameter',
-      });
-    }
-    const validFormat = format === 'base64' ? 'base64' : 'file';
-    if (format && format !== 'base64' && format !== 'file') {
-      return res.status(BAD_REQUEST).json({
-        success: false,
-        message: 'Formato inválido. Use "base64" o "file"',
-      });
-    }
-    const result = await this.contractService.previewContractPdf(
-      sessionId,
-      dni,
-      format as 'base64' | 'file',
-    );
-    if (validFormat === 'file') {
-      const fileResult = result as { buffer: Buffer; fileName: string };
-      res.set({
-        'Content-Type': 'application/pdf',
-        'Content-Length': fileResult.buffer.length.toString(),
-        'Content-Disposition': `inline; filename="${fileResult.fileName}"`,
-      });
-      return res.send(fileResult.buffer);
-    }
-    return res.status(OK).json({
-      success: true,
-      data: result, // Aquí va el objeto { dni, pdfBase64, fileName }
+    const employeeData: EmployeeData = req.body;
+    const { buffer, filename } =
+      await this.pdfGeneratorService.generateContract(
+        employeeData,
+        employeeData.contractType,
+      );
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="${filename}"`,
+      'Content-Length': buffer.length,
     });
+    return res.send(buffer);
   });
 }
