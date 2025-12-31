@@ -95,7 +95,6 @@ export function validateExcelHeaders(
     throw new AppError(
       'No se encontraron encabezados validos en el archivo.',
       BAD_REQUEST,
-      AppErrorCode.VALIDATION_ERROR,
     );
   }
   // Crear mapeo de campos a encabezados encontrados
@@ -146,7 +145,6 @@ export function validateAndGetHeaderMapping(
     throw new AppError(
       `Faltan encabezados requeridos en el archivo Excel: ${missingList}. Por favor, verifica que el archivo contenga todas las columnas necesarias.`,
       BAD_REQUEST,
-      AppErrorCode.VALIDATION_ERROR,
     );
   }
   logger.info(

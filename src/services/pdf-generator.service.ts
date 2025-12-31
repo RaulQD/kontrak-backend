@@ -5,6 +5,7 @@ import {
   generatePartTimeContract,
   generatePlanillaContract,
 } from '../template/contracts';
+import { AppError } from '../utils/app-error';
 
 /**
  * Servicio para generar PDFs de contratos
@@ -22,6 +23,12 @@ export class PDFGeneratorService {
       '📄 Generando contrato PDF',
     );
 
+    if (!employeeData || !employeeData.dni) {
+      throw new AppError(
+        'Faltand datos del empleado para visualizar el contrato',
+        400,
+      );
+    }
     try {
       let buffer: Buffer;
 

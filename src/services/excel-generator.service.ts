@@ -11,8 +11,6 @@ import {
 } from '../constants/contract-field';
 import { excelProcessingResult } from '../types/contract.interface';
 import { ExcelParserServices } from './excel-parser.service';
-import { AppError } from '../utils/app-error';
-import { BAD_REQUEST } from '../constants/http';
 export class ExcelGeneratorServices {
   private readonly excelParseServices: ExcelParserServices;
   constructor() {
@@ -30,26 +28,10 @@ export class ExcelGeneratorServices {
         headerRow: 1,
       },
     );
-    if (
-      validationResult.totalRecords > 0 &&
-      validationResult.validRecords === 0
-    ) {
-      const primerError = validationResult.errors[0];
-      const mensajePista = primerError
-        ? ` (Ej: Fila ${primerError.row}: ${primerError.error.message})`
-        : '';
 
-      throw new AppError(
-        `El archivo contiene ${validationResult.totalRecords} registros, pero ninguno es válido. Por favor revisa el formato de las columnas.${mensajePista}`,
-        BAD_REQUEST,
-      );
-    }
     return {
       totalRecords: validationResult.totalRecords,
-      validRecords: validationResult.validRecords,
-      invalidRecords: validationResult.errors.length,
       employees: validationResult.employees,
-      validationErrors: validationResult.errors,
     };
   }
   async processAddendumExcel(buffer: Buffer) {

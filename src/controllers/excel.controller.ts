@@ -17,7 +17,7 @@ export class ExcelController {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'No se recibió ningún archivo. Envía un campo "excel"',
+        message: 'No se recibió ningún archivo Excel.',
       });
     }
     const response =
@@ -27,6 +27,7 @@ export class ExcelController {
 
     return res.status(CREATED).json({
       success: true,
+      message: `Se importaron ${response.employees.length} empleados correctamente.`,
       data: response,
     });
   });

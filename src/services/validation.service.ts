@@ -1,4 +1,3 @@
-import { AppErrorCode } from '../constants/app-error-code';
 import { BAD_REQUEST } from '../constants/http';
 import { AddendumData } from '../types/addendum.interface';
 import {
@@ -8,7 +7,10 @@ import {
 } from '../types/employees.interface';
 import { AppError } from '../utils/app-error';
 import { addendumSchema } from '../validators/addendum.validator';
-import { employeeSchema } from '../validators/employee.validator';
+import {
+  CONTRACT_TYPES,
+  employeeSchema,
+} from '../validators/employee.validator';
 
 export class ValidationService {
   validateEmployee(
@@ -21,6 +23,26 @@ export class ValidationService {
   } {
     const errors: ValidationError[] = [];
 
+    const rawContractType = String(rowData.contractType || '')
+      .trim()
+      .toUpperCase();
+
+    if (!rawContractType) {
+      errors.push({
+        error: new AppError('El tipo de contrato es requerido', BAD_REQUEST),
+        row: rowNumber,
+        field: 'contractType',
+      });
+      return { errors };
+    }
+    // Si no tiene tipo de contrato, lo saltamos (o marcas error si es obligatorio tener ALGO)
+    if (!rawContractType) {
+      // Retornar vacío ignora la fila
+      return { errors: [] };
+    }
+    if (!CONTRACT_TYPES.includes(rawContractType as ContractType)) {
+      return { errors: [] };
+    }
     if (rowData.dni && typeof rowData.dni === 'string') {
       const dni = rowData.dni.trim();
       if (dniSet.has(dni)) {
@@ -28,7 +50,6 @@ export class ValidationService {
           error: new AppError(
             `El DNI ${dni} ya existe en el archivo (duplicado)`,
             BAD_REQUEST,
-            AppErrorCode.CONFLICT,
           ),
           row: rowNumber,
           field: 'DNI',
@@ -37,21 +58,20 @@ export class ValidationService {
       }
     }
     const result = employeeSchema.safeParse(rowData);
+
     if (!result.success) {
-      //converitr los errores zod en ValidationERror
-      result.error.issues.forEach((issue) => {
-        const field = issue.path.join('. ');
-        const errorCode =
-          issue.code === 'invalid_type'
-            ? AppErrorCode.INVALID_FIELD_FORMAT
-            : AppErrorCode.VALIDATION_ERROR;
-        errors.push({
-          error: new AppError(issue.message, BAD_REQUEST, errorCode),
-          row: rowNumber,
-          field,
-        });
-      });
-      return { errors };
+      // Usamos map para transformar, PERO conservamos tu lógica de errorCode
+      const validationErrors: ValidationError[] = result.error.issues.map(
+        (issue) => {
+          return {
+            row: rowNumber,
+            field: issue.path.join('. '),
+            error: new AppError(issue.message, BAD_REQUEST),
+          };
+        },
+      );
+
+      return { errors: validationErrors };
     }
     dniSet.add(result.data.dni);
     //convertir de employeeFormSchema a EmployeeData
@@ -118,10 +138,10 @@ export class ValidationService {
     rows.forEach((rowData, index) => {
       const rowNumber = index + 2;
       const validation = this.validateEmployee(rowData, rowNumber, dniSet);
-      if (validation.employee) {
-        validEmployees.push(validation.employee);
-      } else {
+      if (validation.errors.length > 0) {
         errors.push(...validation.errors);
+      } else if (validation.employee) {
+        validEmployees.push(validation.employee);
       }
     });
 
@@ -144,7 +164,6 @@ export class ValidationService {
           error: new AppError(
             `El DNI ${dni} ya existe en este archivo (duplicado)`,
             BAD_REQUEST,
-            AppErrorCode.CONFLICT,
           ),
           row: rowNumber,
           field: 'documentNumber',
@@ -156,12 +175,8 @@ export class ValidationService {
     if (!result.success) {
       result.error.issues.forEach((issue) => {
         const field = issue.path.join('.');
-        const errorCode =
-          issue.code === 'invalid_type'
-            ? AppErrorCode.INVALID_FIELD_FORMAT
-            : AppErrorCode.VALIDATION_ERROR;
         errors.push({
-          error: new AppError(issue.message, BAD_REQUEST, errorCode),
+          error: new AppError(issue.message, BAD_REQUEST),
           row: rowNumber,
           field,
         });

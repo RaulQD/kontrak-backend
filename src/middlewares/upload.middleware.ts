@@ -3,7 +3,6 @@ import { Request } from 'express';
 import { config } from '../config';
 import { AppError } from '../utils/app-error';
 import { BAD_REQUEST } from '../constants/http';
-import { AppErrorCode } from '../constants/app-error-code';
 import { ALLOWED_EXCEL_MIMES, ALLOWED_EXTENSIONS } from '../constants/excel';
 import path from 'path';
 
@@ -25,7 +24,6 @@ export const excelUpload = multer({
         new AppError(
           `Tipo de archivo no permitidos ${fileExtension}. solo se permiten archivos Excel( .xlsx, .xls,.csv)`,
           BAD_REQUEST,
-          AppErrorCode.BAD_REQUEST,
         ),
       );
     }
@@ -36,7 +34,6 @@ export const excelUpload = multer({
         new AppError(
           `Extensiones de archivo no permitidas: ${fileExtension}.Solo se permiten: ${ALLOWED_EXTENSIONS.join(', ')}`,
           BAD_REQUEST,
-          AppErrorCode.BAD_REQUEST,
         ),
       );
     }

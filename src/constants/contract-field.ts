@@ -16,15 +16,21 @@ export const LOCATION_FIELDS: Record<string, FieldConfig> = {
     description: 'Dirección del empleado o Domicilio',
   },
   province: {
-    aliases: ['provincia', 'province'],
+    aliases: ['provincia', 'province', 'PROVINCIA', 'Provincia'],
     description: 'Provincia donde residedel empleado',
   },
   district: {
-    aliases: ['distrito', 'district', 'Distrito'],
+    aliases: ['distrito', 'district', 'Distrito', 'DISTRITO'],
     description: 'Distrito donde reside el emeplado',
   },
   department: {
-    aliases: ['departamento', 'department', 'division', 'Departamento'],
+    aliases: [
+      'departamento',
+      'department',
+      'division',
+      'Departamento',
+      'DEPARTAMENTO',
+    ],
     description: 'Departamenteo donde reside el empleado',
   },
 };

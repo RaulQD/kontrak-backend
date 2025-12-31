@@ -1,10 +1,7 @@
-import { EmployeeData, ValidationError } from './employees.interface';
+import { EmployeeData } from './employees.interface';
 
 export interface excelProcessingResult {
   totalRecords: number;
-  validRecords: number;
-  invalidRecords: number;
-  validationErrors?: ValidationError[];
   employees: EmployeeData[]; // NUEVO
 }
 

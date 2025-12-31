@@ -71,7 +71,7 @@ export class FileStorageService {
         .map((folders) => folders.name);
       logger.debug(
         { contractFolders },
-        `📁 Carpetas de contratos encontradas: ${contractFolders.length}`,
+        `Carpetas de contratos encontradas: ${contractFolders.length}`,
       );
       //buscar el pdf del empleado en todas las subcarpetas
       for (const folderName of contractFolders) {
