@@ -16,15 +16,21 @@ export const LOCATION_FIELDS: Record<string, FieldConfig> = {
     description: 'Dirección del empleado o Domicilio',
   },
   province: {
-    aliases: ['provincia', 'province'],
+    aliases: ['provincia', 'province', 'PROVINCIA', 'Provincia'],
     description: 'Provincia donde residedel empleado',
   },
   district: {
-    aliases: ['distrito', 'district', 'Distrito'],
+    aliases: ['distrito', 'district', 'Distrito', 'DISTRITO'],
     description: 'Distrito donde reside el emeplado',
   },
   department: {
-    aliases: ['departamento', 'department', 'division', 'Departamento'],
+    aliases: [
+      'departamento',
+      'department',
+      'division',
+      'Departamento',
+      'DEPARTAMENTO',
+    ],
     description: 'Departamenteo donde reside el empleado',
   },
 };
@@ -177,9 +183,9 @@ export const SUBSIDIO_SPECIFIC_FIELDS: Record<string, FieldConfig> = {
       'suplencia de',
       'SUPLENCIA DE:',
       'SUPLENCIA DE',
-      'Reemplazo',
-      'REEMPLAZO',
-      'reemplazo',
+      'Reemplazo:',
+      'REEMPLAZO:',
+      'reemplazo:',
     ],
     description: 'Empelado que sera reemplazado',
   },
@@ -195,6 +201,23 @@ export const SUBSIDIO_SPECIFIC_FIELDS: Record<string, FieldConfig> = {
       'razón de suplencia',
     ],
     description: 'Motivo de suplencia',
+  },
+  timeForCompany: {
+    aliases: ['tiempo en empresa', 'Tiempo en Empresa', 'Tiempo en empresa'],
+    description: 'Cuanto tiempo tiene en la empresa.',
+  },
+  workingCondition: {
+    aliases: ['CONDICION LABORAL', 'condición laboral', 'Condicion Loboral'],
+    description: 'Condición laboral del empleado',
+  },
+  probationaryPeriod: {
+    aliases: [
+      'PERIODO DE PRUEBA',
+      'Periodo de prueba',
+      'Periodo de Prueba',
+      'periodo de prueba',
+    ],
+    description: 'Periodo de prueba del empleado',
   },
 };
 
@@ -303,7 +326,7 @@ export const ADDENDUM_FIELDS_MAP: Record<string, FieldConfig> = {
   ...LOCATION_FIELDS,
 };
 
-export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO' | 'APE';
+export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO';
 
 export const CONTRACT_VALIDATION_RULES: Record<
   string,
@@ -358,27 +381,6 @@ export const CONTRACT_VALIDATION_RULES: Record<
   },
   PART_TIME: {
     description: 'Contrato Part-Time',
-    requiredFields: [
-      // Campos base (siempre)
-      'name',
-      'lastNameFather',
-      'lastNameMother',
-      'dni',
-      'entryDate',
-      'endDate',
-      'position',
-      'subDivisionOrParking',
-      // Campos comunes
-      'province',
-      'district',
-      'department',
-      'address',
-      'salary',
-      'salaryInWords',
-    ],
-  },
-  APE: {
-    description: 'Contrato APE',
     requiredFields: [
       // Campos base (siempre)
       'name',

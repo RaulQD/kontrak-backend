@@ -9,9 +9,6 @@ import { ValidationResult } from '../types/employees.interface';
 import { FieldConfig } from '../constants/contract-field';
 import { ValidateAddendumResult } from '../types/addendum.interface';
 
-/**
- * Opciones para importar Excel
- */
 export interface ImportOptions {
   sheetIndex?: number; // Índice de la hoja (0, 1, 2...)
   sheetName?: string; // Nombre de la hoja
@@ -52,23 +49,22 @@ export class ExcelParserServices {
       const validation =
         this.validationService.validateEmployeeInbatch(rowData);
 
-      const invalidRows = new Set(validation.errors.map((e) => e.row));
-      const invalidRecords = invalidRows.size;
-      const validRecords = validation.validEmployees?.length || 0;
-
-      logger.info({
-        totalRecords,
-        validRecords,
-        invalidRecords,
-        totalErrors: validation.errors.length,
-      });
+      if (validation.errors.length > 0) {
+        const cleansErrors = validation.errors.map((err) => ({
+          row: err.row,
+          field: err.field,
+          message: err.error.message,
+        }));
+        throw new AppError(
+          `No se pudo procesar el archivo. Se encontraron ${validation.errors.length} errores.`,
+          BAD_REQUEST,
+          { validationErrors: cleansErrors },
+        );
+      }
 
       const result: ValidationResult = {
         employees: validation.validEmployees || [],
-        errors: validation.errors,
         totalRecords,
-        validRecords,
-        invalidRecords,
       };
 
       return result;

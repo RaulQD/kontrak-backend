@@ -1,12 +1,7 @@
 import { config } from '../config';
-import { AppErrorCode } from '../constants/app-error-code';
-import { BAD_REQUEST, NOT_FOUND } from '../constants/http';
-import {
-  excelProcessingResult,
-  PDFPreviewBase64,
-} from '../types/contract.interface';
+import { NOT_FOUND } from '../constants/http';
+import { PDFPreviewBase64 } from '../types/contract.interface';
 import { AppError } from '../utils/app-error';
-import { ExcelParserServices } from './excel-parser.service';
 import { FileStorageService } from './file-storage.service';
 import { PDFGeneratorService } from './pdf-generator.service';
 import path from 'path';
@@ -16,73 +11,21 @@ import archiver from 'archiver';
 import { EmployeeData } from '../types/employees.interface';
 import { Response } from 'express';
 import {
-  ADDENDUM_FIELDS_MAP,
-  CONTRACT_FIELDS_MAP,
-} from '../constants/contract-field';
+  generateDocAnexo,
+  generateProcessingOfPresonalDataPDF,
+} from '../template/contracts';
+import { ValidationService } from './validation.service';
+
 export class ContractService {
-  private readonly excelParseServices: ExcelParserServices;
   private readonly fileStorageService: FileStorageService;
   private readonly pdfGeneratorService: PDFGeneratorService;
+  private readonly validationService: ValidationService;
   constructor() {
-    this.excelParseServices = new ExcelParserServices();
     this.fileStorageService = new FileStorageService();
     this.pdfGeneratorService = new PDFGeneratorService();
+    this.validationService = new ValidationService();
   }
 
-  async processExcelAndGenerateContracts(
-    buffer: Buffer,
-  ): Promise<excelProcessingResult> {
-    const validationResult = await this.excelParseServices.validateExcel(
-      buffer,
-      CONTRACT_FIELDS_MAP,
-      {
-        sheetIndex: 0,
-        skipEmptyRows: true,
-        headerRow: 1,
-      },
-    );
-    if (
-      validationResult.totalRecords > 0 &&
-      validationResult.validRecords === 0
-    ) {
-      const primerError = validationResult.errors[0];
-      const mensajePista = primerError
-        ? ` (Ej: Fila ${primerError.row}: ${primerError.error.message})`
-        : '';
-
-      throw new AppError(
-        `El archivo contiene ${validationResult.totalRecords} registros, pero ninguno es válido. Por favor revisa el formato de las columnas.${mensajePista}`,
-        BAD_REQUEST,
-      );
-    }
-    return {
-      totalRecords: validationResult.totalRecords,
-      validRecords: validationResult.validRecords,
-      invalidRecords: validationResult.errors.length,
-      employees: validationResult.employees,
-      validationErrors: validationResult.errors,
-    };
-  }
-  async processAddendumExcel(buffer: Buffer) {
-    const validationResult =
-      await this.excelParseServices.validateAddendumExcel(
-        buffer,
-        ADDENDUM_FIELDS_MAP,
-        {
-          sheetIndex: 0,
-          skipEmptyRows: true,
-          headerRow: 1,
-        },
-      );
-
-    return {
-      totalRecords: validationResult.totalRecords,
-      validRecords: validationResult.validRecords,
-      invalidRecords: validationResult.errors.length,
-      employees: validationResult.employeesAddendum,
-      validationErrors: validationResult.errors,
-    };
-  }
   async downloadZipStream(response: Response, employee: EmployeeData[]) {
     const archive = archiver('zip', { zlib: { level: 9 } });
     archive.on('error', (err) => {
@@ -92,18 +35,25 @@ export class ContractService {
 
     for (const emp of employee) {
       try {
-        const { buffer, filename } =
-          await this.pdfGeneratorService.generateContract(
-            emp,
-            emp.contractType,
-          );
-        // 2. Definimos el nombre de la carpeta virtual
-        // Usamos la misma lógica que tenías: minúsculas y sin espacios
-        const folderName = emp.contractType
+        const rootFolder = emp.contractType
           .toLocaleLowerCase()
           .replace(/\s+/g, '');
+        const [contractResult, processingOfPresonalDataPDF, anexoDocResult] =
+          await Promise.all([
+            this.pdfGeneratorService.generateContract(emp, emp.contractType),
+            generateProcessingOfPresonalDataPDF(emp),
+            generateDocAnexo(emp),
+          ]);
 
-        archive.append(buffer, { name: `${folderName}/${filename}` });
+        archive.append(contractResult.buffer, {
+          name: `${rootFolder}/${contractResult.filename}`,
+        });
+        archive.append(processingOfPresonalDataPDF, {
+          name: `${rootFolder}/Tratamiento de datos/${emp.dni}.pdf`,
+        });
+        archive.append(anexoDocResult, {
+          name: `${rootFolder}/Anexos/${emp.dni}.pdf`,
+        });
       } catch (error) {
         if (error instanceof Error) {
           logger.info(`Error con empleado ${emp.dni}: ${error.message}`);
@@ -124,21 +74,13 @@ export class ContractService {
       await fs.access(sessionPath);
     } catch (error) {
       if (error instanceof AppError) {
-        throw new AppError(
-          `Sesión no encontrada: ${sessionId}`,
-          NOT_FOUND,
-          AppErrorCode.NOT_FOUND,
-        );
+        throw new AppError(`Sesión no encontrada: ${sessionId}`, NOT_FOUND);
       }
     }
     //BUSCAR EL  PDF DEL EMPLEADO EN LA CARPETA DE SESIÓN
     const result = await this.fileStorageService.getPdfByDNI(sessionPath, dni);
     if (!result) {
-      throw new AppError(
-        `PDF no encontrado para el DNI: ${dni}`,
-        NOT_FOUND,
-        AppErrorCode.NOT_FOUND,
-      );
+      throw new AppError(`PDF no encontrado para el DNI: ${dni}`, NOT_FOUND);
     }
     if (format === 'base64') {
       const base64String = result.buffer.toString('base64');
