@@ -7,18 +7,6 @@ import { EmployeeBatchSchema } from '../validators/employee.validator';
 const router = Router();
 const contractController = new ContractController();
 
-/**
- * POST /api/contracts/generate-pdfs
- * Endpoint para generar PDFs de contratos desde Excel
- * Body: multipart/form-data con campo 'excel'
- */
-
-/**
- * GET /api/contract/generate-pdfs
- * Endpoint para obtener o previsualizarel pdf de contratos.
- * @params: DNI,
- * @query: sessinId, format
- */
 router.post(
   '/download-zip',
   schemaValidatorMiddleware(EmployeeBatchSchema),

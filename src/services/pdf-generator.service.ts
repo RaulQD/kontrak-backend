@@ -1,11 +1,12 @@
 import { logger } from '../utils/logger';
 import { ContractType, EmployeeData } from '../types/employees.interface';
 import {
-  genarateSubsidioContract,
   generatePartTimeContract,
   generatePlanillaContract,
+  generateSubsidioContract,
 } from '../template/contracts';
 import { AppError } from '../utils/app-error';
+import { Browser } from 'puppeteer';
 
 /**
  * Servicio para generar PDFs de contratos
@@ -17,6 +18,7 @@ export class PDFGeneratorService {
   async generateContract(
     employeeData: EmployeeData,
     contractType: ContractType,
+    browser: Browser,
   ): Promise<{ buffer: Buffer; filename: string }> {
     logger.info(
       { dni: employeeData.dni, contractType },
@@ -35,14 +37,14 @@ export class PDFGeneratorService {
       // Generar según el tipo de contrato
       switch (contractType.toLowerCase()) {
         case 'planilla':
-          buffer = await generatePlanillaContract(employeeData);
+          buffer = await generatePlanillaContract(employeeData, browser);
           break;
         case 'subsidio':
-          buffer = await genarateSubsidioContract(employeeData);
+          buffer = await generateSubsidioContract(employeeData, browser);
           break;
         case 'part time':
         case 'parttime':
-          buffer = await generatePartTimeContract(employeeData);
+          buffer = await generatePartTimeContract(employeeData, browser);
           break;
         default:
           throw new Error(`Tipo de contrato desconocido: ${contractType}`);

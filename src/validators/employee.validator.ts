@@ -191,11 +191,12 @@ export const employeeSchema = z
   });
 
 export const EmployeeBatchSchema = z.object({
-  // CAMBIO CLAVE: 'body' ahora es directamente el array de empleados
   body: z
-    .array(employeeSchema)
-    .min(1, 'La lista de empleados no puede estar vacía')
-    .max(80, 'Máximo 80 empleados por lote'),
+    .array(employeeSchema, {
+      error: 'No se recibieron datos. Debes enviar una lista de empleados.',
+    })
+    .min(1, 'Debes seleccionar al menos un empleado para generar el ZIP.')
+    .max(50, 'Máximo 80 empleados por lote'),
 });
 
 export type EmployeeFromExcel = z.infer<typeof employeeSchema>;
