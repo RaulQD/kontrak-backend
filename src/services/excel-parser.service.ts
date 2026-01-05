@@ -109,7 +109,6 @@ export class ExcelParserServices {
         options,
         headerMapping,
       );
-      // const validation = this.validationService.validateEmployeeInbatch(data);
 
       return data;
     } catch (error) {

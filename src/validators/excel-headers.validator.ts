@@ -1,7 +1,6 @@
 import ExcelJS from 'exceljs';
 import { AppError } from '../utils/app-error';
 import { BAD_REQUEST } from '../constants/http';
-import { AppErrorCode } from '../constants/app-error-code';
 import { logger } from '../utils/logger';
 import { HeaderValidationResult } from '../types/excel-types/excel.interface';
 import { FieldConfig } from '../constants/contract-field';
@@ -141,10 +140,17 @@ export function validateAndGetHeaderMapping(
 ): Map<string, string> {
   const result = validateExcelHeaders(worksheet, fields, headerRow);
   if (!result.isValid) {
-    const missingList = result.missingHeaders.map((h) => `${h}`).join(', ');
+    const headerErrors = result.missingHeaders.map((headerName) => ({
+      row: headerRow,
+      field: headerName,
+      message: 'Encabezado requerido no encontrado en el archivo.',
+    }));
+
+    // 2. Lanzamos el error con la estructura que el frontend espera
     throw new AppError(
-      `Faltan encabezados requeridos en el archivo Excel: ${missingList}. Por favor, verifica que el archivo contenga todas las columnas necesarias.`,
+      'La estructura del archivo es incorrecta. Faltan columnas obligatorias.', // Mensaje corto para el Toast
       BAD_REQUEST,
+      { validationErrors: headerErrors },
     );
   }
   logger.info(
@@ -152,8 +158,3 @@ export function validateAndGetHeaderMapping(
   );
   return result.headerMapping;
 }
-
-/**
- * Obtiene los nombres sugeridos de encabezados para una plantilla Excel
- * @returns Array con los nombres sugeridos de encabezados
- */

@@ -21,7 +21,7 @@ export const schemaValidatorMiddleware = (
         }));
         return response.status(BAD_REQUEST).json({
           success: false,
-          message: 'Error de validación',
+          message: 'La solicitud no se pudo procesar',
           errors: errorMessages,
         });
       }

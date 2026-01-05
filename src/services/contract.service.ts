@@ -15,6 +15,7 @@ import {
   generateProcessingOfPresonalDataPDF,
 } from '../template/contracts';
 import { ValidationService } from './validation.service';
+import puppeteer from 'puppeteer';
 
 export class ContractService {
   private readonly fileStorageService: FileStorageService;
@@ -32,34 +33,47 @@ export class ContractService {
       throw err;
     });
     archive.pipe(response);
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
 
-    for (const emp of employee) {
-      try {
-        const rootFolder = emp.contractType
-          .toLocaleLowerCase()
-          .replace(/\s+/g, '');
-        const [contractResult, processingOfPresonalDataPDF, anexoDocResult] =
-          await Promise.all([
-            this.pdfGeneratorService.generateContract(emp, emp.contractType),
-            generateProcessingOfPresonalDataPDF(emp),
-            generateDocAnexo(emp),
-          ]);
+    try {
+      for (const emp of employee) {
+        try {
+          const rootFolder = emp.contractType
+            .toLocaleLowerCase()
+            .replace(/\s+/g, '');
+          const [contractResult, processingOfPresonalDataPDF, anexoDocResult] =
+            await Promise.all([
+              this.pdfGeneratorService.generateContract(
+                emp,
+                emp.contractType,
+                browser,
+              ),
+              generateProcessingOfPresonalDataPDF(emp),
+              generateDocAnexo(emp, browser),
+            ]);
 
-        archive.append(contractResult.buffer, {
-          name: `${rootFolder}/${contractResult.filename}`,
-        });
-        archive.append(processingOfPresonalDataPDF, {
-          name: `${rootFolder}/Tratamiento de datos/${emp.dni}.pdf`,
-        });
-        archive.append(anexoDocResult, {
-          name: `${rootFolder}/Anexos/${emp.dni}.pdf`,
-        });
-      } catch (error) {
-        if (error instanceof Error) {
-          logger.info(`Error con empleado ${emp.dni}: ${error.message}`);
+          archive.append(contractResult.buffer, {
+            name: `${rootFolder}/${contractResult.filename}`,
+          });
+          archive.append(processingOfPresonalDataPDF, {
+            name: `${rootFolder}/Tratamiento de datos/${emp.dni}.pdf`,
+          });
+          archive.append(anexoDocResult, {
+            name: `${rootFolder}/Anexos/${emp.dni}.pdf`,
+          });
+        } catch (error) {
+          if (error instanceof Error) {
+            logger.info(`Error con empleado ${emp.dni}: ${error.message}`);
+          }
         }
       }
+    } finally {
+      await browser.close();
     }
+
     await archive.finalize();
   }
 
