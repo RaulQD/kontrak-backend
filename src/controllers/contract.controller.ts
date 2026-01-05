@@ -3,6 +3,7 @@ import { ContractService } from '../services/contract.service';
 import { catchError } from '../utils/catch-error';
 import { PDFGeneratorService } from '../services/pdf-generator.service';
 import { EmployeeData } from '../types/employees.interface';
+import puppeteer from 'puppeteer';
 
 export class ContractController {
   private readonly contractService: ContractService;
@@ -29,10 +30,15 @@ export class ContractController {
   });
   previewContractPdf = catchError(async (req: Request, res: Response) => {
     const employeeData: EmployeeData = req.body;
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
     const { buffer, filename } =
       await this.pdfGeneratorService.generateContract(
         employeeData,
         employeeData.contractType,
+        browser,
       );
     res.set({
       'Content-Type': 'application/pdf',
