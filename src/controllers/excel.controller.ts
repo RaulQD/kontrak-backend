@@ -20,10 +20,10 @@ export class ExcelController {
         message: 'No se recibió ningún archivo Excel.',
       });
     }
-    const response =
-      await this.generateExcelService.processExcelAndGenerateContracts(
-        req.file.buffer,
-      );
+    const response = await this.generateExcelService.processingExcel(
+      req.file.buffer,
+      req.file.originalname,
+    );
 
     return res.status(CREATED).json({
       success: true,
@@ -41,7 +41,7 @@ export class ExcelController {
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
-    res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', response.length);
 
     res.end(response);
@@ -55,7 +55,7 @@ export class ExcelController {
       'Content-Type',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
-    res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', response.length);
     res.end(response);
   });
@@ -64,11 +64,8 @@ export class ExcelController {
     const response =
       await this.generateExcelService.generateExcelCardID(employee);
     const filename = 'Fotocheck.csv';
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    );
-    res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', response.length);
     res.end(response);
   });
