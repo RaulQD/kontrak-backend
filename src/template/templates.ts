@@ -1469,18 +1469,19 @@ export const ANEXO = `
     <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <style>
-           
+      <style>
             body {
                 font-family: 'Arial', sans-serif;
-                font-size: 8pt; /* Coincide con .fontSize(8) */
+                font-size: 7pt;
                 line-height: 1.3;
                 color: #000;
-                margin: 0;
+                margin-left: 1.59cm;
+                margin-right: 0.74cm;
                 padding: 0;
             }
             .text-center { text-align: center; }
-            .text-justify { text-align: justify; text-justify: inter-word; }
+            .text-justify { text-align: justify; }
+            .underline { text-decoration: underline;}
             .bold { font-weight: bold; }
             
             /* Tablas */
@@ -1491,37 +1492,47 @@ export const ANEXO = `
                 margin-bottom: 10px;
                 font-size: 8pt;
             }
+            thead {
+                display: table-row-group;
+            }
             th, td {
-                border: 1px solid #000; /* defaultStyle: { border: 1 } */
-                padding: 5px;
-                vertical-align: middle;
+                border: 1px solid #000;
+                padding: 0px 5px 0px 5px;
+                vertical-align: top; /* Mejor que middle para textos largos */
+            }
+                tbody td:first-child {
+                text-align: left;
+                vertical-align: middle; /* Centrado vertical (opcional, pero se ve mejor) */
             }
             th {
                 background-color: #93c5fd;
                 text-align: center;
-                font-weight: normal; /* El PDFKit no ponía negrita explícita en header salvo que se indique */
+                font-weight: bold; /* Aseguramos negrita en encabezados */
             }
-            .col-1 { width: 31%; } /* aprox 150 / 480 */
-            .col-2 { width: 69%; } /* aprox 330 / 480 */
+                
+            .col-1 { width: 30%;padding: 10px ;}
+            .col-2 { width: 70%; padding: 10px;}
 
-            /* Listas personalizadas */
             .custom-list-item {
-                display: flex;
+                display: block; 
                 margin-bottom: 8px;
-                margin-left: 1rem; 
                 text-align: justify;
+                padding-left: 15px; 
+                text-indent: -15px; 
             }
 
-            /* Firmas (3 columnas) */
+            /* Firmas */
             .signature-container {
                 margin-top: 50px;
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-end;
+                display: table; 
+                width: 100%;
                 page-break-inside: avoid;
             }
             .sig-box {
-                width: 32%;
+                display: table-cell;
+                width: 33%;
+                vertical-align: bottom;
+                padding: 0 10px;
                 text-align: left;
             }
             .sig-line {
@@ -1541,14 +1552,14 @@ export const ANEXO = `
     <body>
 
         <div class="text-center bold">ANEXO 1</div>
-        <div class="text-center bold">RECOMENDACIONES EN MATERIA DE SEGURIDAD Y SALUD EN EL TRABAJO</div>
+        <div class="text-center bold underline">RECOMENDACIONES EN MATERIA DE SEGURIDAD Y SALUD EN EL TRABAJO</div>
         <div class="text-center bold" style="margin-bottom: 18px;">(Ley Nº 29783, Art. 35º, inc. c))</div>
 
         <div class="text-justify">
             De acuerdo a lo establecido en el artículo 35 de la Ley N° 29783, Ley de Seguridad y Salud en el Trabajo, y el artículo 30 de su Reglamento aprobado por Decreto Supremo N° 005-2012-TR, por medio del presente documento <span class="bold">EL EMPLEADOR </span>cumple con describir las recomendaciones de seguridad y salud en el trabajo que deberá tener presente y cumplir <span class="bold">EL TRABAJADOR, </span>en la ejecución de sus funciones para EL EMPLEADOR en el puesto de <span class="bold">{{position}}</span>
         </div>
         
-        <div class="text-justify" style="margin-top: 0px;">
+        <div class="text-justify" style="margin-top: 10px;">
             <span class="bold">EL TRABAJADOR </span>deberá tener presente los siguientes riesgos propios del centro de trabajo donde prestará sus servicios, así como las medidas de protección y prevención en relación con tales riesgos:
         </div>
 
@@ -1574,7 +1585,7 @@ export const ANEXO = `
                 </tr>
                 <tr>
                     <td>Quemaduras, incendios, explosiones</td>
-                    <td> - Revisar periódicamente la instalación de combustible y el correcto funcionamiento de <br> &nbsp;&nbsp;los medios de protección contra incendios.<br> - Conocer y respetar las vías de evacuación y salidas de emergencia existentes en el<br> &nbsp;&nbsp;área de trabajo.</td>
+                    <td> - Revisar periódicamente la instalación de combustible y el correcto funcionamiento <br> &nbsp;&nbsp;de los medios de protección contra incendios.<br> - Conocer y respetar las vías de evacuación y salidas de emergencia existentes en <br> &nbsp;&nbsp;el área de trabajo.</td>
                 </tr>
             </tbody>
         </table>
@@ -1593,11 +1604,11 @@ export const ANEXO = `
             <tbody>
                 <tr>
                     <td>Lesiones por la espalda por sobreesfuerzos</td>
-                    <td> - Utilizar, si es posible, medios mecánicos para transportar objetos, sobre todo si las <br> &nbsp;&nbsp;cargas son pesadas, voluminosas o si la frecuencia con que estas se manipulan son <br> &nbsp;&nbsp;elevadas.<br> - Solicitar ayuda a otra persona.</td>
+                    <td> - Utilizar, si es posible, medios mecánicos para transportar objetos, sobre todo si las <br> &nbsp;&nbsp;cargas son pesadas, voluminosas o si la frecuencia con que estas se manipulan <br> &nbsp;&nbsp;son elevadas.<br> - Solicitar ayuda a otra persona.</td>
                 </tr>
                 <tr>
                     <td>Lesiones por movimientos forzados</td>
-                    <td> - Utilizar sillas ergonómicas y ajustar la altura de la pantalla del computador a la altura <br> &nbsp;&nbsp;de los ojos.</td>
+                    <td> - Utilizar sillas ergonómicas y ajustar la altura de la pantalla del computador a la <br> &nbsp;&nbsp;altura de los ojos.</td>
                 </tr>
                 <tr>
                     <td>Lesiones en dedos o muñecas por la incorrecta colocación de la mano combinada con la frecuencia de pulsación</td>
@@ -1609,7 +1620,7 @@ export const ANEXO = `
                 </tr>
                 <tr>
                     <td>Daños al sistema músculo esquelético por posturas estáticas prolongadas</td>
-                    <td> - Utilizar el asiento colocado de tal forma que los movimientos se realicen sin forzar la<br> &nbsp;&nbsp;postura.<br> - Adecuar el escritorio, silla y computador para evitar posturas forzadas.</td>
+                    <td> - Utilizar el asiento colocado de tal forma que los movimientos se realicen sin forzar <br> &nbsp;&nbsp;la postura.<br> - Adecuar el escritorio, silla y computador para evitar posturas forzadas.</td>
                 </tr>
                 <tr>
                     <td>Caídas de objetos en manipulación</td>
@@ -1629,7 +1640,7 @@ export const ANEXO = `
                 </tr>
                 <tr>
                     <td>Golpes contra muebles u objetos inmóviles (cajones abiertos u otros)</td>
-                    <td> - Mantener cajones y puertas cerradas, de esta manera se evitarán posibles golpes o <br> &nbsp;&nbsp;caídas. <br> - No colocar mobiliario o almacenar material de oficina en zonas de paso habitual.</td>
+                    <td> - Mantener cajones y puertas cerradas, de esta manera se evitarán posibles golpes <br> &nbsp;&nbsp;o caídas. <br> - No colocar mobiliario o almacenar material de oficina en zonas de paso habitual.</td>
                 </tr>
                 <tr>
                     <td>Golpes por uso inadecuado de herramientas</td>
@@ -1645,7 +1656,7 @@ export const ANEXO = `
                 </tr>
                 <tr>
                     <td>Sobreesfuerzo por manipulación de objetos pesados</td>
-                    <td> En las operaciones de manipulación manual de cargas se deben adoptar las posturas y<br> &nbsp;&nbsp;movimientos adecuados:<br> - Aproximarse a la carga lo máximo posible. <br> - Asegurar un buen apoyo de los pies, manteniéndolos ligeramente separados. En caso <br> &nbsp;&nbsp;el objeto esté sobre una base elevada,aproximarlo al tronco, consiguiendo una base y <br> &nbsp;&nbsp;agarre firme y estable.<br> - Agacharse flexionando las rodillas, manteniendo la espalda recta.<br> - Levantar la carga utilizando los músculos de las piernas y no con la espalda.<br> - Tomar firmemente la carga con las dos manos.<br> - Mantener la carga próxima al cuerpo durante todo el trayecto y andar dando pasos<br> &nbsp;&nbsp;cortos.<br> - En elevaciones con giro, procurar mover los pies en vez de girar la cintura. <br> - Evitar los movimientos bruscos en la espalda, en especial los giros, incluso cuando se<br> &nbsp;&nbsp;maneja carga ligera.</td>
+                    <td> En las operaciones de manipulación manual de cargas se deben adoptar las <br> &nbsp;&nbsp;posturas y movimientos adecuados:<br> - Aproximarse a la carga lo máximo posible. <br> - Asegurar un buen apoyo de los pies, manteniéndolos ligeramente separados. En <br> &nbsp;&nbsp;caso el objeto esté sobre una base elevada,aproximarlo al tronco, consiguiendo <br> &nbsp;&nbsp;una base y agarre firme y estable.<br> - Agacharse flexionando las rodillas, manteniendo la espalda recta.<br> - Levantar la carga utilizando los músculos de las piernas y no con la espalda.<br> - Tomar firmemente la carga con las dos manos.<br> - Mantener la carga próxima al cuerpo durante todo el trayecto y andar dando pasos<br> &nbsp;&nbsp;cortos.<br> - En elevaciones con giro, procurar mover los pies en vez de girar la cintura. <br> - Evitar los movimientos bruscos en la espalda, en especial los giros, incluso cuando <br> &nbsp;&nbsp;se maneja carga ligera.</td>
                 </tr>
                 <tr>
                     <td>Sobreesfuerzos por manipulación manual de cargas y movimientos repetitivos</td>
@@ -1657,11 +1668,11 @@ export const ANEXO = `
                 </tr>
                 <tr>
                     <td>Contactos eléctricos indirectos, con partes o elementos metálicos accidentalmente puestos bajo tensión</td>
-                    <td> - Revisar los equipos eléctricos antes de utilizarlos.<br> - No utilizar / manipular herramientas eléctricas que se encuentran húmedas o mojadas, <br> &nbsp;&nbsp;ni equipos en mal estado.</td>
+                    <td> - Revisar los equipos eléctricos antes de utilizarlos.<br> - No utilizar / manipular herramientas eléctricas que se encuentran húmedas o <br> &nbsp;&nbsp;mojadas, ni equipos en mal estado.</td>
                 </tr>
                 <tr>
                     <td>Contactos eléctricos por usar extensiones subestándar en los enchufes</td>
-                    <td> - Utilizar enchufes correctamente. <br> - No sobrecargar los enchufes. <br> - No tirar de los cables. <br> - Apagar los equipos (computadoras, impresoras, fotocopiadoras, etc.) cuando finalice la <br> &nbsp;&nbsp;jornada.</td>
+                    <td> - Utilizar enchufes correctamente. <br> - No sobrecargar los enchufes. <br> - No tirar de los cables. <br> - Apagar los equipos (computadoras, impresoras, fotocopiadoras, etc.) cuando <br> &nbsp;&nbsp;finalice la jornada.</td>
                 </tr>
                 <tr>
                     <td>Quemaduras por cortocircuitos</td>
@@ -1673,11 +1684,11 @@ export const ANEXO = `
                 </tr>
                 <tr>
                     <td>Sobrecarga mental por estrés por atención al público</td>
-                    <td> - Mantener disponible la información más frecuente y necesaria solicitada por los<br> &nbsp;&nbsp;usuarios. <br> - Liberar el escritorio de documentación. <br> - Crear un grado de autonomía adecuado en el ritmo y organización básica del trabajo. <br> - Hacer pausas para los cambios de postura y reducción de fatiga física y mental.</td>
+                    <td> - Mantener disponible la información más frecuente y necesaria solicitada por los<br> &nbsp;&nbsp;usuarios. <br> - Liberar el escritorio de documentación. <br> - Crear un grado de autonomía adecuado en el ritmo y organización básica del &nbsp;&nbsp;trabajo. <br> - Hacer pausas para los cambios de postura y reducción de fatiga física y mental.</td>
                 </tr>
                 <tr>
                     <td>Fatiga visual: aumento del parpadeo, lagrimeo, pesadez en parpados u ojos</td>
-                    <td> - Verificar que l apantalle esté entre 10° y 60° por debajo de la horizontal de los ojos del<br> &nbsp;&nbsp;operador.<br> - Establecer pausas de 10 minutos cada 90 o 60 minutos de trabajo.<br> - Alternar la visualización de la pantalla con impresos para descansar la vista.<br> - Utilizar la iluminación adecuada en el lugar de trabajo.<br> - Eliminar los reflejos originados por las ventanas, colocando cortinas.<br> - Realizar hábitos saludables: descanso adecuado y alimentación saludable.</td>
+                    <td> - Verificar que l apantalle esté entre 10° y 60° por debajo de la horizontal de los ojos &nbsp;&nbsp; del operador.<br> - Establecer pausas de 10 minutos cada 90 o 60 minutos de trabajo.<br> - Alternar la visualización de la pantalla con impresos para descansar la vista.<br> - Utilizar la iluminación adecuada en el lugar de trabajo.<br> - Eliminar los reflejos originados por las ventanas, colocando cortinas.<br> - Realizar hábitos saludables: descanso adecuado y alimentación saludable.</td>
                 </tr>
                 <tr>
                     <td>Fatiga física: dolor habitual en región cervical, dorsal o lumbar, tensión en hombros, cuello o espalda, molestias en las piernas (adormecimiento)</td>
@@ -1685,7 +1696,7 @@ export const ANEXO = `
                 </tr>
                 <tr>
                     <td>Fatiga auditiva</td>
-                    <td> - Aislar impresoras, ventiladores y fotocopiadoras de la zona de trabajo de las personas<br> &nbsp;&nbsp;que realizan trabajo intelectual.</td>
+                    <td> - Aislar impresoras, ventiladores y fotocopiadoras de la zona de trabajo de las <br> &nbsp;&nbsp;personas que realizan trabajo intelectual.</td>
                 </tr>
                 <tr>
                     <td>Estrés por sobrecarga de trabajo y falta de control de las actividades</td>
@@ -1705,19 +1716,16 @@ export const ANEXO = `
             - &nbsp;Respetar y aplicar las medidas de prevención de riesgos señaladas en el mapa de riesgos.
         </div>
         <div class="custom-list-item">
-            <span class="bold">- &nbsp;EL TRABAJADOR </span>&nbsp;se obliga a aplicar las instrucciones impartidas en las capacitaciones dictadas por <span class="bold">&nbsp;EL EMPLEADOR </span>&nbsp;en materia &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;de Seguridad y Salud en el Trabajo. La inobservancia de dichas disposiciones podrá ser sancionada por <span class="bold">&nbsp;EL EMPLEADOR.</span>
+            <span class="bold">- &nbsp;EL TRABAJADOR </span>&nbsp;tiene la obligación de comunicar al área SSOMA todo evento o situación que ponga o pueda poner en riesgo su seguridad y salud, o la de sus compañeros, siempre que éstas se produzcan dentro de las instalaciones de
         </div>
         <div class="custom-list-item">
-            <span class="bold">- &nbsp;EL TRABAJADOR </span>&nbsp;tiene la obligación de comunicar al área SSOMA todo evento o situación que ponga o pueda poner en riesgo &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;su seguridad y salud, o la de sus compañeros, siempre que éstas se produzcan dentro de las instalaciones de
+            <span class="bold">- &nbsp;EL TRABAJADOR </span>&nbsp;se compromete a someterse a los exámenes médicos a los que, en función al cargo y funciones &nbsp;desempeñadas, se encuentren obligados.
         </div>
         <div class="custom-list-item">
-            <span class="bold">- &nbsp;EL TRABAJADOR </span>&nbsp;se compromete a someterse a los exámenes médicos a los que, en función al cargo y funciones &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;desempeñadas, se encuentren obligados.
+            <span class="bold">- &nbsp;EL TRABAJADOR </span>&nbsp;se compromete a respetar y aplicar los estándares de seguridad y salud establecidos para el puesto que desarrolla.
         </div>
         <div class="custom-list-item">
-            <span class="bold">- &nbsp;EL TRABAJADOR </span>&nbsp;se compromete a respetar y aplicar los estándares de seguridad y salud establecidos para el puesto que &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;desarrolla.
-        </div>
-        <div class="custom-list-item">
-            - &nbsp;Constituye falta grave sancionable, el uso indebido o no uso por parte de <span class="bold">&nbsp;EL TRABAJADOR </span>&nbsp;de los instrumentos y materiales de &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trabajo, así como de los equipos de protección personal y colectiva que proporcione <span class="bold">&nbsp;EL EMPLEADOR </span>&nbsp;o el &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;o el incumplimiento de cualquier otra medida de prevención o protección.
+            - &nbsp;Constituye falta grave sancionable, el uso indebido o no uso por parte de <span class="bold">&nbsp;EL TRABAJADOR </span>&nbsp;de los instrumentos y materiales de trabajo, así como de los equipos de protección personal y colectiva que proporcione <span class="bold">&nbsp;EL EMPLEADOR </span>&nbsp;o el o el incumplimiento de cualquier otra medida de prevención o protección.
         </div>
 
         <div style="margin-top: 12px; margin-bottom: 12px;">
@@ -1759,7 +1767,7 @@ export const ANEXO = `
                 <div class="center-text bold">EL TRABAJADOR</div>
                 <div>NOMBRE: {{fullName}}</div>
                 <div>DNI: {{dni}}</div>
-                <div>DIVISIÓN: {{subDivision}}</div>
+                <div>PLAYA: {{subDivision}}</div>
             </div>
         </div>
 
@@ -2516,5 +2524,151 @@ export const CONTRACT_SUBSIDIO = `
         </div>
 
     </body>
+</html>
+`;
+export const PROCESSING_PERSONAL_DATA = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 7pt; 
+            line-height: 1.5;
+        }
+        .text-center { text-align: center; }
+        .text-justify { text-align: justify; }
+        .bold { font-weight: bold; }
+        .underline { text-decoration: underline; }
+        
+        .title {
+            font-size: 8pt;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* Contenedor de Firmas (Flexbox para 3 columnas) */
+        .signature-container {
+            margin-top: 50px; /* Espacio antes de las firmas */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            page-break-inside: avoid; /* Evita que las firmas se corten entre páginas */
+            width: 100%;
+        }
+
+        .signatures-wrapper {
+                margin-top: 50px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start; /* Alinea al fondo */
+                page-break-inside: avoid; /* Evita que las firmas se corten */
+            }
+            .signature-col {
+                width: 31%; /* 3 columnas aprox */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .signature-img {
+                height: 50px;
+                width: 85px;
+                object-fit: contain;
+                margin-bottom: 5px;
+            }
+            .signature-line {
+                width: 100%;
+                border-top: 1px solid #000;
+                margin-bottom: 5px;
+            }
+            .signature-text {
+                font-size: 8pt;
+                width: 100%;
+                text-align: left;
+                line-height: 1.2;
+            }
+            
+    </style>
+</head>
+<body>
+
+    <div class="text-center bold underline title">
+        TRATAMIENTO DE DATOS PERSONALES
+    </div>
+
+    <div class="text-justify">
+        <p>
+            El Sr. <span class="bold">{{fullName}}</span> identificado con DNI N° {{dni}} (en adelante <span class="bold">”EL TRABAJADOR”</span>) declara conocer que sus datos personales entregados o que se entreguen a <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA S.A.</span> como consecuencia de la ejecución del contrato de trabajo, se encuentran incorporados en el banco de datos denominado <span class="bold">“RECURSOS HUMANOS”</span> de titularidad de <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA S.A</span> (en adelante <span class="bold">“INVERSIONES URBANÍSTICAS OPERADORA”</span>).
+        </p>
+
+        <p>
+            El tratamiento que realizará <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA</span> consiste en conservar, registrar, organizar, almacenar, consultar, extraer y utilizar los datos personales con la finalidad de gestionar los recursos humanos de la empresa, como es el caso de la elaboración de las planillas, gestión de la seguridad y salud en el trabajo, cumplimiento de las exigencias y requerimientos del Ministerio de Trabajo y Promoción del Empleo, así como de la Superintendencia Nacional de Aduanas y Administración Tributaria y, todo lo que implica la gestión y seguimiento de la relación laboral, lo cual incluye las capacitaciones, evaluaciones periódicas del personal, entrega de beneficios, y envío de información a las empresas del grupo empresarial, para efectos de control y cumplimiento de las políticas institucionales, entre otros, vinculados exclusivamente a la ejecución de la relación contractual.
+        </p>
+
+        <p>
+            Cabe indicar que en la medida que la prestación de servicios a cargo de <span class="bold">EL TRABAJADOR</span> importe su destaque en las instalaciones de los clientes de <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA,</span> para la prestación del servicio de administración y operación de playa de estacionamiento y valet parking por parte de este último, <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA,</span> se encuentra facultado a remitir información de <span class="bold">EL TRABAJADOR</span> a su cliente, relativa al cumplimiento de las obligaciones laborales a su cargo, de conformidad con la normatividad de la materia.
+        </p>
+
+        <p>
+            Para efectos de cumplir con la finalidad señalada en el párrafo anterior, <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA</span> cuenta con el apoyo de otras empresas, terceros proveedores de servicios, que actúan en calidad de encargados de tratamiento; los cuales, tienen acceso a los datos personales de los trabajadores; sin perjuicio de las medidas de seguridad establecidas para el efecto.
+        </p>
+
+        <p>
+            Los datos personales del <span class="bold">TRABAJADOR</span> recolectados por <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA</span> son necesarios para la ejecución de la relación laboral.
+        </p>
+
+        <p>
+            Con posterioridad a la conclusión del contrato, los datos personales de <span class="bold">EL TRABAJADOR</span> serán conservados únicamente a fin de ser puestos a disposición de las administraciones públicas, el Poder Judicial y demás autoridades, en ejercicios de sus funciones, de acuerdo a los plazos establecidos por ley para el efecto.
+        </p>
+
+        <p>
+            Además, mediante la presente se informa al <span class="bold">TRABAJADOR,</span> que con fines de control laboral, acorde a lo dispuesto por el artículo 9º del Texto Único Ordenado del Decreto Legislativo N° 728, Ley de Productividad y Competitividad Laboral, aprobado por Decreto Supremo No. 003-97-TR, el desempeño de sus funciones podrá ser video vigilado, actividad que se realizará atendiendo a criterios de razonabilidad y proporcionalidad, y sin afectar los derechos del <span class="bold">TRABAJADOR.</span>
+        </p>
+
+        <p>
+            El ejercicio por parte del <span class="bold">TRABAJADOR,</span> de sus derechos de acceso, rectificación, cancelación y oposición, se podrá llevar a cabo en los términos dispuestos en la Ley N° 29733 - Ley de Protección de Datos Personales y su Reglamento, aprobado por el Decreto Supremo N° 003-2013-JUS, presentando una solicitud escrita ante la Oficina de Capital Humano de <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA,</span> ubicada en Calle Dean Valdivia N°148 Int.1401 Urb. Jardín (Edificio Platinium), Distrito de San Isidro. Asimismo, “INVERSIONES URBANÍSTICAS OPERADORA” le informa que podrá establecer otros canales para tramitar estas solicitudes, lo que será informado oportunamente en la página web.”
+        </p>
+    </div>
+
+    <div class="signatures-wrapper">
+            <div class="signature-col">
+                {{#if signature1}}
+                    <img src="{{signature1}}" class="signature-img" />
+                {{else}}
+                    <div style="height: 55px;"></div>
+                {{/if}}
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL EMPLEADOR</div>
+                <div class="signature-text">NOMBRE: {{signer1Name}}</div>
+                <div class="signature-text">DNI N°: {{signer1DNI}}</div>
+            </div>
+
+            <div class="signature-col">
+                {{#if signature2}}
+                    <img src="{{signature2}}" class="signature-img" />
+                {{else}}
+                    <div style="height: 55px;"></div>
+                {{/if}}
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL EMPLEADOR</div>
+                <div class="signature-text">NOMBRE: {{signer2Name}}</div>
+                <div class="signature-text">DNI N°: {{signer2DNI}}</div>
+            </div>
+
+            <div class="signature-col">
+                <div style="height: 55px;"></div> <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL TRABAJADOR</div>
+                <div class="signature-text">NOMBRE: {{fullName}}</div>
+                <div class="signature-text">DNI: {{dni}}</div>
+                <div class="signature-text">PLAYA: {{subDivision}}</div>
+            </div>
+        </div>
+</body>
 </html>
 `;

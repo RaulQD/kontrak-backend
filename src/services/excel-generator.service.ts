@@ -16,9 +16,13 @@ export class ExcelGeneratorServices {
   constructor() {
     this.excelParseServices = new ExcelParserServices();
   }
-  async processExcelAndGenerateContracts(
+  async processingExcel(
     buffer: Buffer,
+    filename: string,
   ): Promise<excelProcessingResult> {
+    logger.info(
+      `🔄 Iniciando procesamiento de Excel desde OneDrive: ${filename}`,
+    );
     const validationResult = await this.excelParseServices.validateExcel(
       buffer,
       CONTRACT_FIELDS_MAP,
@@ -73,7 +77,12 @@ export class ExcelGeneratorServices {
       { header: 'Condición', key: 'conditions', width: 15 },
       { header: 'Cargo', key: 'position', width: 30 },
       { header: 'Monedas Sueldo', key: 'coinsSalary', width: 20 },
-      { header: 'Sueldo', key: 'salary', width: 30 },
+      {
+        header: 'Sueldo',
+        key: 'salary',
+        width: 30,
+        style: { numFmt: '"S/" #,##0.00' },
+      },
       { header: 'Tasa/Nivel Riesgo', key: 'LevelRisk', width: 20 },
       { header: 'Fec. Ingreso', key: 'entryDate', width: 30 },
     ];
@@ -89,20 +98,6 @@ export class ExcelGeneratorServices {
       const conditions = 'P';
       const typeDoc = 'DNI';
       const coinsSalary = 'SOLES';
-      const birthDateSerial = emp.birthDate
-        ? toExcelSerialDate(
-            typeof emp.birthDate === 'string'
-              ? changeStringToDate(emp.birthDate)
-              : emp.birthDate,
-          )
-        : null;
-      const entryDateSerial = emp.entryDate
-        ? toExcelSerialDate(
-            typeof emp.entryDate === 'string'
-              ? changeStringToDate(emp.entryDate)
-              : emp.entryDate,
-          )
-        : null;
       const sexFormatted = MAP_SEX[emp.sex || ''] || emp.sex;
       worksheet.addRow({
         item,
@@ -110,15 +105,15 @@ export class ExcelGeneratorServices {
         lastNameMother: emp.lastNameMother,
         name: emp.name,
         sex: sexFormatted,
-        birthDate: birthDateSerial,
+        birthDate: this.processDate(emp.birthDate),
         typeDoc,
         dni: emp.dni,
         conditions,
         position: emp.position,
-        salary: formatCurrency(Number(emp.salary)),
+        salary: Number(emp.salary),
         coinsSalary,
         levelRisk: '',
-        entryDate: entryDateSerial,
+        entryDate: this.processDate(emp.entryDate),
       });
     }
     logger.info(`Se agregaron ${employees.length} filas  al excel Vida ley`);
@@ -145,7 +140,12 @@ export class ExcelGeneratorServices {
       { header: 'Condición', key: 'conditions', width: 15 },
       { header: 'Cargo', key: 'position', width: 20 },
       { header: 'Moneda Sueldo', key: 'currencySalary', width: 20 },
-      { header: 'Sueldo', key: 'salary', width: 20 },
+      {
+        header: 'Sueldo',
+        key: 'salary',
+        width: 20,
+        style: { numFmt: '"S/" #,##0.00' },
+      },
       { header: 'Tasa', key: 'rate', width: 20 },
       { header: 'Fecha Ingreso', key: 'entryDate', width: 20 },
       { header: 'Fecha cese', key: 'endDate', width: 20 },
@@ -167,34 +167,13 @@ export class ExcelGeneratorServices {
       const nationality = 'PERUANA';
       const rate = 'ALTO RIESGO';
       const headquarters = 'PLAYA';
-      const birthDateSerial = emp.birthDate
-        ? toExcelSerialDate(
-            typeof emp.birthDate === 'string'
-              ? changeStringToDate(emp.birthDate)
-              : emp.birthDate,
-          )
-        : null;
-      const entryDateSerial = emp.entryDate
-        ? toExcelSerialDate(
-            typeof emp.entryDate === 'string'
-              ? changeStringToDate(emp.entryDate)
-              : emp.entryDate,
-          )
-        : null;
-      const endDateSerial = emp.endDate
-        ? toExcelSerialDate(
-            typeof emp.endDate === 'string'
-              ? changeStringToDate(emp.endDate)
-              : emp.endDate,
-          )
-        : null;
       worksheet.addRow({
         item,
         lastNameFather: emp.lastNameFather,
         lastNameMother: emp.lastNameMother,
         name: emp.name,
         sex: emp.sex,
-        birthDate: birthDateSerial,
+        birthDate: this.processDate(emp.birthDate),
         nationality,
         typeDoc,
         dni: emp.dni,
@@ -202,10 +181,10 @@ export class ExcelGeneratorServices {
         conditions,
         position: emp.position,
         currencySalary,
-        salary: formatCurrency(Number(emp.salary)),
+        salary: Number(emp.salary),
         rate,
-        entryDate: entryDateSerial,
-        endDate: endDateSerial,
+        entryDate: this.processDate(emp.entryDate),
+        endDate: this.processDate(emp.endDate),
         codClient: '',
         headquarters,
       });
@@ -236,7 +215,23 @@ export class ExcelGeneratorServices {
       });
     }
     logger.info(`Se agregaron ${employees.length} filas  al excel Vida ley`);
-    const buffer = await workbook.csv.writeBuffer();
+    const buffer = await workbook.csv.writeBuffer({
+      dateFormat: 'DD/MM/YYYY',
+      dateUTC: false,
+      formatterOptions: {
+        delimiter: ';', // Punto y coma para Excel en español/Latam
+        writeBOM: true,
+      },
+      encoding: 'utf8',
+    });
     return buffer as unknown as Buffer;
+  }
+
+  private processDate(date: string | Date | undefined | null): number | null {
+    if (!date) return null;
+
+    const dateObj = typeof date === 'string' ? changeStringToDate(date) : date;
+
+    return toExcelSerialDate(dateObj);
   }
 }

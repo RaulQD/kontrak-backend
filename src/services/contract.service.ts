@@ -12,7 +12,7 @@ import { EmployeeData } from '../types/employees.interface';
 import { Response } from 'express';
 import {
   generateDocAnexo,
-  generateProcessingOfPresonalDataPDF,
+  generateProcessingOfPersonalDataPDF,
 } from '../template/contracts';
 import { ValidationService } from './validation.service';
 import puppeteer from 'puppeteer';
@@ -51,7 +51,7 @@ export class ContractService {
                 emp.contractType,
                 browser,
               ),
-              generateProcessingOfPresonalDataPDF(emp),
+              generateProcessingOfPersonalDataPDF(emp, browser),
               generateDocAnexo(emp, browser),
             ]);
 
