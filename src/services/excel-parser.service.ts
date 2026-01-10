@@ -29,7 +29,7 @@ export class ExcelParserServices {
   ): Promise<ValidationResult> {
     logger.info(
       { bufferSize: buffer.length },
-      '🚀 Iniciando procesamiento de Excel',
+      'Iniciando procesamiento de Excel',
     );
 
     try {
@@ -44,7 +44,7 @@ export class ExcelParserServices {
 
       const totalRecords = rowData.length;
 
-      logger.info({ totalRecords }, '📄 Registros extraídos del Excel');
+      logger.info({ totalRecords }, 'Registros extraidos del Excel');
 
       const validation =
         this.validationService.validateEmployeeInbatch(rowData);
@@ -69,7 +69,7 @@ export class ExcelParserServices {
 
       return result;
     } catch (error) {
-      logger.error({ error }, '❌ Error al procesar Excel');
+      logger.error({ error }, 'Error al procesar Excel');
       throw error;
     }
   }
@@ -232,13 +232,21 @@ export class ExcelParserServices {
                 finalValue = `${day}/${month}/${year}`;
               }
             } else if (field === 'salary') {
-              if (typeof value === 'string') {
+              // Caso 1: ExcelJS ya lo detectó como número (Ideal)
+              if (typeof value === 'number') {
+                finalValue = value;
+              } else if (typeof value === 'string') {
                 const trimmed = value.trim();
                 if (trimmed === '' || trimmed === 'N/A') {
                   finalValue = null;
                 } else {
-                  let cleanValue = trimmed.replace(/^S\/\.?\s*/i, '').trim();
-                  cleanValue = cleanValue.replace(/\./g, '').replace(',', '.');
+                  // 1.Eliminamos explícitamente el "S/." o variaciones, sin tocar el resto
+                  // /S\/\.?\s*/i -> Busca "S/", opcionalmente un punto ".", y espacios opcionales
+                  let cleanValue = trimmed.replace(/S\/\.?\s*/i, '');
+                  // 2. Eliminamos las comas (separador de miles)
+                  cleanValue = cleanValue.replace(/,/g, '');
+
+                  cleanValue = cleanValue.replace(/[^\d.-]/g, '');
 
                   const num = Number(cleanValue);
                   finalValue = isNaN(num) ? null : num;
@@ -318,7 +326,7 @@ export class ExcelParserServices {
   ): Promise<ValidateAddendumResult> {
     logger.info(
       { bufferSize: buffer.length },
-      '🚀 Iniciando procesamiento de Excel',
+      'Iniciando procesamiento de Excel',
     );
     try {
       const rowData = await this.importExcelFromBuffer(buffer, fields, options);
@@ -329,7 +337,7 @@ export class ExcelParserServices {
         );
       }
       const totalRecords = rowData.length;
-      logger.info({ totalRecords }, '📄 Registros extraídos del Excel');
+      logger.info({ totalRecords }, 'Registros extraídos del Excel');
       const validation =
         this.validationService.validateEmployeeAddendumInBatch(rowData);
       const invalidRows = new Set(validation.errors.map((e) => e.row));
@@ -351,7 +359,7 @@ export class ExcelParserServices {
       };
       return result;
     } catch (error) {
-      logger.error({ error }, '❌ Error al procesar Excel');
+      logger.error({ error }, 'Error al procesar Excel');
       throw error;
     }
   }

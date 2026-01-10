@@ -18,16 +18,15 @@ import { ValidationService } from './validation.service';
 import puppeteer from 'puppeteer';
 
 export class ContractService {
+  private readonly BATCH_SIZE = 3;
   private readonly fileStorageService: FileStorageService;
   private readonly pdfGeneratorService: PDFGeneratorService;
-  private readonly validationService: ValidationService;
   constructor() {
     this.fileStorageService = new FileStorageService();
     this.pdfGeneratorService = new PDFGeneratorService();
-    this.validationService = new ValidationService();
   }
 
-  async downloadZipStream(response: Response, employee: EmployeeData[]) {
+  async downloadZipStream(response: Response, employees: EmployeeData[]) {
     const archive = archiver('zip', { zlib: { level: 9 } });
     archive.on('error', (err) => {
       throw err;
@@ -39,36 +38,49 @@ export class ContractService {
     });
 
     try {
-      for (const emp of employee) {
-        try {
-          const rootFolder = emp.contractType
-            .toLocaleLowerCase()
-            .replace(/\s+/g, '');
-          const [contractResult, processingOfPresonalDataPDF, anexoDocResult] =
-            await Promise.all([
-              this.pdfGeneratorService.generateContract(
-                emp,
-                emp.contractType,
-                browser,
-              ),
-              generateProcessingOfPersonalDataPDF(emp, browser),
-              generateDocAnexo(emp, browser),
-            ]);
+      const batches = this.chunk(employees, this.BATCH_SIZE);
 
-          archive.append(contractResult.buffer, {
-            name: `${rootFolder}/${contractResult.filename}`,
-          });
-          archive.append(processingOfPresonalDataPDF, {
-            name: `${rootFolder}/Tratamiento de datos/${emp.dni}.pdf`,
-          });
-          archive.append(anexoDocResult, {
-            name: `${rootFolder}/Anexos/${emp.dni}.pdf`,
-          });
-        } catch (error) {
-          if (error instanceof Error) {
-            logger.info(`Error con empleado ${emp.dni}: ${error.message}`);
-          }
-        }
+      for (const batch of batches) {
+        // Procesar cada batch en paralelo
+        await Promise.all(
+          batch.map(async (emp) => {
+            try {
+              const rootFolder = emp.contractType
+                .toLocaleLowerCase()
+                .replace(/\s+/g, '');
+
+              if (emp.contractType !== 'APE') {
+                // 1. Contrato principal
+                const contractResult =
+                  await this.pdfGeneratorService.generateContract(
+                    emp,
+                    emp.contractType,
+                    browser,
+                  );
+                archive.append(contractResult.buffer, {
+                  name: `${rootFolder}/${contractResult.filename}`,
+                });
+
+                // 2. Anexo
+                const anexoBuffer = await generateDocAnexo(emp, browser);
+                archive.append(anexoBuffer, {
+                  name: `${rootFolder}/Anexos/${emp.dni}.pdf`,
+                });
+              }
+
+              // 3. Tratamiento de datos (siempre)
+              const processingDataBuffer =
+                await generateProcessingOfPersonalDataPDF(emp, browser);
+              archive.append(processingDataBuffer, {
+                name: `${rootFolder}/Tratamiento de datos/${emp.dni}.pdf`,
+              });
+            } catch (error) {
+              if (error instanceof Error) {
+                logger.error(`Error con empleado ${emp.dni}: ${error.message}`);
+              }
+            }
+          }),
+        );
       }
     } finally {
       await browser.close();
@@ -111,5 +123,12 @@ export class ContractService {
         fileName: result.fileName,
       };
     }
+  }
+  private chunk<T>(array: T[], size: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
   }
 }

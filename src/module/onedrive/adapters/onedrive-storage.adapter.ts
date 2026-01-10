@@ -51,17 +51,22 @@ export class OneDriveStorageAdapter implements FileStorageService {
       throw error;
     }
   }
-  async downloadFile(fileId: string): Promise<Buffer> {
+  async downloadFile(
+    fileId: string,
+  ): Promise<{ buffer: Buffer; error?: string }> {
     try {
       const response = await this.client
         .api(`/users/${this.userEmail}/drive/items/${fileId}/content`)
         .responseType(ResponseType.ARRAYBUFFER)
         .get();
       const buffer = Buffer.from(response);
-      return buffer;
+      return { buffer };
     } catch (error) {
       logger.error({ error }, 'Error al descargar archivo de OneDrive');
-      throw error;
+      return {
+        buffer: Buffer.alloc(0),
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
   async uploadFile(
@@ -70,9 +75,10 @@ export class OneDriveStorageAdapter implements FileStorageService {
     filename: string,
   ): Promise<string> {
     try {
+      // Usar conflictBehavior=replace para sobrescribir si existe
       const response: OneDriveUploadResponse = await this.client
         .api(
-          `/users/${this.userEmail}/drive/root:/${folderPath}/${filename}:/content`,
+          `/users/${this.userEmail}/drive/root:/${folderPath}/${filename}:/content?@microsoft.graph.conflictBehavior=replace`,
         )
         .put(file);
       return response.id;
@@ -95,6 +101,16 @@ export class OneDriveStorageAdapter implements FileStorageService {
         .api(`/users/${this.userEmail}/drive/items/${fileId}`)
         .delete();
     } catch (error) {
+      // Si el archivo ya no existe (404), ignorar el error
+      if (
+        error &&
+        typeof error === 'object' &&
+        'statusCode' in error &&
+        error.statusCode === 404
+      ) {
+        logger.warn(`Archivo ya eliminado o no encontrado: ${fileId}`);
+        return; // No lanzar error, solo continuar
+      }
       logger.error({ error }, 'Error al eliminar archivo de OneDrive');
       throw error;
     }

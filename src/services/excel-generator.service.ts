@@ -20,9 +20,7 @@ export class ExcelGeneratorServices {
     buffer: Buffer,
     filename: string,
   ): Promise<excelProcessingResult> {
-    logger.info(
-      `🔄 Iniciando procesamiento de Excel desde OneDrive: ${filename}`,
-    );
+    logger.info(`Iniciando procesamiento de Excel desde OneDrive: ${filename}`);
     const validationResult = await this.excelParseServices.validateExcel(
       buffer,
       CONTRACT_FIELDS_MAP,

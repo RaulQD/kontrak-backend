@@ -8,10 +8,10 @@ export class OneDriveProvider {
 
   public static getClient(): Client {
     if (this.client) {
-      logger.info('♻️ Reutilizando cliente Microsoft Graph');
+      logger.info('Reutilizando cliente Microsoft Graph');
       return this.client;
     }
-    logger.info('🔧 Inicializando cliente');
+    logger.info('Inicializando cliente');
     const { AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET } =
       process.env;
 
