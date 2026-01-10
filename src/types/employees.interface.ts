@@ -1,6 +1,6 @@
 import { AppError } from '../utils/app-error';
 
-export type ContractType = 'PLANILLA' | 'SUBSIDIO' | 'PART TIME';
+export type ContractType = 'PLANILLA' | 'SUBSIDIO' | 'PART TIME' | 'APE';
 
 export interface EmployeeData {
   name: string;
@@ -19,6 +19,8 @@ export interface EmployeeData {
   sex?: string;
   position: string;
   subDivisionOrParking: string;
+  division: string;
+  sctr: string;
   birthDate?: Date | string;
   // Campos específicos de SUBSIDIO
   timeForCompany?: string;

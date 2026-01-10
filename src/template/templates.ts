@@ -3,6 +3,7 @@ export const CONTRACT_PART_TIME = `
     <html lang="es">
     <head>
         <meta charset="UTF-8">
+        <title>{{dni}}</title>
         <style>
             body {
                 font-family: 'Arial MT', sans-serif;
@@ -558,7 +559,7 @@ export const CONTRACT_PART_TIME = `
 
             </div>
         </div>
-        <div class="clause-row" style="margin-bottom:80px">
+        <div class="clause-row"">
             <div class="clause-num">16.4</div>
             <div class="clause-text">
                 Las Partes acuerdan que, durante el periodo de vigencia del Contrato, estarán obligadas a actuar en estricto cumplimiento de la legislación vigente, quedando completamente prohibido, bajo cualquier circunstancia, realizar actos que impliquen la vulneración de la ley penal.
@@ -570,7 +571,7 @@ export const CONTRACT_PART_TIME = `
                 Adicionalmente, EL TRABAJADOR se compromete a no cometer delitos estipulados en la Ley N°31740, los cuales se encuentran relacionadas con las siguientes leyes:
             </div>
         </div>
-        <ul class='bullet-row'>
+        <ul class='bullet-row' style="margin-bottom:80px">
             <li>DL N°1106: Lavado de Activos</li>
             <li>Ley N°25475: Terrorismo</li>
             <li>Código Penal Peruano: Fraude en las Personas Jurídicas</li>
@@ -681,6 +682,7 @@ export const CONTRACT_FULL_TIME = `
     <html lang="es">
     <head>
         <meta charset="UTF-8">
+        <title>{{dni}}</title>
         <style>
             body {
                 font-family: 'Arial MT', sans-serif;
@@ -791,7 +793,7 @@ export const CONTRACT_FULL_TIME = `
         <div class="clause-row">
             <div class="clause-num">1.2</div>
             <div class="clause-text">
-                En ese contexto, <span class="bold">EL EMPLEADOR</span> ha asumido la administración de una serie de playas de estacionamiento en la ciudad de Lima y provincias, así como la implementación de negocios colaterales en las playas de estacionamiento que ya vienen siendo administradas, situación que generará un incremento considerable de sus actividades – directa o indirectamente vinculadas al giro del negocio de estacionamientos, con la consecuente necesidad de contratar personal para concretar sus operaciones en las referidas playas de estacionamiento, siendo que las áreas involucradas son <span class="bold">TIME SURCO.</span>
+                En ese contexto, <span class="bold">EL EMPLEADOR</span> ha asumido la administración de una serie de playas de estacionamiento en la ciudad de Lima y provincias, así como la implementación de negocios colaterales en las playas de estacionamiento que ya vienen siendo administradas, situación que generará un incremento considerable de sus actividades – directa o indirectamente vinculadas al giro del negocio de estacionamientos, con la consecuente necesidad de contratar personal para concretar sus operaciones en las referidas playas de estacionamiento, siendo que las áreas involucradas son <span class="bold">{{division}}</span>
             </div>
         </div>
 
@@ -814,7 +816,7 @@ export const CONTRACT_FULL_TIME = `
         <div class="clause-row">
             <div class="clause-num">2.1</div>
             <div class="clause-text">
-                Por el presente documento <span class="bold">EL EMPLEADOR</span> contrata a plazo fijo a <span class="bold">EL TRABAJADOR</span> bajo la modalidad de <span class="bold">INCREMENTO DE ACTIVIDADES</span> para que ocupe el cargo de <span class="bold">ANFITRION(A) PT</span> asumiendo las responsabilidades propias del puesto y de acuerdo a las estipulaciones contenidas en este Contrato.
+                Por el presente documento <span class="bold">EL EMPLEADOR</span> contrata a plazo fijo a <span class="bold">EL TRABAJADOR</span> bajo la modalidad de <span class="bold">INCREMENTO DE ACTIVIDADES</span> para que ocupe el cargo de <span class="bold">{{position}}</span> asumiendo las responsabilidades propias del puesto y de acuerdo a las estipulaciones contenidas en este Contrato.
             </div>
         </div>
 
@@ -1469,6 +1471,7 @@ export const ANEXO = `
     <html lang="es">
     <head>
         <meta charset="UTF-8">
+        <title>{{dni}}</title>
       <style>
             body {
                 font-family: 'Arial', sans-serif;
@@ -1521,30 +1524,46 @@ export const ANEXO = `
                 text-indent: -15px; 
             }
 
-            /* Firmas */
-            .signature-container {
+               /* Contenedor de Firmas (Flexbox para 3 columnas) */
+        .signature-container {
+            margin-top: 50px; /* Espacio antes de las firmas */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            page-break-inside: avoid; /* Evita que las firmas se corten entre páginas */
+            width: 100%;
+        }
+
+        .signatures-wrapper {
                 margin-top: 50px;
-                display: table; 
                 width: 100%;
-                page-break-inside: avoid;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start; /* Alinea al fondo */
+                page-break-inside: avoid; /* Evita que las firmas se corten */
             }
-            .sig-box {
-                display: table-cell;
-                width: 33%;
-                vertical-align: bottom;
-                padding: 0 10px;
-                text-align: left;
+            .signature-col {
+                width: 31%; /* 3 columnas aprox */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
             }
-            .sig-line {
-                border-top: 1px solid black;
-                margin-bottom: 5px;
-            }
-            .sig-img {
+            .signature-img {
                 height: 50px;
                 width: 85px;
                 object-fit: contain;
-                display: block;
-                margin: 0 auto 5px auto;
+                margin-bottom: 5px;
+            }
+            .signature-line {
+                width: 100%;
+                border-top: 1px solid #000;
+                margin-bottom: 5px;
+            }
+            .signature-text {
+                font-size: 8pt;
+                width: 100%;
+                text-align: left;
+                line-height: 1.2;
             }
             .center-text { text-align: center; }
         </style>
@@ -1736,38 +1755,38 @@ export const ANEXO = `
             En señal de conformidad, las partes suscriben dos (02) ejemplares del presente contrato en la ciudad de <span class="bold">{{department}}, </span>el día <span class="bold">{{entryDate}}</span> quedando un ejemplar en poder del empleador y otro en poder del trabajador, quien declara haber recibido una copia del contrato y estar de acuerdo con su contenido.
         </div>
 
-        <div class="signature-container">
-            <div class="sig-box">
+        <div class="signatures-wrapper">
+            <div class="signature-col">
                 {{#if signature1}}
-                    <img src="{{signature1}}" class="sig-img" />
+                    <img src="{{signature1}}" class="signature-img" />
                 {{else}}
-                    <div style="height: 50px;"></div>
+                    <div style="height: 55px;"></div>
                 {{/if}}
-                <div class="sig-line"></div>
-                <div class="center-text bold">EL EMPLEADOR</div>
-                <div>NOMBRE: {{signer1Name}}</div>
-                <div>DNI N°: {{signer1DNI}}</div>
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL EMPLEADOR</div>
+                <div class="signature-text">NOMBRE: {{signer1Name}}</div>
+                <div class="signature-text">DNI N°: {{signer1DNI}}</div>
             </div>
 
-            <div class="sig-box">
+            <div class="signature-col">
                 {{#if signature2}}
-                    <img src="{{signature2}}" class="sig-img" />
+                    <img src="{{signature2}}" class="signature-img" />
                 {{else}}
-                    <div style="height: 50px;"></div>
+                    <div style="height: 55px;"></div>
                 {{/if}}
-                <div class="sig-line"></div>
-                <div class="center-text bold">EL EMPLEADOR</div>
-                <div>NOMBRE: {{signer2Name}}</div>
-                <div>DNI N°: {{signer2DNI}}</div>
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL EMPLEADOR</div>
+                <div class="signature-text">NOMBRE: {{signer2Name}}</div>
+                <div class="signature-text">DNI N°: {{signer2DNI}}</div>
             </div>
 
-            <div class="sig-box" style="margin-top:10px">
-                <div style="height: 50px;"></div>
-                <div class="sig-line"></div>
-                <div class="center-text bold">EL TRABAJADOR</div>
-                <div>NOMBRE: {{fullName}}</div>
-                <div>DNI: {{dni}}</div>
-                <div>PLAYA: {{subDivision}}</div>
+            <div class="signature-col">
+                <div style="height: 55px;"></div>
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL TRABAJADOR</div>
+                <div class="signature-text">NOMBRE: {{fullName}}</div>
+                <div class="signature-text">DNI: {{dni}}</div>
+                <div class="signature-text">PLAYA: {{division}}</div>
             </div>
         </div>
 
@@ -1779,6 +1798,7 @@ export const CONTRACT_SUBSIDIO = `
     <html lang="es">
     <head>
         <meta charset="UTF-8">
+        <title>{{dni}}</title>
         <style>
             body {
                 font-family: 'Arial', sans-serif;
@@ -2531,6 +2551,7 @@ export const PROCESSING_PERSONAL_DATA = `
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <title>{{dni}}</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -2666,7 +2687,7 @@ export const PROCESSING_PERSONAL_DATA = `
                 <div class="signature-text text-center bold">EL TRABAJADOR</div>
                 <div class="signature-text">NOMBRE: {{fullName}}</div>
                 <div class="signature-text">DNI: {{dni}}</div>
-                <div class="signature-text">PLAYA: {{subDivision}}</div>
+                <div class="signature-text">PLAYA: {{division}}</div>
             </div>
         </div>
 </body>

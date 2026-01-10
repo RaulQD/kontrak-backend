@@ -36,7 +36,7 @@ export class BrowserManager {
     if (this.browser) {
       await this.browser.close();
       this.browser = null;
-      logger.info('🔒 Browser cerrado');
+      logger.info('Browser cerrado');
     }
   }
 

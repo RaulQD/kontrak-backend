@@ -88,6 +88,8 @@ export class ValidationService {
       department: result.data.department,
       position: result.data.position,
       subDivisionOrParking: result.data.subDivisionOrParking,
+      division: result.data.division,
+      sctr: result.data.sctr,
       contractType: this.mapContractType(result.data.contractType),
       sex: result.data.sex,
       salary: result.data.salary,
@@ -125,7 +127,7 @@ export class ValidationService {
     if (lower === 'subsidio') return 'SUBSIDIO';
     if (lower === 'part-time' || lower === 'part_time' || lower === 'part time')
       return 'PART TIME';
-
+    if (lower === 'ape') return 'APE';
     return 'PLANILLA';
   }
   validateEmployeeInbatch(rows: Record<string, unknown>[]): {

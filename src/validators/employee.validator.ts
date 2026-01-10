@@ -1,6 +1,12 @@
+import { error } from 'console';
 import z from 'zod';
 
-export const CONTRACT_TYPES = ['PLANILLA', 'PART TIME', 'SUBSIDIO'] as const;
+export const CONTRACT_TYPES = [
+  'PLANILLA',
+  'PART TIME',
+  'SUBSIDIO',
+  'APE',
+] as const;
 export type ContractType = (typeof CONTRACT_TYPES)[number];
 // Esquema para normalizar y validar tipo de contrato
 export const contractTypeSchema = z
@@ -11,13 +17,14 @@ export const contractTypeSchema = z
     if (lower === 'planilla') return 'Planilla';
     if (lower === 'subsidio' || lower === 'suplencia' || lower === 'reemplazo')
       return 'Subsidio';
-    // CORRECCIÓN: Normalizamos siempre a "Part Time" (o como prefieras, pero consistente)
+    if (lower === 'ape') return 'APE';
+
     if (lower.includes('part') && lower.includes('time')) return 'Part Time';
 
     return val; // Devolvemos el valor original si no matchea para que falle en el refine
   })
-  .refine((val) => ['Planilla', 'Subsidio', 'Part Time'].includes(val), {
-    message: 'El tipo de contrato debe ser: Planilla, Subsidio, Part Time',
+  .refine((val) => ['Planilla', 'Subsidio', 'Part Time', 'APE'].includes(val), {
+    message: 'El tipo de contrato debe ser: Planilla, Subsidio, Part Time, APE',
   });
 export const AddressSchema = z.object({
   province: z.string({ error: 'Provincia es requerida.' }),
@@ -132,6 +139,8 @@ export const employeeSchema = z
       },
     ),
     subDivisionOrParking: z.string({ error: 'sub división requerida' }).trim(),
+    division: z.string({ error: 'división requerida' }).trim(),
+    sctr: z.string({ error: 'sctr requerida' }).trim(),
     replacementFor: z.string().trim().optional(),
     reasonForSubstitution: z.string().trim().optional(),
     timeForCompany: z.string().trim().optional(),

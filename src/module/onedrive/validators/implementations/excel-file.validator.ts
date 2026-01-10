@@ -75,7 +75,7 @@ export class ExcelFileValidator implements FileValidator {
           'name',
         ),
       );
-      logger.warn(`⏭️ Archivo temporal ignorado: ${file.name}`);
+      logger.warn(`Archivo temporal ignorado: ${file.name}`);
     }
 
     // Validación 3: Tamaño del archivo
@@ -90,7 +90,7 @@ export class ExcelFileValidator implements FileValidator {
         ),
       );
       logger.warn(
-        `⏭️ Archivo demasiado grande: ${file.name} (${sizeMB}MB, máx: ${maxMB}MB)`,
+        `Archivo demasiado grande: ${file.name} (${sizeMB}MB, máx: ${maxMB}MB)`,
       );
     }
 
@@ -126,42 +126,3 @@ export class ExcelFileValidator implements FileValidator {
     return size > this.config.maxSizeBytes;
   }
 }
-
-// ============================================
-// FUNCIONES LEGACY (mantener por compatibilidad)
-// Se pueden eliminar después de migrar todo el código
-// ============================================
-
-/**
- * @deprecated Usar ExcelFileValidator.validate() en su lugar
- * Verifica si el archivo NO es un Excel válido
- * @returns true si NO es Excel (debe ser ignorado)
- */
-export const isNotExcelFile = (file: { name: string }): boolean => {
-  const isExcel =
-    file.name.toLowerCase().endsWith('.xlsx') ||
-    file.name.toLowerCase().endsWith('.xls');
-
-  if (!isExcel) {
-    logger.warn(`⏭️ Archivo ignorado (no es Excel): ${file.name}`);
-    return true;
-  }
-
-  return false;
-};
-
-/**
- * @deprecated Usar ExcelFileValidator.validate() en su lugar
- * Verifica si es un archivo temporal de Excel
- * @returns true si es temporal (debe ser ignorado)
- */
-export const isExcelFileTemp = (file: { name: string }): boolean => {
-  const isTemp = file.name.startsWith('~$');
-
-  if (isTemp) {
-    logger.warn(`⏭️ Archivo temporal ignorado: ${file.name}`);
-    return true;
-  }
-
-  return false;
-};

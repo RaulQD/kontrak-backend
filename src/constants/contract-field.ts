@@ -132,12 +132,21 @@ export const BASE_FIELDS: Record<string, FieldConfig> = {
       'PLAYA',
       'ESTACIONAMIENTO',
       'Sub Division o playa',
+      'Sub-division o playa',
       'SUB DIVISION o playa',
       'SUB-DIVISION o playa',
       'SUB-DIVISION',
       'subdivision',
     ],
     description: 'Lugar de trabajo donde trabajara el empleado',
+  },
+  division: {
+    aliases: ['division', 'Division', 'DIVISION'],
+    description: 'Lugar de trabajo donde trabajara el empleado',
+  },
+  sctr: {
+    aliases: ['sctr', 'SCTR', 'Sctr'],
+    description: 'Seguro Complementario de Trabajo de Riesgo del empleado',
   },
   position: {
     aliases: ['Cargo', 'CARGO', 'POSICION', 'cargo', 'Cargo', 'Posicion'],

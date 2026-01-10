@@ -14,5 +14,5 @@ export {
   ExcelFileValidator,
   ExcelValidatorConfig,
 } from './implementations/excel-file.validator';
+
 export { CompositeValidator } from './implementations/composite.validator';
-export { isFileTooLarge } from './implementations/size.validator';

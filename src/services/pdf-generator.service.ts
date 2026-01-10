@@ -22,7 +22,7 @@ export class PDFGeneratorService {
   ): Promise<{ buffer: Buffer; filename: string }> {
     logger.info(
       { dni: employeeData.dni, contractType },
-      '📄 Generando contrato PDF',
+      'Generando contrato PDF',
     );
 
     if (!employeeData || !employeeData.dni) {
@@ -51,9 +51,6 @@ export class PDFGeneratorService {
       }
 
       const filename = `${employeeData.dni}.pdf`;
-
-      logger.info({ filename }, '✅ Contrato PDF generado exitosamente');
-
       return { buffer, filename };
     } catch (error) {
       if (error instanceof Error) {
@@ -64,7 +61,7 @@ export class PDFGeneratorService {
             stack: error.stack,
             dni: employeeData.dni,
           },
-          '❌ Error generando PDF',
+          'Error generando PDF',
         );
       }
       throw error;

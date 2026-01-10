@@ -22,7 +22,7 @@ async function main(): Promise<void> {
     const oneDriveBot = new OneDriveServices();
 
     // Ejecutar cada 30 segundos (30000ms)
-    const INTERVALO_MS = 30000; // 30 segundos
+    const INTERVALO_MS = 10000; // 10 segundos
     setInterval(async () => {
       logger.info('Iniciando revision periodica de OneDrive...');
       await oneDriveBot.vigilarYProcesar();
