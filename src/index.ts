@@ -1,8 +1,8 @@
 import { createApp } from './app';
 import { config } from './config';
-import { OneDriveServices } from './module/onedrive/services/onedrive.service';
+import { OneDriveScheduler } from './infrastructure/onedrive/scheduler/onedrive.scheduler';
 import { Server } from './server';
-import { logger } from './utils/logger';
+import { logger } from './shared/utils/logger';
 
 // Ejecutar aplicación
 (async () => {
@@ -16,21 +16,8 @@ async function main(): Promise<void> {
     logger.info('Inicializando servidor...');
     const server = new Server(app);
     server.listen(Number(config.server.port));
-
-    // 🤖 INICIAR BOT DE ONEDRIVE
-    logger.info('Arrancando Bot de Vigilancia de OneDrive...');
-    const oneDriveBot = new OneDriveServices();
-
-    // Ejecutar cada 30 segundos (30000ms)
-    const INTERVALO_MS = 10000; // 10 segundos
-    setInterval(async () => {
-      logger.info('Iniciando revision periodica de OneDrive...');
-      await oneDriveBot.vigilarYProcesar();
-    }, INTERVALO_MS);
-
-    logger.info(
-      `Bot configurado para revisar OneDrive cada ${INTERVALO_MS / 1000} segundos`,
-    );
+    const oneDriveScheduler = new OneDriveScheduler();
+    oneDriveScheduler.start();
   } catch (error: unknown) {
     logger.error({ error }, 'Error during application initialization');
     process.exit(1);

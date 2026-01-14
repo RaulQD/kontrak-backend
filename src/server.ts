@@ -1,5 +1,5 @@
 import { Application } from 'express';
-import { logger } from './utils/logger';
+import { logger } from './shared/utils/logger';
 
 export class Server {
   public readonly app: Application;

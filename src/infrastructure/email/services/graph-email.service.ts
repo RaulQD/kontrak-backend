@@ -1,16 +1,14 @@
 import { Client } from '@microsoft/microsoft-graph-client';
 import { SendEmailOptions } from '../types/email.types';
-import { OneDriveProvider } from '../../../module/provider/onedrive.provider';
+import { OneDriveProvider } from '../../onedrive/provider/onedrive.provider';
 
 export class GraphEmailService {
   private client: Client;
   constructor() {
     this.client = OneDriveProvider.getClient();
   }
-  async sendEmailWithAttachment(options: SendEmailOptions) {
-    const { to, cc, subject, body, attachment } = options;
-    //CONVERTIR EL BUFFER EN BASE64
-    const base64Content = attachment?.content.toString('base64');
+  async sendEmailWithAttachment(options: SendEmailOptions): Promise<void> {
+    const { from, to, cc, subject, body, attachment } = options;
     const message = {
       subject,
       body: {
@@ -26,17 +24,24 @@ export class GraphEmailService {
         cc?.map((email) => ({
           emailAddress: { address: email },
         })) || [],
-      attachments: [
-        {
-          '@odata.type': '#microsoft.graph.fileAttachment',
-          name: attachment?.filename,
-          contentType: attachment?.contentType,
-          contentBytes: base64Content,
-        },
-      ],
+      attachments: attachment
+        ? [
+            {
+              '@odata.type': '#microsoft.graph.fileAttachment',
+              name: attachment.filename,
+              contentBytes: attachment.content.toString('base64'),
+            },
+          ]
+        : [],
     };
-    await this.client
-      .api(`users/${process.env.ONEDRIVE_USER_EMAIL}/sendMail`)
-      .post({ message });
+    try {
+      const response = await this.client
+        .api(`/users/${from}/sendMail`)
+        .post({ message, saveToSentItems: true });
+      console.log('response', response);
+    } catch (error) {
+      console.error('Error al enviar el correo', error);
+      throw error;
+    }
   }
 }

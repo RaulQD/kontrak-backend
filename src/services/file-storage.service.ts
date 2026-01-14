@@ -1,8 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { logger } from '../utils/logger';
 import { formatDate } from 'date-fns';
 import { config } from '../config';
+import { logger } from '../shared/utils/logger';
 
 export class FileStorageService {
   /**

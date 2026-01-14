@@ -1,10 +1,10 @@
 import express, { Express } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import { errorHandler } from './middlewares/error-handle.middleware';
+import { errorHandler } from './api/middlewares/error-handle.middleware';
 import { corsConfig } from './config/cors.config';
-import { logger } from './utils/logger';
-import router from './routes';
+import { logger } from './shared/utils/logger';
+import router from './api/routes';
 
 export const createApp = async (): Promise<Express> => {
   const app = express();
