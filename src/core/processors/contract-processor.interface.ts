@@ -1,5 +1,5 @@
 import { Browser } from 'puppeteer';
-import { EmployeeData } from '../../types/employees.interface';
+import { EmployeeData } from '../../shared/types/employees.interface';
 
 /**
  * Resultado del procesamiento de un contrato
@@ -9,7 +9,16 @@ export interface ContractResult {
   filename: string;
   buffer?: Buffer;
   error?: string;
-  documentType: 'contracts' | 'anexos' | 'processing-data' | 'sctr-reports'; // ← NUEVO
+  documentType:
+    | 'contracts'
+    | 'anexos'
+    | 'processing-data'
+    | 'sctr-reports'
+    | 'sctr-ape-reports'
+    | 'card-id-reports'
+    | 'lawlife-reports';
+
+  contractType?: 'PLANILLA' | 'PART TIME' | 'SUBSIDIO' | 'APE';
 }
 
 /**

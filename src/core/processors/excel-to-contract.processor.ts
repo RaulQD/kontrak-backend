@@ -4,14 +4,15 @@ import {
   ContractProcessorResult,
   ContractResult,
 } from './contract-processor.interface';
-import { ExcelGeneratorServices } from '../../services/excel-generator.service';
-import { PDFGeneratorService } from '../../services/pdf-generator.service';
-import { logger } from '../../utils/logger';
+import { ExcelGeneratorServices } from '../../domain/excel/services/excel-generator.service';
+import { PDFGeneratorService } from '../../domain/contracts/services/pdf-generator.service';
 import {
   generateDocAnexo,
   generateProcessingOfPersonalDataPDF,
-} from '../../template/contracts';
-import { EmployeeData } from '../../types/employees.interface';
+} from '../../domain/contracts/templates/contracts';
+import { logger } from '../../shared/utils/logger';
+import { chunk } from '../../shared/utils/array.utits';
+import { EmployeeData } from '../../shared/types/employees.interface';
 
 /**
  * Procesador que convierte archivos Excel en contratos PDF
@@ -50,7 +51,7 @@ export class ExcelToContractProcessor implements ContractProcessor {
   ): Promise<ContractProcessorResult> {
     logger.info(`Procesando ${employees.length} empleados para contratos`);
     // 2. Generar PDFs para cada empleado
-    const batches = this.chunk(employees, this.BATCH_SIZE);
+    const batches = chunk(employees, this.BATCH_SIZE);
     const contracts: ContractResult[] = [];
 
     logger.info(
@@ -90,6 +91,7 @@ export class ExcelToContractProcessor implements ContractProcessor {
           filename: contractResult.filename,
           buffer: contractResult.buffer,
           documentType: 'contracts',
+          contractType: employee.contractType,
         });
 
         // 2. Anexo
@@ -99,6 +101,7 @@ export class ExcelToContractProcessor implements ContractProcessor {
           filename: `${employee.dni}.pdf`,
           buffer: anexoBuffer,
           documentType: 'anexos',
+          contractType: employee.contractType,
         });
       }
       // 3. Tratamiento de datos
@@ -111,6 +114,7 @@ export class ExcelToContractProcessor implements ContractProcessor {
         filename: `${employee.dni}.pdf`,
         buffer: processingDataBuffer,
         documentType: 'processing-data',
+        contractType: employee.contractType,
       });
 
       logger.info(`Documentos generados para: ${employee.dni}`);
@@ -125,12 +129,5 @@ export class ExcelToContractProcessor implements ContractProcessor {
       logger.error(`Error generando PDF para ${employee.dni}: ${error}`);
     }
     return result;
-  }
-  private chunk<T>(array: T[], size: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunks.push(array.slice(i, i + size));
-    }
-    return chunks;
   }
 }

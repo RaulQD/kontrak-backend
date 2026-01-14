@@ -1,6 +1,6 @@
 import { Browser } from 'puppeteer';
 import puppeteer from 'puppeteer';
-import { logger } from '../../utils/logger';
+import { logger } from '../../shared/utils/logger';
 
 export class BrowserManager {
   private static instance: BrowserManager;
