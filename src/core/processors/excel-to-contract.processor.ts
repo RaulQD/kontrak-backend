@@ -116,6 +116,20 @@ export class ExcelToContractProcessor implements ContractProcessor {
         documentType: 'processing-data',
         contractType: employee.contractType,
       });
+      const noSubjectToControlBuffer =
+        await this.pdfService.generateLetterNoSubectToControl(
+          employee,
+          browser,
+        );
+      if (noSubjectToControlBuffer) {
+        result.push({
+          success: true,
+          filename: `${employee.dni}.pdf`,
+          buffer: noSubjectToControlBuffer.buffer,
+          documentType: 'no-subject-to-control',
+          contractType: employee.contractType,
+        });
+      }
 
       logger.info(`Documentos generados para: ${employee.dni}`);
     } catch (error) {

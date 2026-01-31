@@ -63,7 +63,7 @@ export class ExcelGeneratorServices {
 
     const worksheet = workbook.addWorksheet('hoja1');
     worksheet.columns = [
-      { header: 'Item', key: 'item', width: 20 },
+      { header: 'Item', key: 'item', width: 10 },
       { header: 'Apellido Paterno', key: 'lastNameFather', width: 30 },
       { header: 'Apellido Materno', key: 'lastNameMother', width: 30 },
       { header: 'Nombres', key: 'name', width: 30 },
@@ -74,12 +74,7 @@ export class ExcelGeneratorServices {
       { header: 'Condición', key: 'conditions', width: 15 },
       { header: 'Cargo', key: 'position', width: 30 },
       { header: 'Monedas Sueldo', key: 'coinsSalary', width: 20 },
-      {
-        header: 'Sueldo',
-        key: 'salary',
-        width: 30,
-        style: { numFmt: '"S/" #,##0.00' },
-      },
+      { header: 'Sueldo', key: 'salary', width: 30, style: { numFmt: '0.00' } },
       { header: 'Tasa/Nivel Riesgo', key: 'LevelRisk', width: 20 },
       { header: 'Fec. Ingreso', key: 'entryDate', width: 30 },
     ];
@@ -102,7 +97,7 @@ export class ExcelGeneratorServices {
         lastNameMother: emp.lastNameMother,
         name: emp.name,
         sex: sexFormatted,
-        birthDate: this.processDate(emp.birthDate),
+        birthDate: emp.birthDate,
         typeDoc,
         dni: emp.dni,
         conditions,
@@ -110,10 +105,9 @@ export class ExcelGeneratorServices {
         salary: Number(emp.salary),
         coinsSalary,
         levelRisk: '',
-        entryDate: this.processDate(emp.entryDate),
+        entryDate: emp.entryDate,
       });
     }
-    logger.info(`Se agregaron ${employees.length} filas al excel Vida ley`);
     const buffer = await workbook.xlsx.writeBuffer();
     return buffer as unknown as Buffer;
   }
@@ -122,31 +116,26 @@ export class ExcelGeneratorServices {
 
     workbook.creator = 'FORMATO_SCTR';
     workbook.created = new Date();
-    const worksheet = workbook.addWorksheet('SCTR');
+    const worksheet = workbook.addWorksheet('Formato');
     worksheet.columns = [
       { header: 'Item', key: 'item', width: 10 },
       { header: 'Apellido Paterno', key: 'lastNameFather', width: 20 },
       { header: 'Apellido Materno', key: 'lastNameMother', width: 20 },
       { header: 'Nombres', key: 'name', width: 20 },
       { header: 'Sexo', key: 'sex', width: 15 },
-      { header: 'Fecha Nac.', key: 'birthDate', width: 15 },
+      { header: 'Fecha Nac/', key: 'birthDate', width: 15 },
       { header: 'Nacionalidad', key: 'nationality', width: 20 },
-      { header: 'Tipo Doc.', key: 'typeDoc', width: 15 },
-      { header: 'Numero Doc.', key: 'dni', width: 20 },
+      { header: 'Tipo Doc/', key: 'typeDoc', width: 15 },
+      { header: 'Numero Doc/', key: 'dni', width: 20 },
       { header: 'DC', key: 'DC', width: 15 },
       { header: 'Condición', key: 'conditions', width: 15 },
       { header: 'Cargo', key: 'position', width: 20 },
       { header: 'Moneda Sueldo', key: 'currencySalary', width: 20 },
-      {
-        header: 'Sueldo',
-        key: 'salary',
-        width: 20,
-        style: { numFmt: '"S/" #,##0.00' },
-      },
+      { header: 'Sueldo', key: 'salary', width: 20 },
       { header: 'Tasa', key: 'rate', width: 20 },
-      { header: 'Fecha Ingreso', key: 'entryDate', width: 20 },
-      { header: 'Fecha cese', key: 'endDate', width: 20 },
-      { header: 'Cod/Cliente', key: 'codClient', width: 20 },
+      { header: 'Fec/ Ingreso', key: 'entryDate', width: 20 },
+      { header: 'Fec/ cese', key: 'endDate', width: 20 },
+      { header: 'Cod/ Cliente Ext/', key: 'codClient', width: 20 },
       { header: 'Sede', key: 'headquarters', width: 20 },
     ];
     const rows = worksheet.getRow(1);
@@ -160,8 +149,8 @@ export class ExcelGeneratorServices {
       const item = i + 1;
       const conditions = 'P';
       const typeDoc = 'DNI';
-      const currencySalary = 'SOLES';
-      const nationality = 'PERUANA';
+      const currencySalary = '0';
+      const nationality = '174';
       const rate = 'ALTO RIESGO';
       const headquarters = 'PLAYA';
       worksheet.addRow({
@@ -233,7 +222,7 @@ export class ExcelGeneratorServices {
     const worksheet = workbook.addWorksheet('SCTR APE');
     worksheet.columns = [
       { header: 'TIPO_PRODUCTO', key: 'typeProduct', width: 30 },
-      { header: 'SUCURSAL_EMPRES', key: 'headquarters', width: 30 },
+      { header: 'SUCURSAL_EMPRESA', key: 'headquarters', width: 30 },
       { header: 'TIPO_DOCUMENTO', key: 'typeDoc', width: 20 },
       { header: 'NRO_DOCUMENTO', key: 'dni', width: 20 },
       { header: 'APELLIDO_PATERNO', key: 'lastNameFather', width: 20 },
@@ -246,9 +235,9 @@ export class ExcelGeneratorServices {
         header: 'IMPORTE_SUELDO_BRUTO',
         key: 'salary',
         width: 30,
-        style: { numFmt: '"S/" #,##0.00' },
+        style: { numFmt: '0.00' },
       },
-      { header: 'FECHA_DE_INGRESO', key: 'entryDate', width: 30 },
+      { header: 'FECHA_INGRESO_EMPRESA', key: 'entryDate', width: 30 },
     ];
     const rows = worksheet.getRow(1);
     rows.eachCell((cell) => {
@@ -257,10 +246,18 @@ export class ExcelGeneratorServices {
         horizontal: 'center',
       };
     });
+    rows.font = { bold: true, color: { argb: '000000' } };
+    rows.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'd1d5db' },
+    };
     for (const emp of employee) {
-      const nameComplete = emp.name.split(' ');
-      const firstName = nameComplete[0];
-      const secondName = nameComplete.length > 1 ? nameComplete[1] : '';
+      const nameComplete = emp.name.split(' ').filter((n) => n.trim() !== '');
+      const firstName = nameComplete[0] || '';
+      // Si hay 2+ nombres, toma todos los restantes después del primero
+      const secondName =
+        nameComplete.length > 1 ? nameComplete.slice(1).join(' ') : '';
       const sexFormatted = MAP_SEX[emp.sex || ''] || emp.sex;
       worksheet.addRow({
         typeProduct: 'VG',

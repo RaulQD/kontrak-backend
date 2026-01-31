@@ -1,10 +1,8 @@
 import { Browser } from 'puppeteer';
 import {
-  ContractProcessor,
   ContractProcessorResult,
   ContractResult,
 } from './contract-processor.interface';
-import { logger } from '../../shared/utils/logger';
 import { ExcelGeneratorServices } from '../../domain/excel/services/excel-generator.service';
 import { getFormattedDate } from '../../shared/utils/data-folder';
 import { BaseProcessor } from './base.processor';
@@ -42,7 +40,7 @@ export class SctrReportApeProcessor extends BaseProcessor {
         success: true,
         filename: `VG_FORMATO_DE_CARGA_NOMIAL_${getFormattedDate()}.xlsx`,
         buffer: apeSctrBuffer,
-        documentType: 'sctr-reports',
+        documentType: 'sctr-ape-reports',
       });
     }
     return {

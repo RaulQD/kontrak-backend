@@ -1,4 +1,5 @@
 import { BrevoEmailService } from '../../../infrastructure/email/services/brevo-email.service';
+import { logger } from '../../../shared/utils/logger';
 import { getSuccessTemplate, getValidationErrorTemplate } from '../templates';
 import {
   FileErrorTemplateData,
@@ -24,7 +25,7 @@ export class EmailNotificationService {
         body: temnplate,
       });
     } catch (error) {
-      console.log(error);
+      logger.error({ error }, 'Error al enviar correo de exito');
     }
   }
   async sendValidationErrorNotification(data: ValidationErrorTemplateData) {
@@ -37,7 +38,7 @@ export class EmailNotificationService {
         body: temnplate,
       });
     } catch (error) {
-      console.log(error);
+      logger.error({ error }, 'Error al enviar correo de exito');
     }
   }
   async sendValidationFileNotification(data: FileErrorTemplateData) {
@@ -50,7 +51,7 @@ export class EmailNotificationService {
         body: temnplate,
       });
     } catch (error) {
-      console.log(error);
+      logger.error({ error }, 'Error al enviar correo de exito');
     }
   }
 }

@@ -108,6 +108,9 @@ export class ValidationService {
       ...(result.data.probationaryPeriod && {
         probationaryPeriod: result.data.probationaryPeriod,
       }),
+      ...(result.data.phone && {
+        phone: result.data.phone,
+      }),
     };
 
     return { errors: [], employee };

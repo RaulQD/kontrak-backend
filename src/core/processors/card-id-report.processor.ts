@@ -13,6 +13,10 @@ export class CardIdReportProcessor extends BaseProcessor {
   public readonly name = 'CardIdReportProcessor';
   private excelGeneratorServicec: ExcelGeneratorServices;
 
+  constructor() {
+    super();
+    this.excelGeneratorServicec = new ExcelGeneratorServices();
+  }
   async processEmployees(
     employees: EmployeeData[],
     _browser: Browser,
@@ -24,7 +28,7 @@ export class CardIdReportProcessor extends BaseProcessor {
         await this.excelGeneratorServicec.generateExcelCardID(employees);
       resultReports.push({
         success: true,
-        filename: `VG_FORMATO_DE_CARGA_NOMIAL_${getFormattedDate()}.xlsx`,
+        filename: `FOTOCHECK_${getFormattedDate()}.csv`,
         buffer: cardIdBuffer,
         documentType: 'card-id-reports',
       });

@@ -1,4 +1,6 @@
 import {
+  DATA_APPARKA,
+  LOGO_APPARKA,
   SIGNATURE_EMPLOYEE,
   SIGNATURE_EMPLOYEE_TWO,
 } from '../../../shared/constants/signatures';
@@ -14,11 +16,13 @@ import {
   CONTRACT_FULL_TIME,
   CONTRACT_PART_TIME,
   CONTRACT_SUBSIDIO,
+  NO_SUBJECT_TO_CONTROL,
   PROCESSING_PERSONAL_DATA,
 } from './templates';
 import { Browser } from 'puppeteer';
 import { formatCurrency } from '../../../shared/utils/formatCurrency';
 import { EmployeeData } from '../../../shared/types/employees.interface';
+import { MONTHS } from '../../../shared/constants/months';
 
 export const generatePartTimeContract = async (
   data: EmployeeData,
@@ -51,7 +55,10 @@ export const generatePartTimeContract = async (
   });
 
   const page = await browser.newPage();
-  await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
+  await page.setContent(finalHtml, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000,
+  });
   const pdfBuffer = await page.pdf({
     format: 'Letter',
     printBackground: true,
@@ -107,7 +114,10 @@ export const generatePlanillaContract = async (
   });
 
   const page = await browser.newPage();
-  await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
+  await page.setContent(finalHtml, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000,
+  });
   const pdfBuffer = await page.pdf({
     format: 'Letter',
     printBackground: true,
@@ -163,7 +173,10 @@ export const generateSubsidioContract = async (
   });
 
   const page = await browser.newPage();
-  await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
+  await page.setContent(finalHtml, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000,
+  });
   const pdfBuffer = await page.pdf({
     format: 'Letter',
     printBackground: true,
@@ -206,7 +219,10 @@ export const generateDocAnexo = async (
   });
 
   const page = await browser.newPage();
-  await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
+  await page.setContent(finalHtml, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000,
+  });
   const pdfBuffer = await page.pdf({
     format: 'LETTER',
     printBackground: true,
@@ -249,7 +265,10 @@ export const generateProcessingOfPersonalDataPDF = async (
     signature2: SIGNATURE_EMPLOYEE_TWO,
   });
   const page = await browser.newPage();
-  await page.setContent(finalHTML, { waitUntil: 'networkidle0' });
+  await page.setContent(finalHTML, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000,
+  });
   const pdfBuffer = await page.pdf({
     format: 'LETTER',
     printBackground: true,
@@ -259,6 +278,53 @@ export const generateProcessingOfPersonalDataPDF = async (
       right: '2.26cm',
       bottom: '0.49cm',
       left: '1.81cm',
+    },
+  });
+  await page.close();
+  return Buffer.from(pdfBuffer);
+};
+export const generateNoSubjectToControlPDF = async (
+  data: EmployeeData,
+  browser: Browser,
+): Promise<Buffer> => {
+  const template = Handlebars.compile(NO_SUBJECT_TO_CONTROL);
+
+  // Formatear fecha de emisión en español
+  const currentDate = new Date();
+  const emissionDate = `Lima, ${currentDate.getDate()} de ${MONTHS[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+
+  const finalHTML = template({
+    emissionDate,
+    fullName:
+      `${data.name || ''} ${data.lastNameFather || ''} ${data.lastNameMother || ''}`.trim(),
+    dni: data.dni,
+    address: data.address,
+    district: data.district,
+    province: data.province,
+    department: data.department,
+    position: data.position,
+    entryDate: data.entryDate,
+    subDivision: data.subDivisionOrParking,
+    division: data.division,
+    signer2Name: FULL_NAME_SECOND_EMPLOYEE,
+    signature2: SIGNATURE_EMPLOYEE_TWO,
+    dataApparka: DATA_APPARKA,
+    logo: LOGO_APPARKA,
+  });
+  const page = await browser.newPage();
+  await page.setContent(finalHTML, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000,
+  });
+  const pdfBuffer = await page.pdf({
+    format: 'LETTER',
+    printBackground: true,
+    preferCSSPageSize: true,
+    margin: {
+      top: '1.38cm',
+      right: '2.36cm',
+      bottom: '0.49cm',
+      left: '2.36cm',
     },
   });
   await page.close();

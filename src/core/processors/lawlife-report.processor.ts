@@ -9,29 +9,40 @@ import { ExcelGeneratorServices } from '../../domain/excel/services/excel-genera
 import { logger } from '../../shared/utils/logger';
 import { BaseProcessor } from './base.processor';
 
-export class LawlifeReportProcess extends BaseProcessor {
+export class LawlifeReportProcessor extends BaseProcessor {
   public readonly name: string = 'Lawlive Report Processor';
   private excelGeneratorServicec: ExcelGeneratorServices;
 
+  constructor() {
+    super();
+    this.excelGeneratorServicec = new ExcelGeneratorServices();
+  }
   async processEmployees(
     employees: EmployeeData[],
     _browser: Browser,
   ): Promise<ContractProcessorResult> {
+    //AGREGAR TODOS LOS CONTRATOS MENOS EL TIPO DE CONTRATO APE
+    const employeesWithoutApe = this.filterEmployees(
+      employees,
+      (emp) => emp.contractType !== 'APE',
+    );
     const resultReports: ContractResult[] = [];
     logger.info('Iniciando reporte Vida Ley');
-    if (employees.length > 0) {
+    if (employeesWithoutApe.length > 0) {
       const lawliveBuffer =
-        await this.excelGeneratorServicec.generateExcelLawLife(employees);
+        await this.excelGeneratorServicec.generateExcelLawLife(
+          employeesWithoutApe,
+        );
       resultReports.push({
         success: true,
-        filename: 'FORMATO_SCTR.xlsx',
+        filename: '1.1 VIDA_LEY TRAMA INV URB OP.xlsx',
         buffer: lawliveBuffer,
         documentType: 'lawlife-reports',
       });
-      logger.info('Reporte SCTR generado');
+      logger.info('Reporte Vida Ley generado');
     }
     return {
-      employees,
+      employees: employeesWithoutApe,
       contracts: resultReports,
     };
   }

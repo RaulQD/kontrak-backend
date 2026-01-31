@@ -2508,7 +2508,7 @@ export const CONTRACT_SUBSIDIO = `
         En señal de conformidad, las partes suscriben dos (02) ejemplares del presente contrato en la ciudad de  <span class="bold">{{department}}</span>, el día  <span class="bold">{{entryDate}}</span>, quedando un ejemplar en poder del empleador y otro en poder del trabajador, quien declara haber recibido una copia del contrato y estar de acuerdo con su contenido.
     </div>
 
-        <div class="signatures-wrapper">
+    <div class="signatures-wrapper">
             <div class="signature-col">
                 {{#if signature1}}
                     <img src="{{signature1}}" class="signature-img" />
@@ -2693,3 +2693,160 @@ export const PROCESSING_PERSONAL_DATA = `
 </body>
 </html>
 `;
+export const NO_SUBJECT_TO_CONTROL = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+     <title>{{dni}}</title>
+    <style>
+        body {
+            font-family: 'Calibri', sans-serif;
+            font-size: 11pt;
+            line-height: 1.3;
+            text-align: justify;
+            text-justify: inter-word;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 60px;
+        }
+        img {
+            image-rendering: -webkit-optimize-contrast; 
+            object-fit: contain; 
+        }
+        .header-date {
+            margin-bottom: 30px;
+            text-align: left; 
+        }
+        .recipient-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .recipient-name {
+            font-weight: bold;
+            text-transform: uppercase;
+            display: block;
+        }
+        .recipient-address {
+            text-transform: uppercase;
+            display: block;
+        }
+        .reference {
+            text-decoration: underline;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .greeting {
+            margin-bottom: 20px;
+        }
+        .attention {
+             margin: 40px 0 80px 0;
+        }
+        .paragrah {
+            text-align: justify; /* Justificado como en la imagen */
+            margin-bottom: 15px;
+        }
+        .highlight-variable {
+            /* Clase opcional si quisieras mantener el resaltado amarillo, 
+               pero para el PDF final lo dejaremos limpio o en negrita */
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+        }
+        .signatures-wrapper {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .signature-col {
+            width: 30%;
+            text-align: center;
+        }
+        .signature-img {
+            width: 100%;
+            height: auto;
+        }
+        .signature-line {
+            width: 100%;
+            height: 2px;
+            background-color: #000;
+            margin: 0;
+        }
+        .signature-text {
+            font-size: 10pt;
+        }
+        .italic{
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{dataApparka}}" alt="dataApparka">
+        <img src="{{logo}}" alt="logo">
+    </div>
+    <div class="header-date">
+        {{emissionDate}}
+    </div>
+
+    <div class="recipient-section">
+       <p>Señor(a):</p>
+        <span class="recipient-name">{{fullName}}</span>
+        <span class="recipient-address">{{address}}</span>
+        <span class="recipient-address">{{department}}-{{province}}-{{district}}</span>
+    </div>
+
+    <span class="reference">Presente.-</span>
+
+    <div class="greeting">
+        De nuestra consideración:
+    </div>
+
+    <p class="paragrah">
+        Por intermedio de la presente le comunicamos que el puesto de 
+        <span class="highlight-variable">{{position}}</span> 
+        que usted desempeña califica dentro de los alcances del artículo 5° del Texto Único Ordenado de la 
+        Ley de Jornada de Trabajo, Horario y Trabajo, aprobado por Decreto Supremo N° 007-2002-TR, así 
+        como el artículo 10° de su Reglamento, aprobado por Decreto Supremo N° 008-2002-TR, los cuales 
+        establecen que no se encuentran comprendidos dentro de la jornada máxima de trabajo los 
+        trabajadores que no se encuentren sujetos a fiscalización inmediata.
+    </p>
+
+    <p class="paragrah">
+        Esta especificación obedece a que las labores a su cargo implican que usted realiza sus labores o parte 
+        de ellas sin supervisión inmediata del empleador, o lo hace parcial o totalmente fuera del centro de 
+        trabajo, acudiendo a él para dar cuenta de su trabajo y realizar las coordinaciones pertinentes.
+    </p>
+
+    <p class="paragrah">
+        En este sentido, con la presente comunicación le manifestamos que usted <strong>no se encuentra sujeto a 
+        fiscalización</strong>, razón por la cual, no está en la obligación de registrar su asistencia, de conformidad con 
+        lo dispuesto por el artículo 1° del Decreto Supremo N° 004-2006-TR.
+    </p>
+
+    <p class="attention">Atentamente,</p>
+    <div class="signatures-wrapper">
+            <div class="signature-col">
+                {{#if signature2}}
+                    <img src="{{signature2}}" class="signature-img" />
+                {{else}}
+                    <div style="height: 55px;"></div>
+                {{/if}}
+                <div class="signature-line"></div>
+                <div class="signature-text">{{signer2Name}}</div>
+                <div class="signature-text italic">APODERADO</div>
+            </div>
+        </div>
+
+</body>
+</html>`;

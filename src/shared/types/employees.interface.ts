@@ -28,6 +28,7 @@ export interface EmployeeData {
   workingCondition?: string;
   probationaryPeriod?: string;
   contractType: ContractType;
+  phone?: string;
 }
 export interface EmployeeWithStatus extends EmployeeData {
   pdfGenerated?: boolean;

@@ -16,8 +16,9 @@ export interface ContractResult {
     | 'sctr-reports'
     | 'sctr-ape-reports'
     | 'card-id-reports'
-    | 'lawlife-reports';
-
+    | 'lawlife-reports'
+    | 'salary-account'
+    | 'no-subject-to-control';
   contractType?: 'PLANILLA' | 'PART TIME' | 'SUBSIDIO' | 'APE';
 }
 

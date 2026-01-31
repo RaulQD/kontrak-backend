@@ -3,6 +3,9 @@ import { FileMetadata } from './file-metadata.interface';
 export interface FileStorageService {
   getFiles(folderPath: string): Promise<FileMetadata[]>;
   downloadFile(fileId: string): Promise<{ buffer: Buffer; error?: string }>;
+  downloadFileByPath(
+    filePath: string,
+  ): Promise<{ buffer: Buffer; error?: string }>;
   uploadFile(
     file: Buffer,
     folderPath: string,

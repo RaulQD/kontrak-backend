@@ -216,6 +216,12 @@ export class ExcelParserServices {
             ) {
               // Convertir DNI de number a string
               finalValue = String(value);
+              //SI EL DNI es menor a 8 digitos, agregar ceros a la izquierda
+              if (finalValue.length < 8) {
+                finalValue = finalValue.padStart(8, '0');
+              }
+            } else if (field === 'phone' && typeof value === 'number') {
+              finalValue = String(value);
             } else if (
               field === 'entryDate' ||
               field === 'endDate' ||

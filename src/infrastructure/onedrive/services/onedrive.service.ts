@@ -15,6 +15,9 @@ import {
 } from '../../../core/processors';
 import { ServiceContainer } from '../../../config/service.container';
 import { logger } from '../../../shared/utils/logger';
+import { LawlifeReportProcessor } from '../../../core/processors/lawlife-report.processor';
+import { CardIdReportProcessor } from '../../../core/processors/card-id-report.processor';
+import { SalaryAccountProcessor } from '../../../core/processors/salary-account.processor';
 
 /**
  * OneDrive Service - Ahora es un simple SCHEDULER
@@ -31,6 +34,7 @@ export class OneDriveServices {
   private browserManager: BrowserManager;
   private orchestrator: FileProcessingOrchestrator;
   private validator: FileValidator;
+  private salaryAccountProcessor: SalaryAccountProcessor;
 
   constructor(storage?: FileStorageService, validator?: FileValidator) {
     this.enterFile = 'subir excel';
@@ -38,6 +42,7 @@ export class OneDriveServices {
     this.storage = storage ?? new OneDriveStorageAdapter();
     this.validator = validator ?? new ExcelFileValidator();
     this.browserManager = BrowserManager.getInstance();
+    this.salaryAccountProcessor = new SalaryAccountProcessor(this.storage);
 
     // Crear orquestador con todas las dependencias
     const servicesContainer = ServiceContainer.getInstance();
@@ -48,6 +53,9 @@ export class OneDriveServices {
       policy: new DefaultProcessingPolicy(),
       sctrProcessor: new SctrReportProcessor(),
       sctrApeProcessor: new SctrReportApeProcessor(),
+      lawlifeProcessor: new LawlifeReportProcessor(),
+      cardIdProcessor: new CardIdReportProcessor(),
+      salaryAccountProcessor: new SalaryAccountProcessor(this.storage),
       emailService: servicesContainer.emailService,
       excelService: servicesContainer.excelService,
       emailNotificationService: servicesContainer.emailNotificationService,

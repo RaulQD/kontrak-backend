@@ -141,6 +141,7 @@ export const employeeSchema = z
     subDivisionOrParking: z.string({ error: 'sub división requerida' }).trim(),
     division: z.string({ error: 'división requerida' }).trim(),
     sctr: z.string({ error: 'sctr requerida' }).trim(),
+    phone: z.string().trim().optional(),
     replacementFor: z.string().trim().optional(),
     reasonForSubstitution: z.string().trim().optional(),
     timeForCompany: z.string().trim().optional(),

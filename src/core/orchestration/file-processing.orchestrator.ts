@@ -21,6 +21,9 @@ import { EmailNotificationService } from '../notifications/services/email-notifi
 import { AppError } from '../../shared/utils/app-error';
 import { logger } from '../../shared/utils/logger';
 import { getOutPutFolders } from '../../shared/utils/data-folder';
+import { LawlifeReportProcessor } from '../processors/lawlife-report.processor';
+import { CardIdReportProcessor } from '../processors/card-id-report.processor';
+import { SalaryAccountProcessor } from '../processors/salary-account.processor';
 
 /**
  * Metadata mínima del archivo para procesamiento
@@ -42,6 +45,9 @@ export interface OrchestratorDependencies {
   excelToContractProcessor: ExcelToContractProcessor;
   sctrProcessor: SctrReportProcessor;
   sctrApeProcessor: SctrReportApeProcessor;
+  lawlifeProcessor: LawlifeReportProcessor;
+  cardIdProcessor: CardIdReportProcessor;
+  salaryAccountProcessor: SalaryAccountProcessor;
   policy?: ProcessingPolicy;
   emailService: BrevoEmailService;
   excelService: ExcelGeneratorServices;
@@ -60,6 +66,9 @@ export class FileProcessingOrchestrator {
   private excelToContractProcessor: ExcelToContractProcessor;
   private sctrProcessor: SctrReportProcessor;
   private sctrApeProcessor: SctrReportApeProcessor;
+  private lawlifeProcessor: LawlifeReportProcessor;
+  private cardIdProcessor: CardIdReportProcessor;
+  private salaryAccountProcessor: SalaryAccountProcessor;
   private policy: ProcessingPolicy;
   private excelService: ExcelGeneratorServices;
   private emailService: BrevoEmailService;
@@ -72,6 +81,9 @@ export class FileProcessingOrchestrator {
     this.policy = dependencies.policy ?? new DefaultProcessingPolicy();
     this.sctrProcessor = dependencies.sctrProcessor;
     this.sctrApeProcessor = dependencies.sctrApeProcessor;
+    this.lawlifeProcessor = dependencies.lawlifeProcessor;
+    this.cardIdProcessor = dependencies.cardIdProcessor;
+    this.salaryAccountProcessor = dependencies.salaryAccountProcessor;
     this.emailService = dependencies.emailService;
     this.excelService = dependencies.excelService;
     this.emailNotificationService = dependencies.emailNotificationService;
@@ -132,10 +144,19 @@ export class FileProcessingOrchestrator {
       logger.info(`Excel parseado: ${employees.length} empleados`);
 
       // 4. PROCESAR EN PARALELO(AMBOS RECIBEN EMPLEADOS PARSEADOS)
-      const [contractResult, sctrResult, sctrApeResult] = await Promise.all([
+      const [
+        contractResult,
+        sctrResult,
+        sctrApeResult,
+        lawlifeResult,
+        cardIdResult,
+      ] = await Promise.all([
         this.excelToContractProcessor.processEmployees!(employees, browser),
         this.sctrProcessor.processEmployees!(employees, browser),
         this.sctrApeProcessor.processEmployees!(employees, browser),
+        this.lawlifeProcessor.processEmployees!(employees, browser),
+        this.cardIdProcessor.processEmployees!(employees, browser),
+        this.salaryAccountProcessor.processEmployees!(employees, browser),
       ]);
 
       // 5. COMBINAR RESULTADOS
@@ -143,6 +164,8 @@ export class FileProcessingOrchestrator {
         ...contractResult.contracts,
         ...sctrResult.contracts,
         ...sctrApeResult.contracts,
+        ...lawlifeResult.contracts,
+        ...cardIdResult.contracts,
       ];
       const uploadResults: ItemProcessingResult[] = [];
 
@@ -164,8 +187,24 @@ export class FileProcessingOrchestrator {
                 targetFolder = `${folder.contracts}/${subFolder}/tratamiento-datos`;
                 break;
               case 'sctr-reports':
-                targetFolder = folder.sctrReports;
+                targetFolder = folder.sctr;
                 break;
+              case 'sctr-ape-reports':
+                targetFolder = folder.sctrApe;
+                break;
+              case 'lawlife-reports':
+                targetFolder = folder.lawlife;
+                break;
+              case 'card-id-reports':
+                targetFolder = folder.cardId;
+                break;
+              // 👇 AGREGAR ESTE CASO:
+              case 'no-subject-to-control':
+                targetFolder = folder.noSubjectToControl;
+                break;
+
+              case 'salary-account':
+                continue;
               default:
                 targetFolder = `${folder.contracts}/${subFolder}/contratos`;
             }
@@ -198,66 +237,14 @@ export class FileProcessingOrchestrator {
           });
         }
       }
-      //6. ENVIAR EMAILS CON REPORTES SCTR
-      const recipientEmail = file.createdByEmail;
-      if (sctrResult.contracts.length > 0 && sctrResult.contracts[0].buffer) {
-        try {
-          await this.emailService.sendEmailWithAttachment({
-            from: recipientEmail,
-            to: ['gguerra@apparka.pe'],
-            cc: ['raul@prodequa.com', 'raulqdkev@gmail.com'],
-            subject: 'Reporte SCTR - Kontrak',
-            body: `
-                  <h1>Reporte SCTR</h1>
-                  <p>Adjunto encontrarás el reporte SCTR con ${employees.length} empleados.</p>
-                  <p>Fecha de generación: ${new Date().toLocaleDateString('es-PE')}</p>
-                `,
-            attachment: {
-              filename: `FORMATO_SCTR.xlsx`,
-              content: sctrResult.contracts[0].buffer,
-            },
-          });
-          logger.info('Email SCTR enviado');
-        } catch (error) {
-          logger.error(`Error enviando email SCTR: ${error}`);
-          uploadResults.push({
-            success: false,
-            filename: 'EMAIL_SCTR',
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
-
-      if (
-        sctrApeResult.contracts.length > 0 &&
-        sctrApeResult.contracts[0].buffer
-      ) {
-        try {
-          const response = await this.emailService.sendEmailWithAttachment({
-            from: recipientEmail,
-            to: ['raul@prodequa.com'],
-            cc: ['i201911176@cibertec.edu.pe'],
-            subject: 'Reporte SCTR para APE - Kontrak',
-            body: `
-                  <h1>Reporte SCTR</h1>
-                  <p>Adjunto encontrarás el reporte SCTR con ${employees.length} empleados.</p>
-                  <p>Fecha de generación: ${new Date().toLocaleDateString('es-PE')}</p>
-                `,
-            attachment: {
-              filename: `FORMATO_SCTR.xlsx`,
-              content: sctrApeResult.contracts[0].buffer,
-            },
-          });
-          logger.info('Email SCTR enviado');
-        } catch (error) {
-          logger.error(`Error enviando email SCTR: ${error}`);
-          uploadResults.push({
-            success: false,
-            filename: 'EMAIL_SCTR',
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+      // 6. ENVIAR EMAILS CON REPORTES
+      await this.sendNotificationEmail({
+        recipientEmail: file.createdByEmail,
+        employeesCount: employees.length,
+        sctrBuffer: sctrResult.contracts[0]?.buffer,
+        sctrApeBuffer: sctrApeResult.contracts[0]?.buffer,
+        uploadResults,
+      });
       // 7. CREAR RESULTADO
       const result = ProcessingResultFactory.success(file.name, uploadResults);
       result.processingTimeMs = Date.now() - startTime;
@@ -266,6 +253,7 @@ export class FileProcessingOrchestrator {
       if (this.policy.shouldDeleteOriginal(result)) {
         logger.info(`Eliminando archivo original: ${file.name}`);
         await this.storage.deleteFile(file.id);
+        logger.info(`Archivo original eliminado: ${file.name}`);
       } else if (result.failureCount > 0) {
         logger.warn(
           `No se elimina ${file.name} porque hubo ${result.failureCount} fallos`,
@@ -327,5 +315,114 @@ export class FileProcessingOrchestrator {
         error instanceof Error ? error.message : String(error),
       );
     }
+  }
+  /**
+   * Envía email con los reportes generados (SCTR, SCTR APE, etc.)
+   */
+  private async sendNotificationEmail(params: {
+    recipientEmail: string;
+    employeesCount: number;
+    sctrBuffer: Buffer | undefined;
+    sctrApeBuffer: Buffer | undefined;
+    uploadResults: ItemProcessingResult[];
+  }): Promise<void> {
+    const {
+      recipientEmail,
+      employeesCount,
+      sctrBuffer,
+      sctrApeBuffer,
+      uploadResults,
+    } = params;
+
+    // Enviar reporte SCTR
+    if (sctrBuffer && sctrBuffer.length > 0) {
+      await this.sendEmail({
+        recipientEmail,
+        to: ['raul@prodequa.com'],
+        cc: ['kevindev2026@outlook.com'],
+        subject: 'Reporte SCTR - Kontrak',
+        body: this.buildEmailBody('Reporte SCTR', employeesCount),
+        attachment: {
+          filename: 'FORMATO_SCTR.xlsx',
+          content: sctrBuffer,
+        },
+        reportType: 'SCTR',
+        uploadResults,
+      });
+    }
+
+    // Enviar reporte SCTR APE
+    if (sctrApeBuffer && sctrApeBuffer.length > 0) {
+      const month = new Date().getMonth() + 1;
+      const year = new Date().getFullYear();
+      await this.sendEmail({
+        recipientEmail,
+        to: ['raul@prodequa.com'],
+        cc: ['kevindev2026@outlook.com'],
+        subject: 'FORMATO DE CARGA NOMINAL',
+        body: this.buildEmailBody('Reporte SCTR APE', employeesCount),
+        attachment: {
+          filename: `VG_FORMATO_DE_CARGA_NOMINAL_${month}_${year}.xlsx`,
+          content: sctrApeBuffer,
+        },
+        reportType: 'FORMATO DE CARGA NOMINAL',
+        uploadResults,
+      });
+    }
+  }
+
+  /**
+   * Método genérico para enviar email con adjunto
+   */
+  private async sendEmail(params: {
+    recipientEmail: string;
+    to: string[];
+    cc: string[];
+    subject: string;
+    body: string;
+    attachment: { filename: string; content: Buffer };
+    reportType: string;
+    uploadResults: ItemProcessingResult[];
+  }): Promise<void> {
+    const {
+      recipientEmail,
+      to,
+      cc,
+      subject,
+      body,
+      attachment,
+      reportType,
+      uploadResults,
+    } = params;
+
+    try {
+      await this.emailService.sendEmailWithAttachment({
+        from: recipientEmail,
+        to,
+        cc,
+        subject,
+        body,
+        attachment,
+      });
+      logger.info(`Correo electrónico ${reportType} enviado correctamente`);
+    } catch (error) {
+      logger.error(`Error enviando correo electrónico ${reportType}: ${error}`);
+      uploadResults.push({
+        success: false,
+        filename: `EMAIL_${reportType.replace(/\s+/g, '_').toUpperCase()}`,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Construye el cuerpo HTML del email
+   */
+  private buildEmailBody(title: string, employeesCount: number): string {
+    return `
+      <h1>${title}</h1>
+      <p>Adjunto encontrarás el reporte con ${employeesCount} empleados.</p>
+      <p>Fecha de generación: ${new Date().toLocaleDateString('es-PE')}</p>
+    `;
   }
 }

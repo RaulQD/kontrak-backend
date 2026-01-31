@@ -1,4 +1,5 @@
 import {
+  generateNoSubjectToControlPDF,
   generatePartTimeContract,
   generatePlanillaContract,
   generateSubsidioContract,
@@ -69,5 +70,20 @@ export class PDFGeneratorService {
       }
       throw error;
     }
+  }
+  async generateLetterNoSubectToControl(
+    employeeData: EmployeeData,
+    browser: Browser,
+  ): Promise<{ buffer: Buffer; filename: string } | null> {
+    logger.info(
+      `Iniciando la generacion de la carta de no sujeto a control para el ${employeeData.dni}`,
+    );
+    if (
+      employeeData.workingCondition?.toUpperCase() !== 'NO SUJETO A CONTROL'
+    ) {
+      return null;
+    }
+    const buffer = await generateNoSubjectToControlPDF(employeeData, browser);
+    return { buffer, filename: `${employeeData.dni}.pdf` };
   }
 }
