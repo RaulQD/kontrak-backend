@@ -1,0 +1,31 @@
+import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
+import { logger } from '../../shared/utils/logger';
+import { AppError } from '../../shared/utils/app-error';
+import { INTERNAL_SERVER_ERROR } from '../../shared/constants/http';
+
+const handlerAppError = (res: Response, error: AppError) => {
+  res.status(error.statusCode).json({
+    success: false,
+    message: error.message,
+    data: error.data || null,
+  });
+};
+
+//Nota el tipo ErrorRequestHandler y el export default
+export const errorHandler: ErrorRequestHandler = (
+  error,
+  _req: Request,
+  res,
+  _next: NextFunction,
+) => {
+  if (error instanceof AppError) {
+    handlerAppError(res, error);
+    return;
+  }
+  logger.error(`${error.stack || error.message}`);
+  res.status(INTERNAL_SERVER_ERROR).json({
+    success: false,
+    message: 'Internal Server Error',
+    errors: error.message,
+  });
+};

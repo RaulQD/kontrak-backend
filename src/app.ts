@@ -1,10 +1,10 @@
 import express, { Express } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
-import { errorHandler } from './middlewares/error-handle.middleware';
+import { errorHandler } from './api/middlewares/error-handle.middleware';
 import { corsConfig } from './config/cors.config';
-import { logger } from './utils/logger';
-import router from './routes';
+import { logger } from './shared/utils/logger';
+import router from './api/routes';
 
 export const createApp = async (): Promise<Express> => {
   const app = express();
@@ -16,10 +16,7 @@ export const createApp = async (): Promise<Express> => {
   // Health check - Endpoint raíz
   logger.info('Registrando ruta GET /');
   app.get('/', (req, res) => {
-    logger.info(
-      { path: req.path, method: req.method },
-      '✅ Ruta GET / alcanzada',
-    );
+    logger.info({ path: req.path, method: req.method }, 'Ruta GET / alcanzada');
     res.json({
       success: true,
       message: 'Kontrak API - Sistema de Generación de Contratos',
@@ -32,7 +29,7 @@ export const createApp = async (): Promise<Express> => {
       },
     });
   });
-  logger.info('✅ Ruta GET / registrada');
+  logger.info('Ruta GET / registrada');
 
   // Rutas de la API (debe ir ANTES del errorHandler)
   logger.info('Registrando rutas en /api');
@@ -54,9 +51,6 @@ export const createApp = async (): Promise<Express> => {
       },
     });
   });
-
-  // Manejo de errores (debe ir al final, solo para errores)
-  // NOTA: errorHandler solo se ejecuta cuando hay un error pasado a next()
   app.use(errorHandler);
 
   return app;
