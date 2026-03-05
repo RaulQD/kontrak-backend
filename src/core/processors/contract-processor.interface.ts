@@ -1,5 +1,7 @@
 import { Browser } from 'puppeteer';
 import { EmployeeData } from '../../shared/types/employees.interface';
+import { Readable } from 'stream';
+import { AddendumData } from '../../shared/types/addendum.interface';
 
 /**
  * Resultado del procesamiento de un contrato
@@ -7,7 +9,7 @@ import { EmployeeData } from '../../shared/types/employees.interface';
 export interface ContractResult {
   success: boolean;
   filename: string;
-  buffer?: Buffer;
+  stream?: Readable;
   error?: string;
   documentType:
     | 'contracts'
@@ -16,16 +18,20 @@ export interface ContractResult {
     | 'sctr-reports'
     | 'sctr-ape-reports'
     | 'card-id-reports'
-    | 'lawlife-reports';
-
-  contractType?: 'PLANILLA' | 'PART TIME' | 'SUBSIDIO' | 'APE';
+    | 'lawlife-reports'
+    | 'salary-account'
+    | 'no-subject-to-control'
+    | 'insurances-fola'
+    | 'addendum';
+  contractType?: 'PLANILLA' | 'PART TIME' | 'SUBSIDIO' | 'APE' | 'PRACTICANTE';
+  addendumType?: 'POR INICIO O INCREMENTO DE ACTIVIDAD' | 'DE SUPLENCIA';
 }
 
 /**
  * Resultado del procesamiento de un archivo Excel
  */
 export interface ContractProcessorResult {
-  employees: EmployeeData[];
+  employees: EmployeeData[] | AddendumData[];
   contracts: ContractResult[];
 }
 
@@ -47,13 +53,17 @@ export interface ContractProcessor {
    * @returns Resultados del procesamiento
    */
   process(
-    buffer: Buffer,
+    buffer: Buffer | Readable,
     fileName: string,
     browser: Browser,
   ): Promise<ContractProcessorResult>;
 
   processEmployees?(
     employees: EmployeeData[],
+    browser: Browser,
+  ): Promise<ContractProcessorResult>;
+  processAddendums?(
+    employees: AddendumData[],
     browser: Browser,
   ): Promise<ContractProcessorResult>;
 }

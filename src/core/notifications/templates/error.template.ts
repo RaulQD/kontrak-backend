@@ -27,17 +27,6 @@ export function getErrorTemplate(data: ErrorTemplateData): string {
                         <td style="padding: 40px 30px;">
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                 
-                                <!-- Icono -->
-                                <tr>
-                                    <td align="center">
-                                        
-                <div style="background-color: #FEE2E2; color: #EF4444; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                </div>
-                
-                                    </td>
-                                </tr>
-
                                 <!-- Título -->
                                 <tr>
                                     <td align="center" style="padding-bottom: 10px;">

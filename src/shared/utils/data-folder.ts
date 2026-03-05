@@ -9,15 +9,30 @@ export const getFormattedDate = () => {
 export const getDataFolderName = (): string => {
   return `contratos-${getFormattedDate()}`;
 };
+export const getDataFolderNameInsurance = (): string => {
+  return `seguros-${getFormattedDate()}`;
+};
 export const getOutPutFolders = (
-  baseFolder: string = 'contratos',
+  contractBaseFolder: string = 'contratos',
+  insuranceBaseFolder: string = 'seguros',
 ): {
   contracts: string;
-  sctrReports: string;
+  sctr: string;
+  sctrApe: string;
+  lawlife: string;
+  cardId: string;
+  noSubjectToControl: string;
+  insuranceFola: string;
 } => {
   const dataFolderName = getDataFolderName();
+  const dataFolderNameInsurance = getDataFolderNameInsurance();
   return {
-    contracts: `${baseFolder}/${dataFolderName}/contratos`,
-    sctrReports: `${baseFolder}/${dataFolderName}/reportes-sctr`,
+    contracts: `${contractBaseFolder}/${dataFolderName}/contratos`,
+    sctr: `${insuranceBaseFolder}/${dataFolderNameInsurance}/SCTR`,
+    sctrApe: `${insuranceBaseFolder}/${dataFolderNameInsurance}/VIDA GRUPO`,
+    lawlife: `${insuranceBaseFolder}/${dataFolderNameInsurance}/VIDA LEY`,
+    cardId: `${insuranceBaseFolder}/${dataFolderNameInsurance}/CARD ID`,
+    noSubjectToControl: `${contractBaseFolder}/${dataFolderName}/NO SUJETO A CONTROL`,
+    insuranceFola: `${insuranceBaseFolder}/${dataFolderNameInsurance}/SEGUROS FOLA`,
   };
 };

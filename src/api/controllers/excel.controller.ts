@@ -45,9 +45,8 @@ export class ExcelController {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Content-Length', response.length);
 
-    res.end(response);
+    response.pipe(res);
   });
   generateExcelSCTR = catchError(async (req: Request, res: Response) => {
     const employees = req.body;
@@ -59,8 +58,7 @@ export class ExcelController {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Content-Length', response.length);
-    res.end(response);
+    response.pipe(res);
   });
   generateExcelCardID = catchError(async (req: Request, res: Response) => {
     const employee = req.body;
@@ -69,8 +67,7 @@ export class ExcelController {
     const filename = 'Fotocheck.csv';
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Content-Length', response.length);
-    res.end(response);
+    response.pipe(res);
   });
   excelToImage = catchError(async (req: Request, res: Response) => {
     const employees = req.body;

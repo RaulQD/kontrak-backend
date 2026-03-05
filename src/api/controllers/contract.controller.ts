@@ -34,7 +34,7 @@ export class ContractController {
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
-    const { buffer, filename } =
+    const { stream, filename } =
       await this.pdfGeneratorService.generateContract(
         employeeData,
         employeeData.contractType,
@@ -43,8 +43,7 @@ export class ContractController {
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `inline; filename="${filename}"`,
-      'Content-Length': buffer.length,
     });
-    return res.send(buffer);
+    stream.pipe(res);
   });
 }

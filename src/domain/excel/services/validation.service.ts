@@ -5,12 +5,13 @@ import {
   ValidationError,
 } from '../../../shared/types/employees.interface';
 import { AppError } from '../../../shared/utils/app-error';
-import { addendumSchema } from '../validators/addendum.validator';
+import { addendumSchema } from '../../contracts/validators/addendum.validator';
 import {
   CONTRACT_TYPES,
   employeeSchema,
 } from '../../contracts/validators/employee.validator';
 import { AddendumData } from '../../../shared/types/addendum.interface';
+import { AddendumType } from '../constants/contract-field';
 
 export class ValidationService {
   validateEmployee(
@@ -108,6 +109,9 @@ export class ValidationService {
       ...(result.data.probationaryPeriod && {
         probationaryPeriod: result.data.probationaryPeriod,
       }),
+      ...(result.data.phone && {
+        phone: result.data.phone,
+      }),
     };
 
     return { errors: [], employee };
@@ -124,8 +128,19 @@ export class ValidationService {
     if (lower === 'part-time' || lower === 'part_time' || lower === 'part time')
       return 'PART TIME';
     if (lower === 'ape') return 'APE';
+    if (lower === 'practicante') return 'PRACTICANTE';
     return 'PLANILLA';
   }
+  // private mapAddendumType(tipo: string): AddendumType {
+  //   const normalized = tipo.trim();
+  //   const lower = normalized.toLowerCase();
+  //   //VALIDAR POR INCREMENTO DE ACTIVIDAD
+  //   if (lower === 'por inicio o incremento de actividad')
+  //     return 'POR INICIO O INCREMENTO DE ACTIVIDAD';
+  //   //VALIDAR POR SUPLENCIA
+  //   if (lower === 'de suplencia') return 'DE SUPLENCIA';
+  //   return 'POR INICIO O INCREMENTO DE ACTIVIDAD';
+  // }
   validateEmployeeInbatch(rows: Record<string, unknown>[]): {
     errors: ValidationError[];
     validEmployees?: EmployeeData[];
@@ -186,8 +201,9 @@ export class ValidationService {
       division: result.data.division,
       worker: result.data.worker,
       documentNumber: result.data.documentNumber,
+      contractType: result.data.contractType as AddendumType,
       entryDate: result.data.entryDate,
-      start: result.data.start,
+
       end: result.data.end,
       startAddendum: result.data.startAddendum,
       endAddendum: result.data.endAddendum,
@@ -197,6 +213,17 @@ export class ValidationService {
       department: result.data.department,
       salary: result.data.salary,
       salaryInWords: result.data.salaryInWords,
+      subDivisionOrParking: result.data.subDivisionOrParking,
+      position: result.data.position,
+      ...(result.data.replacementFor && {
+        replacementFor: result.data.replacementFor,
+      }),
+      ...(result.data.unit && {
+        unit: result.data.unit,
+      }),
+      ...(result.data.start && {
+        start: result.data.start,
+      }),
     };
     return { isValid: true, errors: [], employeeAddendum };
   }

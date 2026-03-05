@@ -13,6 +13,10 @@ export class CardIdReportProcessor extends BaseProcessor {
   public readonly name = 'CardIdReportProcessor';
   private excelGeneratorServicec: ExcelGeneratorServices;
 
+  constructor() {
+    super();
+    this.excelGeneratorServicec = new ExcelGeneratorServices();
+  }
   async processEmployees(
     employees: EmployeeData[],
     _browser: Browser,
@@ -20,12 +24,12 @@ export class CardIdReportProcessor extends BaseProcessor {
     logger.info('Iniciando reporte tarjetas');
     const resultReports: ContractResult[] = [];
     if (employees.length > 0) {
-      const cardIdBuffer =
+      const cardIdStream =
         await this.excelGeneratorServicec.generateExcelCardID(employees);
       resultReports.push({
         success: true,
-        filename: `VG_FORMATO_DE_CARGA_NOMIAL_${getFormattedDate()}.xlsx`,
-        buffer: cardIdBuffer,
+        filename: `FOTOCHECK_${getFormattedDate()}.csv`,
+        stream: cardIdStream,
         documentType: 'card-id-reports',
       });
     }

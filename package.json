@@ -51,6 +51,7 @@
     "pino": "^10.1.0",
     "puppeteer": "^24.34.0",
     "typescript": "^5.9.3",
+    "xlsx-populate": "^1.21.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

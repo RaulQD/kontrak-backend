@@ -13,6 +13,7 @@ import {
 import { logger } from '../../shared/utils/logger';
 import { chunk } from '../../shared/utils/array.utits';
 import { EmployeeData } from '../../shared/types/employees.interface';
+import { Readable } from 'stream';
 
 /**
  * Procesador que convierte archivos Excel en contratos PDF
@@ -33,7 +34,7 @@ export class ExcelToContractProcessor implements ContractProcessor {
   }
 
   async process(
-    buffer: Buffer,
+    buffer: Buffer | Readable,
     fileName: string,
     browser: Browser,
   ): Promise<ContractProcessorResult> {
@@ -79,7 +80,10 @@ export class ExcelToContractProcessor implements ContractProcessor {
   ): Promise<ContractResult[]> {
     const result: ContractResult[] = [];
     try {
-      if (employee.contractType !== 'APE') {
+      if (
+        employee.contractType !== 'APE' &&
+        employee.contractType !== 'PRACTICANTE'
+      ) {
         // 1. Contrato principal
         const contractResult = await this.pdfService.generateContract(
           employee,
@@ -89,33 +93,55 @@ export class ExcelToContractProcessor implements ContractProcessor {
         result.push({
           success: true,
           filename: contractResult.filename,
-          buffer: contractResult.buffer,
+          stream: contractResult.stream,
           documentType: 'contracts',
           contractType: employee.contractType,
         });
-
-        // 2. Anexo
-        const anexoBuffer = await generateDocAnexo(employee, browser);
+      }
+      // 2. Anexo — Para todos MENOS APE (Practicante SÍ lo recibe)
+      if (employee.contractType !== 'APE') {
+        const anexoStream = await generateDocAnexo(employee, browser);
         result.push({
           success: true,
           filename: `${employee.dni}.pdf`,
-          buffer: anexoBuffer,
+          stream: anexoStream,
           documentType: 'anexos',
           contractType: employee.contractType,
         });
       }
-      // 3. Tratamiento de datos
-      const processingDataBuffer = await generateProcessingOfPersonalDataPDF(
-        employee,
-        browser,
-      );
-      result.push({
-        success: true,
-        filename: `${employee.dni}.pdf`,
-        buffer: processingDataBuffer,
-        documentType: 'processing-data',
-        contractType: employee.contractType,
-      });
+      // 3. Tratamiento de datos — Para todos MENOS PRACTICANTE (APE sí lo recibe)
+      if (employee.contractType !== 'PRACTICANTE') {
+        // 3. Tratamiento de datos
+        const processingDataStream = await generateProcessingOfPersonalDataPDF(
+          employee,
+          browser,
+        );
+        result.push({
+          success: true,
+          filename: `${employee.dni}.pdf`,
+          stream: processingDataStream,
+          documentType: 'processing-data',
+          contractType: employee.contractType,
+        });
+      }
+
+      // 4. No sujeto a control — Para todos MENOS PRACTICANTE
+      if (employee.contractType !== 'PRACTICANTE') {
+        const noSubjectToControlStream =
+          await this.pdfService.generateLetterNoSubectToControl(
+            employee,
+            browser,
+          );
+        if (noSubjectToControlStream) {
+          result.push({
+            success: true,
+            filename: `${employee.dni}.pdf`,
+            stream: noSubjectToControlStream.stream,
+            documentType: 'no-subject-to-control',
+            contractType: employee.contractType,
+          });
+        }
+      }
 
       logger.info(`Documentos generados para: ${employee.dni}`);
     } catch (error) {

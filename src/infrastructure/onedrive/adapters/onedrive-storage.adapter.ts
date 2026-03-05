@@ -7,6 +7,9 @@ import {
 } from '../types/onedrive-api.types';
 import { FileMetadata, FileStorageService } from '../storage';
 import { logger } from '../../../shared/utils/logger';
+import { AppError } from '../../../shared/utils/app-error';
+import { BAD_REQUEST } from '../../../shared/constants/http';
+import { Readable } from 'node:stream';
 
 export class OneDriveStorageAdapter implements FileStorageService {
   private client: Client;
@@ -17,7 +20,28 @@ export class OneDriveStorageAdapter implements FileStorageService {
     this.userEmail = process.env.ONEDRIVE_USER_EMAIL || '';
 
     if (!this.userEmail) {
-      throw new Error('ONEDRIVE_USER_EMAIL no está configurado');
+      throw new AppError(
+        'ONEDRIVE_USER_EMAIL no está configurado',
+        BAD_REQUEST,
+      );
+    }
+  }
+  async downloadFileByPath(
+    filePath: string,
+  ): Promise<{ buffer: Buffer; error?: string }> {
+    try {
+      const response: ArrayBuffer = await this.client
+        .api(`users/${this.userEmail}/drive/root:/${filePath}:/content`)
+        .responseType(ResponseType.ARRAYBUFFER)
+        .get();
+      const buffer = Buffer.from(response);
+      return { buffer };
+    } catch (error) {
+      logger.error({ error }, 'Error al descargar archivo de OneDrive');
+      return {
+        buffer: Buffer.alloc(0),
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
   async getFiles(folderPath: string): Promise<FileMetadata[]> {
@@ -63,7 +87,7 @@ export class OneDriveStorageAdapter implements FileStorageService {
     fileId: string,
   ): Promise<{ buffer: Buffer; error?: string }> {
     try {
-      const response = await this.client
+      const response: ArrayBuffer = await this.client
         .api(`/users/${this.userEmail}/drive/items/${fileId}/content`)
         .responseType(ResponseType.ARRAYBUFFER)
         .get();
@@ -78,17 +102,27 @@ export class OneDriveStorageAdapter implements FileStorageService {
     }
   }
   async uploadFile(
-    file: Buffer,
+    file: Buffer | Readable,
     folderPath: string,
     filename: string,
   ): Promise<string> {
     try {
+      let uploadBody: Buffer;
+      if (file instanceof Readable) {
+        const chunks: Buffer[] = [];
+        for await (const chunk of file) {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        }
+        uploadBody = Buffer.concat(chunks);
+      } else {
+        uploadBody = file;
+      }
       // Usar conflictBehavior=replace para sobrescribir si existe
       const response: OneDriveUploadResponse = await this.client
         .api(
           `/users/${this.userEmail}/drive/root:/${folderPath}/${filename}:/content?@microsoft.graph.conflictBehavior=replace`,
         )
-        .put(file);
+        .put(uploadBody);
       return response.id;
     } catch (error) {
       if (
@@ -97,7 +131,10 @@ export class OneDriveStorageAdapter implements FileStorageService {
         'statusCode' in error &&
         error.statusCode === 404
       ) {
-        throw new Error(`La carpeta '${folderPath}' no existe en OneDrive`);
+        throw new AppError(
+          `La carpeta '${folderPath}' no existe en OneDrive`,
+          BAD_REQUEST,
+        );
       }
       logger.error({ error }, 'Error al subir archivo a OneDrive');
       throw error;
@@ -109,18 +146,35 @@ export class OneDriveStorageAdapter implements FileStorageService {
         .api(`/users/${this.userEmail}/drive/items/${fileId}`)
         .delete();
     } catch (error) {
-      // Si el archivo ya no existe (404), ignorar el error
       if (
         error &&
         typeof error === 'object' &&
         'statusCode' in error &&
         error.statusCode === 404
       ) {
-        logger.warn(`Archivo ya eliminado o no encontrado: ${fileId}`);
-        return; // No lanzar error, solo continuar
+        return;
       }
       logger.error({ error }, 'Error al eliminar archivo de OneDrive');
       throw error;
+    }
+  }
+  //MÉTODOS NUEVOS CON STREAMS
+  async downloadFileAsStream(
+    fileId: string,
+  ): Promise<{ stream: Readable; error?: string }> {
+    try {
+      const response: ArrayBuffer = await this.client
+        .api(`/users/${this.userEmail}/drive/items/${fileId}/content`)
+        .responseType(ResponseType.ARRAYBUFFER)
+        .get();
+      const stream = Readable.from(Buffer.from(response));
+      return { stream };
+    } catch (error) {
+      logger.error({ error }, 'Error al descargar archivo de OneDrive');
+      return {
+        stream: Readable.from([]),
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 }

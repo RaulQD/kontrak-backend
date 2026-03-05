@@ -1,4 +1,7 @@
 import {
+  generateAddendumIncrementoActividadesPDF,
+  generateAddendumReplacementForPDF,
+  generateNoSubjectToControlPDF,
   generatePartTimeContract,
   generatePlanillaContract,
   generateSubsidioContract,
@@ -10,6 +13,9 @@ import {
   EmployeeData,
 } from '../../../shared/types/employees.interface';
 import { logger } from '../../../shared/utils/logger';
+import { Readable } from 'stream';
+import { AddendumType } from '../../excel/constants/contract-field';
+import { AddendumData } from '../../../shared/types/addendum.interface';
 
 /**
  * Servicio para generar PDFs de contratos
@@ -22,7 +28,7 @@ export class PDFGeneratorService {
     employeeData: EmployeeData,
     contractType: ContractType,
     browser: Browser,
-  ): Promise<{ buffer: Buffer; filename: string }> {
+  ): Promise<{ stream: Readable; filename: string }> {
     logger.info(
       { dni: employeeData.dni, contractType },
       'Generando contrato PDF',
@@ -35,26 +41,26 @@ export class PDFGeneratorService {
       );
     }
     try {
-      let buffer: Buffer;
+      let stream: Readable;
 
       // Generar según el tipo de contrato
       switch (contractType.toLowerCase()) {
         case 'planilla':
-          buffer = await generatePlanillaContract(employeeData, browser);
+          stream = await generatePlanillaContract(employeeData, browser);
           break;
         case 'subsidio':
-          buffer = await generateSubsidioContract(employeeData, browser);
+          stream = await generateSubsidioContract(employeeData, browser);
           break;
         case 'part time':
         case 'parttime':
-          buffer = await generatePartTimeContract(employeeData, browser);
+          stream = await generatePartTimeContract(employeeData, browser);
           break;
         default:
           throw new Error(`Tipo de contrato desconocido: ${contractType}`);
       }
 
       const filename = `${employeeData.dni}.pdf`;
-      return { buffer, filename };
+      return { stream, filename };
     } catch (error) {
       if (error instanceof Error) {
         logger.error(
@@ -63,6 +69,73 @@ export class PDFGeneratorService {
             message: error.message,
             stack: error.stack,
             dni: employeeData.dni,
+          },
+          'Error generando PDF',
+        );
+      }
+      throw error;
+    }
+  }
+  async generateLetterNoSubectToControl(
+    employeeData: EmployeeData,
+    browser: Browser,
+  ): Promise<{ stream: Readable; filename: string } | null> {
+    if (
+      employeeData.workingCondition?.toUpperCase() !== 'NO SUJETO A CONTROL'
+    ) {
+      return null;
+    }
+    logger.info(
+      { dni: employeeData.dni },
+      'Iniciando la generacion de la carta de no sujeto a control',
+    );
+    const stream = await generateNoSubjectToControlPDF(employeeData, browser);
+    return { stream, filename: `${employeeData.dni}.pdf` };
+  }
+  async generateAddendumPDF(
+    employeeData: AddendumData,
+    contractType: AddendumType,
+    browser: Browser,
+  ): Promise<{ stream: Readable; filename: string }> {
+    logger.info(
+      { dni: employeeData.documentNumber },
+      'Iniciando la generacion de la adenda de incremento de actividades',
+    );
+    if (!employeeData || !employeeData.documentNumber) {
+      throw new AppError(
+        'Faltand datos del empleado   para visualizar el contrato',
+        400,
+      );
+    }
+    try {
+      let stream: Readable;
+
+      switch (contractType.toLowerCase()) {
+        case 'por inicio o incremento de actividad':
+          stream = await generateAddendumIncrementoActividadesPDF(
+            employeeData,
+            browser,
+          );
+          break;
+        case 'de suplencia':
+          stream = await generateAddendumReplacementForPDF(
+            employeeData,
+            browser,
+          );
+          break;
+        default:
+          throw new Error(`Tipo de contrato desconocido: ${contractType}`);
+      }
+      const filename = `${employeeData.documentNumber}.pdf`;
+      return { stream, filename };
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error(
+          {
+            err: error,
+            message: error.message,
+            stack: error.stack,
+            dni: employeeData.documentNumber,
           },
           'Error generando PDF',
         );

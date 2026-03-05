@@ -1,6 +1,11 @@
 import { AppError } from '../utils/app-error';
 
-export type ContractType = 'PLANILLA' | 'SUBSIDIO' | 'PART TIME' | 'APE';
+export type ContractType =
+  | 'PLANILLA'
+  | 'SUBSIDIO'
+  | 'PART TIME'
+  | 'APE'
+  | 'PRACTICANTE';
 
 export interface EmployeeData {
   name: string;
@@ -28,7 +33,9 @@ export interface EmployeeData {
   workingCondition?: string;
   probationaryPeriod?: string;
   contractType: ContractType;
+  phone?: string;
 }
+
 export interface EmployeeWithStatus extends EmployeeData {
   pdfGenerated?: boolean;
   pdfPath?: string;
