@@ -31,15 +31,13 @@ export class SctrReportApeProcessor extends BaseProcessor {
     const resultReports: ContractResult[] = [];
 
     if (apeEmployees.length > 0) {
-      const apeSctrBuffer =
-        await this.excelGeneratorService.generateExcelSctrToApeContract(
-          apeEmployees,
-        );
+      const apeSctrStream =
+        await this.excelGeneratorService.generateExcelGroupLife(apeEmployees);
 
       resultReports.push({
         success: true,
         filename: `VG_FORMATO_DE_CARGA_NOMIAL_${getFormattedDate()}.xlsx`,
-        buffer: apeSctrBuffer,
+        stream: apeSctrStream,
         documentType: 'sctr-ape-reports',
       });
     }

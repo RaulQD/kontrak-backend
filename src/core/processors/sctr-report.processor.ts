@@ -32,13 +32,13 @@ export class SctrReportProcessor extends BaseProcessor {
     const resultReports: ContractResult[] = [];
 
     if (sctrEmployees.length > 0) {
-      const sctrBuffer =
+      const sctrStream =
         await this.excelGeneratorService.generateExcelSCTR(sctrEmployees);
 
       resultReports.push({
         success: true,
         filename: 'FORMATO_SCTR.xlsx',
-        buffer: sctrBuffer,
+        stream: sctrStream,
         documentType: 'sctr-reports',
       });
       logger.info('Reporte SCTR generado');

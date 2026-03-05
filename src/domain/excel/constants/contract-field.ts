@@ -271,10 +271,10 @@ export const ADDENDUM_FIELDS: Record<string, FieldConfig> = {
     ],
     description: 'Fecha de inicio del empleado',
   },
-  start: {
-    aliases: ['INICIO', 'inicio', 'Inicio'],
-    description: 'Fecha de inicio del contrato original',
-  },
+  // start: {
+  //   aliases: ['INICIO', 'inicio', 'Inicio'],
+  //   description: 'Fecha de inicio del contrato original',
+  // },
   end: {
     aliases: [
       'FECHA FIN',
@@ -326,6 +326,60 @@ export const ADDENDUM_FIELDS: Record<string, FieldConfig> = {
     aliases: ['FIN ADENDA', 'fin adenda', 'fecha fin adenda', 'vigencia hasta'],
     description: 'Fecha donde termina la vigencia de la adenda',
   },
+  subDivisionOrParking: {
+    aliases: [
+      'playa',
+      'estacionamiento',
+      'PLAYA',
+      'ESTACIONAMIENTO',
+      'Sub Division o playa',
+      'Sub-division o playa',
+      'SUB DIVISION o playa',
+      'SUB-DIVISION o playa',
+      'SUB-DIVISION',
+      'subdivision',
+      'Sub División',
+      'Sub Division',
+    ],
+    description: 'Lugar de trabajo donde trabajara el empleado',
+  },
+  position: {
+    aliases: ['Cargo', 'CARGO', 'POSICION', 'cargo', 'Cargo', 'Posicion'],
+    description: 'Cargo del empleado',
+  },
+  contractType: {
+    aliases: [
+      'tipo de contrato',
+      'Tipo Contrato',
+      'tipodecontrato',
+      'tipo_de_contrato',
+      'tipo contrato',
+      'TIPO DE CONTRATO',
+    ],
+    description: 'Tipo de contrato del empleado',
+  },
+  replacementFor: {
+    aliases: [
+      'Suplencia de:',
+      'suplencia de:',
+      'Suplencia de',
+      'suplencia de',
+      'SUPLENCIA DE:',
+      'SUPLENCIA DE',
+      'Reemplazo:',
+      'REEMPLAZO:',
+      'reemplazo:',
+    ],
+    description: 'Empelado que sera reemplazado',
+  },
+  start: {
+    aliases: ['INICIO', 'inicio', 'Inicio'],
+    description: 'Fecha de inicio del contrato original',
+  },
+  unit: {
+    aliases: ['Unidad', 'UNIDAD', 'unidad'],
+    description: 'Unidad o área del trabajador',
+  },
 };
 export const CONTRACT_FIELDS_MAP: Record<string, FieldConfig> = {
   ...BASE_FIELDS,
@@ -339,6 +393,9 @@ export const ADDENDUM_FIELDS_MAP: Record<string, FieldConfig> = {
 };
 
 export type ContractType = 'PLANILLA' | 'PART TIME' | 'SUBSIDIO';
+export type AddendumType =
+  | 'POR INICIO O INCREMENTO DE ACTIVIDAD'
+  | 'DE SUPLENCIA';
 
 export const CONTRACT_VALIDATION_RULES: Record<
   string,

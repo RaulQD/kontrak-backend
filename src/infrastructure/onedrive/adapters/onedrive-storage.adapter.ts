@@ -9,6 +9,7 @@ import { FileMetadata, FileStorageService } from '../storage';
 import { logger } from '../../../shared/utils/logger';
 import { AppError } from '../../../shared/utils/app-error';
 import { BAD_REQUEST } from '../../../shared/constants/http';
+import { Readable } from 'node:stream';
 
 export class OneDriveStorageAdapter implements FileStorageService {
   private client: Client;
@@ -101,17 +102,27 @@ export class OneDriveStorageAdapter implements FileStorageService {
     }
   }
   async uploadFile(
-    file: Buffer,
+    file: Buffer | Readable,
     folderPath: string,
     filename: string,
   ): Promise<string> {
     try {
+      let uploadBody: Buffer;
+      if (file instanceof Readable) {
+        const chunks: Buffer[] = [];
+        for await (const chunk of file) {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        }
+        uploadBody = Buffer.concat(chunks);
+      } else {
+        uploadBody = file;
+      }
       // Usar conflictBehavior=replace para sobrescribir si existe
       const response: OneDriveUploadResponse = await this.client
         .api(
           `/users/${this.userEmail}/drive/root:/${folderPath}/${filename}:/content?@microsoft.graph.conflictBehavior=replace`,
         )
-        .put(file);
+        .put(uploadBody);
       return response.id;
     } catch (error) {
       if (
@@ -145,6 +156,25 @@ export class OneDriveStorageAdapter implements FileStorageService {
       }
       logger.error({ error }, 'Error al eliminar archivo de OneDrive');
       throw error;
+    }
+  }
+  //MÉTODOS NUEVOS CON STREAMS
+  async downloadFileAsStream(
+    fileId: string,
+  ): Promise<{ stream: Readable; error?: string }> {
+    try {
+      const response: ArrayBuffer = await this.client
+        .api(`/users/${this.userEmail}/drive/items/${fileId}/content`)
+        .responseType(ResponseType.ARRAYBUFFER)
+        .get();
+      const stream = Readable.from(Buffer.from(response));
+      return { stream };
+    } catch (error) {
+      logger.error({ error }, 'Error al descargar archivo de OneDrive');
+      return {
+        stream: Readable.from([]),
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 }

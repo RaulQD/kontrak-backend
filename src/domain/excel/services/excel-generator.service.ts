@@ -10,18 +10,21 @@ import { excelProcessingResult } from '../../../shared/types/contract.interface'
 import { toExcelSerialDate } from '../../../shared/utils/date-to-serial-number';
 import { EmployeeData } from '../../../shared/types/employees.interface';
 import { logger } from '../../../shared/utils/logger';
+import { getRiskLevelByPosition } from '../helpers/risk-level.helper';
+import { PassThrough, Readable } from 'stream';
+import { AppError } from '../../../shared/utils/app-error';
 export class ExcelGeneratorServices {
   private readonly excelParseServices: ExcelParserServices;
   constructor() {
     this.excelParseServices = new ExcelParserServices();
   }
   async processingExcel(
-    buffer: Buffer,
+    source: Buffer | Readable,
     filename: string,
   ): Promise<excelProcessingResult> {
     logger.info(`Iniciando procesamiento de Excel desde OneDrive: ${filename}`);
     const validationResult = await this.excelParseServices.validateExcel(
-      buffer,
+      source,
       CONTRACT_FIELDS_MAP,
       {
         sheetIndex: 0,
@@ -35,10 +38,10 @@ export class ExcelGeneratorServices {
       employees: validationResult.employees,
     };
   }
-  async processAddendumExcel(buffer: Buffer) {
+  async processAddendumExcel(source: Buffer | Readable) {
     const validationResult =
       await this.excelParseServices.validateAddendumExcel(
-        buffer,
+        source,
         ADDENDUM_FIELDS_MAP,
         {
           sheetIndex: 0,
@@ -49,13 +52,10 @@ export class ExcelGeneratorServices {
 
     return {
       totalRecords: validationResult.totalRecords,
-      validRecords: validationResult.validRecords,
-      invalidRecords: validationResult.errors.length,
       employees: validationResult.employeesAddendum,
-      validationErrors: validationResult.errors,
     };
   }
-  async generateExcelLawLife(employees: EmployeeData[]): Promise<Buffer> {
+  async generateExcelLawLife(employees: EmployeeData[]): Promise<Readable> {
     const workbook = new ExcelJS.Workbook();
 
     workbook.creator = 'Generación de excel Vida Ley';
@@ -83,7 +83,7 @@ export class ExcelGeneratorServices {
     headerRow.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: 'fef08a' },
+      fgColor: { argb: 'FFFF00' },
     };
     for (const [i, emp] of employees.entries()) {
       const item = i + 1;
@@ -108,10 +108,12 @@ export class ExcelGeneratorServices {
         entryDate: emp.entryDate,
       });
     }
-    const buffer = await workbook.xlsx.writeBuffer();
-    return buffer as unknown as Buffer;
+    const stream = new PassThrough();
+    await workbook.xlsx.write(stream);
+    stream.end();
+    return stream;
   }
-  async generateExcelSCTR(employees: EmployeeData[]): Promise<Buffer> {
+  async generateExcelSCTR(employees: EmployeeData[]): Promise<Readable> {
     const workbook = new ExcelJS.Workbook();
 
     workbook.creator = 'FORMATO_SCTR';
@@ -151,7 +153,7 @@ export class ExcelGeneratorServices {
       const typeDoc = 'DNI';
       const currencySalary = '0';
       const nationality = '174';
-      const rate = 'ALTO RIESGO';
+      const rate = getRiskLevelByPosition(emp.position) ?? 'ALTO RIESGO';
       const headquarters = 'PLAYA';
       worksheet.addRow({
         item,
@@ -175,10 +177,12 @@ export class ExcelGeneratorServices {
         headquarters,
       });
     }
-    const buffer = await workbook.xlsx.writeBuffer();
-    return buffer as unknown as Buffer;
+    const stream = new PassThrough();
+    await workbook.xlsx.write(stream);
+    stream.end();
+    return stream;
   }
-  async generateExcelCardID(employees: EmployeeData[]): Promise<Buffer> {
+  async generateExcelCardID(employees: EmployeeData[]): Promise<Readable> {
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'FOTOCHECK EN CSV';
     workbook.created = new Date();
@@ -210,11 +214,12 @@ export class ExcelGeneratorServices {
       },
       encoding: 'utf8',
     });
-    return buffer as unknown as Buffer;
+    const stream = new PassThrough();
+    await workbook.csv.write(stream);
+    stream.end();
+    return stream;
   }
-  async generateExcelSctrToApeContract(
-    employee: EmployeeData[],
-  ): Promise<Buffer> {
+  async generateExcelGroupLife(employee: EmployeeData[]): Promise<Readable> {
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'SCTR APE';
     workbook.created = new Date();
@@ -231,12 +236,7 @@ export class ExcelGeneratorServices {
       { header: 'SEGUNDO_NOMRE', key: 'secondName', width: 20 },
       { header: 'FECHA_NACIMIENTO', key: 'birthDate', width: 30 },
       { header: 'SEXO', key: 'sex', width: 20 },
-      {
-        header: 'IMPORTE_SUELDO_BRUTO',
-        key: 'salary',
-        width: 30,
-        style: { numFmt: '0.00' },
-      },
+      { header: 'IMPORTE_SUELDO_BRUTO', key: 'salary', width: 30 },
       { header: 'FECHA_INGRESO_EMPRESA', key: 'entryDate', width: 30 },
     ];
     const rows = worksheet.getRow(1);
@@ -255,7 +255,6 @@ export class ExcelGeneratorServices {
     for (const emp of employee) {
       const nameComplete = emp.name.split(' ').filter((n) => n.trim() !== '');
       const firstName = nameComplete[0] || '';
-      // Si hay 2+ nombres, toma todos los restantes después del primero
       const secondName =
         nameComplete.length > 1 ? nameComplete.slice(1).join(' ') : '';
       const sexFormatted = MAP_SEX[emp.sex || ''] || emp.sex;
@@ -274,8 +273,59 @@ export class ExcelGeneratorServices {
         entryDate: emp.entryDate,
       });
     }
-    const buffer = await workbook.xlsx.writeBuffer();
-    return buffer as unknown as Buffer;
+    const stream = new PassThrough();
+    await workbook.xlsx.write(stream);
+    stream.end();
+    return stream;
+  }
+  async generateInsurancesFola(employee: EmployeeData[]): Promise<Readable> {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'INSURANCES FOLA';
+    workbook.created = new Date();
+
+    const worksheet = workbook.addWorksheet('Hoja1');
+    worksheet.columns = [
+      { header: 'APELLIDO PATERNO', key: 'lastNameFather', width: 20 },
+      { header: 'APELLIDO MATERNO', key: 'lastNameMother', width: 20 },
+      { header: 'NOMBRE COMPLETO', key: 'name', width: 20 },
+      { header: 'DNI', key: 'dni', width: 20 },
+      { header: 'FECHA DE INGRESO', key: 'entryDate', width: 20 },
+      { header: 'FECHA DE NACIMIENTO', key: 'birthDate', width: 20 },
+      { header: 'DIRECCION', key: 'address', width: 20 },
+      { header: 'M O F', key: 'sex', width: 20 },
+      { header: 'TEL/CELL', key: 'phone', width: 20 },
+    ];
+    const rows = worksheet.getRow(1);
+    rows.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'center',
+      };
+    });
+    rows.font = { bold: true, color: { argb: '000000' } };
+    rows.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFFF00' },
+    };
+    for (const emp of employee) {
+      worksheet.addRow({
+        lastNameFather: emp.lastNameFather,
+        lastNameMother: emp.lastNameMother,
+        name: emp.name,
+        dni: emp.dni,
+        entryDate: emp.entryDate,
+        birthDate: emp.birthDate,
+        address: emp.address,
+        sex: emp.sex,
+        phone: emp.phone,
+      });
+    }
+    const stream = new PassThrough();
+    await workbook.xlsx.write(stream);
+    stream.end();
+    return stream;
   }
   private processDate(date: string | Date | undefined | null): number | null {
     if (!date) return null;
@@ -283,5 +333,36 @@ export class ExcelGeneratorServices {
     const dateObj = typeof date === 'string' ? changeStringToDate(date) : date;
 
     return toExcelSerialDate(dateObj);
+  }
+  async detectExcelType(
+    source: Buffer | Readable,
+  ): Promise<'contracts' | 'addendum'> {
+    const workbook = new ExcelJS.Workbook();
+    let buffer: Buffer;
+    if (source instanceof Readable) {
+      const chunks: Buffer[] = [];
+      for await (const chunk of source) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      buffer = Buffer.concat(chunks);
+    } else {
+      buffer = source;
+    }
+    await workbook.xlsx.load(buffer as unknown as ExcelJS.Buffer);
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet)
+      throw new AppError('Excel vacío, no tiene información', 400);
+    const header: string[] = [];
+    worksheet.getRow(1).eachCell((cell) => {
+      header.push(String(cell.value).toLowerCase().trim());
+    });
+    const addendumKeywords = ['INICIO ADENDA', 'FIN ADENDA'];
+    const isAddendum = addendumKeywords.some((keyword) =>
+      header.some((h) => h.includes(keyword.toLowerCase())),
+    );
+    logger.info(
+      `Tipo de Excel detectado: ${isAddendum ? 'ADENDA' : 'CONTRATO'}`,
+    );
+    return isAddendum ? 'addendum' : 'contracts';
   }
 }

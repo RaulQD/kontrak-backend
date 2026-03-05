@@ -6,6 +6,7 @@ export const CONTRACT_TYPES = [
   'PART TIME',
   'SUBSIDIO',
   'APE',
+  'PRACTICANTE',
 ] as const;
 export type ContractType = (typeof CONTRACT_TYPES)[number];
 // Esquema para normalizar y validar tipo de contrato
@@ -18,14 +19,20 @@ export const contractTypeSchema = z
     if (lower === 'subsidio' || lower === 'suplencia' || lower === 'reemplazo')
       return 'Subsidio';
     if (lower === 'ape') return 'APE';
+    if (lower === 'practicante') return 'Practicante';
 
     if (lower.includes('part') && lower.includes('time')) return 'Part Time';
 
     return val; // Devolvemos el valor original si no matchea para que falle en el refine
   })
-  .refine((val) => ['Planilla', 'Subsidio', 'Part Time', 'APE'].includes(val), {
-    message: 'El tipo de contrato debe ser: Planilla, Subsidio, Part Time, APE',
-  });
+  .refine(
+    (val) =>
+      ['Planilla', 'Subsidio', 'Part Time', 'APE', 'Practicante'].includes(val),
+    {
+      message:
+        'El tipo de contrato debe ser: Planilla, Subsidio, Part Time, APE, Practicante',
+    },
+  );
 export const AddressSchema = z.object({
   province: z.string({ error: 'Provincia es requerida.' }),
   district: z.string({ error: 'Distrito es requerido' }),
@@ -142,11 +149,26 @@ export const employeeSchema = z
     division: z.string({ error: 'división requerida' }).trim(),
     sctr: z.string({ error: 'sctr requerida' }).trim(),
     phone: z.string().trim().optional(),
-    replacementFor: z.string().trim().optional(),
-    reasonForSubstitution: z.string().trim().optional(),
-    timeForCompany: z.string().trim().optional(),
-    workingCondition: z.string().trim().optional(),
-    probationaryPeriod: z.string().trim().optional(),
+    replacementFor: z
+      .string({ error: 'El reemplazado es requerido.' })
+      .trim()
+      .optional(),
+    reasonForSubstitution: z
+      .string({ error: 'El motivo de suplencia es requerido.' })
+      .trim()
+      .optional(),
+    timeForCompany: z
+      .string({ error: 'El tiempo en empresa es requerido.' })
+      .trim()
+      .optional(),
+    workingCondition: z
+      .string({ error: 'La condición laboral es requerida.' })
+      .trim()
+      .optional(),
+    probationaryPeriod: z
+      .string({ error: 'El periodo de prueba es requerido.' })
+      .trim()
+      .optional(),
     contractType: contractTypeSchema,
   })
   .superRefine((data, ctx) => {

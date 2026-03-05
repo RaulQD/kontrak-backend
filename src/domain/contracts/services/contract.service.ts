@@ -58,21 +58,21 @@ export class ContractService {
                     emp.contractType,
                     browser,
                   );
-                archive.append(contractResult.buffer, {
+                archive.append(contractResult.stream, {
                   name: `${rootFolder}/${contractResult.filename}`,
                 });
 
                 // 2. Anexo
-                const anexoBuffer = await generateDocAnexo(emp, browser);
-                archive.append(anexoBuffer, {
+                const anexoStream = await generateDocAnexo(emp, browser);
+                archive.append(anexoStream, {
                   name: `${rootFolder}/Anexos/${emp.dni}.pdf`,
                 });
               }
 
               // 3. Tratamiento de datos (siempre)
-              const processingDataBuffer =
+              const processingDataStream =
                 await generateProcessingOfPersonalDataPDF(emp, browser);
-              archive.append(processingDataBuffer, {
+              archive.append(processingDataStream, {
                 name: `${rootFolder}/Tratamiento de datos/${emp.dni}.pdf`,
               });
             } catch (error) {

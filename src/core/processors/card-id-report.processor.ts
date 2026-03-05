@@ -24,12 +24,12 @@ export class CardIdReportProcessor extends BaseProcessor {
     logger.info('Iniciando reporte tarjetas');
     const resultReports: ContractResult[] = [];
     if (employees.length > 0) {
-      const cardIdBuffer =
+      const cardIdStream =
         await this.excelGeneratorServicec.generateExcelCardID(employees);
       resultReports.push({
         success: true,
         filename: `FOTOCHECK_${getFormattedDate()}.csv`,
-        buffer: cardIdBuffer,
+        stream: cardIdStream,
         documentType: 'card-id-reports',
       });
     }

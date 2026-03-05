@@ -11,11 +11,11 @@ import { BaseProcessor } from './base.processor';
 
 export class LawlifeReportProcessor extends BaseProcessor {
   public readonly name: string = 'Lawlive Report Processor';
-  private excelGeneratorServicec: ExcelGeneratorServices;
+  private excelGeneratorService: ExcelGeneratorServices;
 
   constructor() {
     super();
-    this.excelGeneratorServicec = new ExcelGeneratorServices();
+    this.excelGeneratorService = new ExcelGeneratorServices();
   }
   async processEmployees(
     employees: EmployeeData[],
@@ -29,14 +29,14 @@ export class LawlifeReportProcessor extends BaseProcessor {
     const resultReports: ContractResult[] = [];
     logger.info('Iniciando reporte Vida Ley');
     if (employeesWithoutApe.length > 0) {
-      const lawliveBuffer =
-        await this.excelGeneratorServicec.generateExcelLawLife(
+      const lawliveStream =
+        await this.excelGeneratorService.generateExcelLawLife(
           employeesWithoutApe,
         );
       resultReports.push({
         success: true,
         filename: '1.1 VIDA_LEY TRAMA INV URB OP.xlsx',
-        buffer: lawliveBuffer,
+        stream: lawliveStream,
         documentType: 'lawlife-reports',
       });
       logger.info('Reporte Vida Ley generado');

@@ -13,6 +13,8 @@ import {
 import Handlebars from 'handlebars';
 import {
   ANEXO,
+  CONTRACT_ADDENDUM_INCREMENTO_ACTIVIDADES,
+  CONTRACT_ADDENDUM_POR_SUPLENCIA,
   CONTRACT_FULL_TIME,
   CONTRACT_PART_TIME,
   CONTRACT_SUBSIDIO,
@@ -23,11 +25,13 @@ import { Browser } from 'puppeteer';
 import { formatCurrency } from '../../../shared/utils/formatCurrency';
 import { EmployeeData } from '../../../shared/types/employees.interface';
 import { MONTHS } from '../../../shared/constants/months';
+import { Readable } from 'stream';
+import { AddendumData } from '../../../shared/types/addendum.interface';
 
 export const generatePartTimeContract = async (
   data: EmployeeData,
   browser: Browser,
-): Promise<Buffer> => {
+): Promise<Readable> => {
   const template = Handlebars.compile(CONTRACT_PART_TIME);
   const finalHtml = template({
     // Datos del empleado
@@ -53,7 +57,6 @@ export const generatePartTimeContract = async (
     signature1: SIGNATURE_EMPLOYEE, // Debe ser URL o base64
     signature2: SIGNATURE_EMPLOYEE_TWO,
   });
-
   const page = await browser.newPage();
   await page.setContent(finalHtml, {
     waitUntil: 'domcontentloaded',
@@ -73,13 +76,13 @@ export const generatePartTimeContract = async (
 
   await page.close();
 
-  return Buffer.from(pdfBuffer);
+  return Readable.from(Buffer.from(pdfBuffer));
 };
 
 export const generatePlanillaContract = async (
   data: EmployeeData,
   browser: Browser,
-): Promise<Buffer> => {
+): Promise<Readable> => {
   const salaryFormatted = Number(data.salary).toLocaleString('es-PE', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -132,13 +135,13 @@ export const generatePlanillaContract = async (
 
   await page.close();
 
-  return Buffer.from(pdfBuffer);
+  return Readable.from(Buffer.from(pdfBuffer));
 };
 
 export const generateSubsidioContract = async (
   data: EmployeeData,
   browser: Browser,
-): Promise<Buffer> => {
+): Promise<Readable> => {
   const fullName =
     `${data.lastNameFather || ' '} ${data.lastNameMother || ' '} ${data.name || ''}`
       .trim()
@@ -191,12 +194,12 @@ export const generateSubsidioContract = async (
 
   await page.close();
 
-  return Buffer.from(pdfBuffer);
+  return Readable.from(Buffer.from(pdfBuffer));
 };
 export const generateDocAnexo = async (
   data: EmployeeData,
   browser: Browser,
-): Promise<Buffer> => {
+): Promise<Readable> => {
   const template = Handlebars.compile(ANEXO);
   const finalHtml = template({
     fullName:
@@ -237,13 +240,13 @@ export const generateDocAnexo = async (
 
   await page.close();
 
-  return Buffer.from(pdfBuffer);
+  return Readable.from(Buffer.from(pdfBuffer));
 };
 
 export const generateProcessingOfPersonalDataPDF = async (
   data: EmployeeData,
   browser: Browser,
-): Promise<Buffer> => {
+): Promise<Readable> => {
   const template = Handlebars.compile(PROCESSING_PERSONAL_DATA);
   const finalHTML = template({
     fullName:
@@ -281,12 +284,12 @@ export const generateProcessingOfPersonalDataPDF = async (
     },
   });
   await page.close();
-  return Buffer.from(pdfBuffer);
+  return Readable.from(Buffer.from(pdfBuffer));
 };
 export const generateNoSubjectToControlPDF = async (
   data: EmployeeData,
   browser: Browser,
-): Promise<Buffer> => {
+): Promise<Readable> => {
   const template = Handlebars.compile(NO_SUBJECT_TO_CONTROL);
 
   // Formatear fecha de emisión en español
@@ -328,5 +331,122 @@ export const generateNoSubjectToControlPDF = async (
     },
   });
   await page.close();
-  return Buffer.from(pdfBuffer);
+  return Readable.from(Buffer.from(pdfBuffer));
+};
+
+export const generateAddendumIncrementoActividadesPDF = async (
+  data: AddendumData,
+  browser: Browser,
+): Promise<Readable> => {
+  const salaryFormatted = Number(data.salary).toLocaleString('es-PE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const template = Handlebars.compile(CONTRACT_ADDENDUM_INCREMENTO_ACTIVIDADES);
+  const finalHtml = template({
+    // Datos del trabajador
+    fullName: data.worker,
+    dni: data.documentNumber,
+    address: data.address,
+    district: data.district,
+    province: data.province,
+    department: data.department,
+    position: data.position,
+    salary: salaryFormatted,
+    salaryInWords: data.salaryInWords,
+    entryDate: data.entryDate,
+    startAddendum: data.startAddendum,
+    endAddendum: data.endAddendum,
+    subDivision: data.subDivisionOrParking,
+    division: data.division,
+    end: data.end,
+
+    // Datos fijos de firmantes
+    signer1Name: FULL_NAME_PRIMARY_EMPLOYEE,
+    signer1DNI: DNI_EMPLOYEE_PRIMARY,
+    signer2Name: FULL_NAME_SECOND_EMPLOYEE,
+    signer2DNI: DNI_EMPLOYEE_SECOND,
+    signature1: SIGNATURE_EMPLOYEE,
+    signature2: SIGNATURE_EMPLOYEE_TWO,
+  });
+
+  const page = await browser.newPage();
+  await page.setContent(finalHtml, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000,
+  });
+  const pdfBuffer = await page.pdf({
+    format: 'Letter',
+    printBackground: true,
+    preferCSSPageSize: true,
+    margin: {
+      top: '2.25cm',
+      bottom: '1cm',
+      left: '1.38cm',
+      right: '2.29cm',
+    },
+  });
+
+  await page.close();
+
+  return Readable.from(Buffer.from(pdfBuffer));
+};
+
+export const generateAddendumReplacementForPDF = async (
+  data: AddendumData,
+  browser: Browser,
+): Promise<Readable> => {
+  const salaryFormatted = Number(data.salary).toLocaleString('es-PE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const template = Handlebars.compile(CONTRACT_ADDENDUM_POR_SUPLENCIA);
+  const finalHtml = template({
+    // Datos del trabajador
+    fullName: data.worker,
+    dni: data.documentNumber,
+    address: data.address,
+    district: data.district,
+    province: data.province,
+    department: data.department,
+    position: data.position,
+    salary: salaryFormatted,
+    salaryInWords: data.salaryInWords,
+    entryDate: data.entryDate,
+    startAddendum: data.startAddendum,
+    endAddendum: data.endAddendum,
+    subDivision: data.subDivisionOrParking,
+    division: data.division,
+    end: data.end,
+    replacementFor: data.replacementFor,
+    start: data.start,
+    unit: data.unit,
+    // Datos fijos de firmantes
+    signer1Name: FULL_NAME_PRIMARY_EMPLOYEE,
+    signer1DNI: DNI_EMPLOYEE_PRIMARY,
+    signer2Name: FULL_NAME_SECOND_EMPLOYEE,
+    signer2DNI: DNI_EMPLOYEE_SECOND,
+    signature1: SIGNATURE_EMPLOYEE,
+    signature2: SIGNATURE_EMPLOYEE_TWO,
+  });
+  const page = await browser.newPage();
+  await page.setContent(finalHtml, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60000,
+  });
+  const pdfBuffer = await page.pdf({
+    format: 'Letter',
+    printBackground: true,
+    preferCSSPageSize: true,
+    margin: {
+      top: '2.75cm',
+      bottom: '3.75cm',
+      left: '3cm',
+      right: '3cm',
+    },
+  });
+
+  await page.close();
+
+  return Readable.from(Buffer.from(pdfBuffer));
 };

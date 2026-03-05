@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 import { FileMetadata } from './file-metadata.interface';
 
 export interface FileStorageService {
@@ -6,8 +7,12 @@ export interface FileStorageService {
   downloadFileByPath(
     filePath: string,
   ): Promise<{ buffer: Buffer; error?: string }>;
+  downloadFileAsStream(
+    fileId: string,
+  ): Promise<{ stream: Readable; error?: string }>;
+
   uploadFile(
-    file: Buffer,
+    file: Buffer | Readable,
     folderPath: string,
     filename: string,
   ): Promise<string>;

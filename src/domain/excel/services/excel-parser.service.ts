@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import { Readable } from 'stream';
 import { BAD_REQUEST } from '../../../shared/constants/http';
 import { validateAndGetHeaderMapping } from '../validators/excel-headers.validator';
 import { ValidationService } from './validation.service';
@@ -23,17 +24,14 @@ export class ExcelParserServices {
     this.validationService = new ValidationService();
   }
   async validateExcel(
-    buffer: Buffer,
+    source: Buffer | Readable,
     fields: Record<string, FieldConfig>,
     options: ImportOptions,
   ): Promise<ValidationResult> {
-    logger.info(
-      { bufferSize: buffer.length },
-      'Iniciando procesamiento de Excel',
-    );
+    logger.info('Iniciando procesamiento de Excel');
 
     try {
-      const rowData = await this.importExcelFromBuffer(buffer, fields, options);
+      const rowData = await this.importExcelFromSource(source, fields, options);
 
       if (!rowData || rowData.length === 0) {
         throw new AppError(
@@ -73,7 +71,55 @@ export class ExcelParserServices {
       throw error;
     }
   }
-
+  async importExcelFromSource(
+    source: Buffer | Readable,
+    fields: Record<string, FieldConfig>,
+    options: ImportOptions,
+  ): Promise<ExcelRowData[]> {
+    logger.info('Iniciando lectura de Excel');
+    try {
+      const workbook = new ExcelJS.Workbook();
+      if (source instanceof Readable) {
+        await workbook.xlsx.read(source);
+      } else {
+        await workbook.xlsx.load(source as unknown as ExcelJS.Buffer);
+      }
+      if (workbook.worksheets.length === 0) {
+        throw new AppError(
+          'El archivo Excel está vacío o no contiene hojas',
+          BAD_REQUEST,
+        );
+      }
+      const worksheet = this.selectWorkSheet(workbook, options);
+      const headerRow = options.headerRow ?? 1;
+      const headerMapping = validateAndGetHeaderMapping(
+        worksheet,
+        fields,
+        headerRow,
+      );
+      const data = this.extractDataFromWorksheet(
+        worksheet,
+        options,
+        headerMapping,
+      );
+      return data;
+    } catch (error) {
+      logger.error({ error }, 'Error al leer Excel');
+      if (error instanceof AppError) {
+        throw error;
+      }
+      if (
+        (error as Error).message.includes('corrupt') ||
+        (error as Error).message.includes('zip')
+      ) {
+        throw new AppError(
+          'El archivo Excel está corrupto o no es un archivo válido',
+          BAD_REQUEST,
+        );
+      }
+      throw new AppError('Error al procesar archivo Excel', BAD_REQUEST);
+    }
+  }
   async importExcelFromBuffer(
     buffer: Buffer,
     fields: Record<string, FieldConfig>,
@@ -326,16 +372,13 @@ export class ExcelParserServices {
     return stringValue === '' ? null : stringValue;
   }
   async validateAddendumExcel(
-    buffer: Buffer,
+    source: Buffer | Readable,
     fields: Record<string, FieldConfig>,
     options: ImportOptions,
   ): Promise<ValidateAddendumResult> {
-    logger.info(
-      { bufferSize: buffer.length },
-      'Iniciando procesamiento de Excel',
-    );
+    logger.info('Iniciando procesamiento de Excel');
     try {
-      const rowData = await this.importExcelFromBuffer(buffer, fields, options);
+      const rowData = await this.importExcelFromSource(source, fields, options);
       if (!rowData || rowData.length === 0) {
         throw new AppError(
           'El archivo Excel no contiene datos válidos',
@@ -346,22 +389,26 @@ export class ExcelParserServices {
       logger.info({ totalRecords }, 'Registros extraídos del Excel');
       const validation =
         this.validationService.validateEmployeeAddendumInBatch(rowData);
-      const invalidRows = new Set(validation.errors.map((e) => e.row));
-      const invalidRecords = invalidRows.size;
-      const validRecords = validation.validEmployeesAddendum?.length || 0;
       logger.info({
         totalRecords,
-        validRecords,
-        invalidRecords,
         totalErrors: validation.errors.length,
       });
+      if (validation.errors.length > 0) {
+        const cleansErrors = validation.errors.map((error) => ({
+          row: error.row,
+          field: error.field,
+          message: error.error.message,
+        }));
+        throw new AppError(
+          `No se pudo procesar el archivo. Se encontraron ${validation.errors.length} errores.`,
+          BAD_REQUEST,
+          { validationErrors: cleansErrors },
+        );
+      }
 
       const result: ValidateAddendumResult = {
         employeesAddendum: validation.validEmployeesAddendum || [],
-        errors: validation.errors,
         totalRecords,
-        validRecords,
-        invalidRecords,
       };
       return result;
     } catch (error) {

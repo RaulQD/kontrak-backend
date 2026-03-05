@@ -12,12 +12,14 @@ import {
   ExcelToContractProcessor,
   SctrReportProcessor,
   SctrReportApeProcessor,
+  AddendumContractProcessor,
 } from '../../../core/processors';
 import { ServiceContainer } from '../../../config/service.container';
 import { logger } from '../../../shared/utils/logger';
 import { LawlifeReportProcessor } from '../../../core/processors/lawlife-report.processor';
 import { CardIdReportProcessor } from '../../../core/processors/card-id-report.processor';
 import { SalaryAccountProcessor } from '../../../core/processors/salary-account.processor';
+import { InsurancesFolaProcessor } from '../../../core/processors/insurances-fola.processor';
 
 /**
  * OneDrive Service - Ahora es un simple SCHEDULER
@@ -56,6 +58,8 @@ export class OneDriveServices {
       lawlifeProcessor: new LawlifeReportProcessor(),
       cardIdProcessor: new CardIdReportProcessor(),
       salaryAccountProcessor: new SalaryAccountProcessor(this.storage),
+      insurancesFolaProcessor: new InsurancesFolaProcessor(),
+      addendumContractProcessor: new AddendumContractProcessor(),
       emailService: servicesContainer.emailService,
       excelService: servicesContainer.excelService,
       emailNotificationService: servicesContainer.emailNotificationService,

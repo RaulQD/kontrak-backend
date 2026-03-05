@@ -5,11 +5,12 @@ import {
   ContractProcessorResult,
 } from './contract-processor.interface';
 import { logger } from '../../shared/utils/logger';
+import { Readable } from 'stream';
 
 export abstract class BaseProcessor implements ContractProcessor {
   public abstract readonly name: string;
   process(
-    _buffer: Buffer,
+    _buffer: Buffer | Readable,
     _fileName: string,
     _browser: Browser,
   ): Promise<ContractProcessorResult> {

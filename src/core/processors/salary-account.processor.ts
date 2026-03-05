@@ -10,6 +10,7 @@ import { FileStorageService } from '../../infrastructure/onedrive/storage';
 import { logger } from '../../shared/utils/logger';
 import { AppError } from '../../shared/utils/app-error';
 import { NOT_FOUND } from '../../shared/constants/http';
+import { Readable } from 'stream';
 
 export class SalaryAccountProcessor extends BaseProcessor {
   public readonly name: string = 'SalaryAccountProcessor';
@@ -29,17 +30,26 @@ export class SalaryAccountProcessor extends BaseProcessor {
     _browser: Browser,
   ): Promise<ContractProcessorResult> {
     const resultReports: ContractResult[] = [];
+    const templatePath = `${this.TEMPLATE_FOLDER}/${this.TEMPLATE_FILE}`;
     try {
       logger.info('Iniciando proceso de Apertura de cuentas sueldo');
       //1 . Descargar la plantilla .xlsm de Onedrive
-      const templatePath = `${this.TEMPLATE_FOLDER}/${this.TEMPLATE_FILE}`;
-      const templateBuffer =
+      const templateResult =
         await this.storage.downloadFileByPath(templatePath);
-      if (templateBuffer.error) {
-        throw new AppError('No se encontro la plantilla', NOT_FOUND);
+      if (templateResult.error) {
+        logger.error(
+          `Plantilla no encontrada en OneDrive. Ruta buscada: "${templatePath}". ` +
+            `Verifica que el archivo exista en la carpeta "macros" de OneDrive.`,
+        );
+        throw new AppError(
+          `Plantilla no encontrada: "${templatePath}"`,
+          NOT_FOUND,
+        );
       }
+
+      const templateBuffer = templateResult.buffer;
       const filledBuffer = await this.salaryAccountService.updateExcel(
-        templateBuffer.buffer,
+        templateBuffer,
         employees,
       );
       await this.storage.uploadFile(
@@ -50,18 +60,30 @@ export class SalaryAccountProcessor extends BaseProcessor {
       resultReports.push({
         success: true,
         filename: this.TEMPLATE_FILE,
-        buffer: filledBuffer,
+        stream: Readable.from(filledBuffer),
         documentType: 'salary-account',
       });
       logger.info(
         'Plantilla de apertura de cuentas sueldo actualizada exitosamente',
       );
     } catch (error) {
-      logger.error({ error }, 'Error procesando apertura de cuenta sueldo');
+      const isNotFound = (error as any)?.statusCode === 404;
+      const isInvalidArg = (error as any)?.code === 'ERR_INVALID_ARG_TYPE';
+      const rawMessage = error instanceof Error ? error.message : String(error);
+      let friendlyMessage: string;
+      if (isNotFound || isInvalidArg) {
+        friendlyMessage =
+          `No se pudo descargar la plantilla de OneDrive. ` +
+          `Ruta esperada: "${templatePath}". ` +
+          `Asegúrate de que el archivo "${this.TEMPLATE_FILE}" exista en la carpeta "${this.TEMPLATE_FOLDER}".`;
+      } else {
+        friendlyMessage = `Error inesperado al procesar apertura de cuenta sueldo: ${rawMessage}`;
+      }
+      logger.error(friendlyMessage);
       resultReports.push({
         success: false,
         filename: this.TEMPLATE_FILE,
-        error: error instanceof Error ? error.message : String(error),
+        error: friendlyMessage,
         documentType: 'salary-account',
       });
     }

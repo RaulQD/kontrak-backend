@@ -22,15 +22,17 @@ export const getOutPutFolders = (
   lawlife: string;
   cardId: string;
   noSubjectToControl: string;
+  insuranceFola: string;
 } => {
   const dataFolderName = getDataFolderName();
   const dataFolderNameInsurance = getDataFolderNameInsurance();
   return {
     contracts: `${contractBaseFolder}/${dataFolderName}/contratos`,
     sctr: `${insuranceBaseFolder}/${dataFolderNameInsurance}/SCTR`,
-    sctrApe: `${insuranceBaseFolder}/${dataFolderNameInsurance}/SCTR APE`,
+    sctrApe: `${insuranceBaseFolder}/${dataFolderNameInsurance}/VIDA GRUPO`,
     lawlife: `${insuranceBaseFolder}/${dataFolderNameInsurance}/VIDA LEY`,
     cardId: `${insuranceBaseFolder}/${dataFolderNameInsurance}/CARD ID`,
     noSubjectToControl: `${contractBaseFolder}/${dataFolderName}/NO SUJETO A CONTROL`,
+    insuranceFola: `${insuranceBaseFolder}/${dataFolderNameInsurance}/SEGUROS FOLA`,
   };
 };

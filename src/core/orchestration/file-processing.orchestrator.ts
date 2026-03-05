@@ -10,6 +10,7 @@ import {
 } from './result/processing-result.interface';
 import { ExcelGeneratorServices } from '../../domain/excel/services/excel-generator.service';
 import {
+  AddendumContractProcessor,
   ExcelToContractProcessor,
   SctrReportApeProcessor,
   SctrReportProcessor,
@@ -24,6 +25,8 @@ import { getOutPutFolders } from '../../shared/utils/data-folder';
 import { LawlifeReportProcessor } from '../processors/lawlife-report.processor';
 import { CardIdReportProcessor } from '../processors/card-id-report.processor';
 import { SalaryAccountProcessor } from '../processors/salary-account.processor';
+import { InsurancesFolaProcessor } from '../processors/insurances-fola.processor';
+import { Readable } from 'stream';
 
 /**
  * Metadata mínima del archivo para procesamiento
@@ -52,6 +55,8 @@ export interface OrchestratorDependencies {
   emailService: BrevoEmailService;
   excelService: ExcelGeneratorServices;
   emailNotificationService: EmailNotificationService;
+  insurancesFolaProcessor: InsurancesFolaProcessor;
+  addendumContractProcessor: AddendumContractProcessor;
 }
 
 /**
@@ -73,6 +78,8 @@ export class FileProcessingOrchestrator {
   private excelService: ExcelGeneratorServices;
   private emailService: BrevoEmailService;
   private emailNotificationService: EmailNotificationService;
+  private insurancesFolaProcessor: InsurancesFolaProcessor;
+  private addendumContractProcessor: AddendumContractProcessor;
 
   constructor(dependencies: OrchestratorDependencies) {
     this.storage = dependencies.storage;
@@ -87,6 +94,8 @@ export class FileProcessingOrchestrator {
     this.emailService = dependencies.emailService;
     this.excelService = dependencies.excelService;
     this.emailNotificationService = dependencies.emailNotificationService;
+    this.insurancesFolaProcessor = dependencies.insurancesFolaProcessor;
+    this.addendumContractProcessor = dependencies.addendumContractProcessor;
   }
 
   /**
@@ -127,17 +136,30 @@ export class FileProcessingOrchestrator {
     try {
       // 2. DESCARGAR
       logger.info(`Descargando: ${file.name}`);
-      const downloadResult = await this.storage.downloadFile(file.id);
+      const downloadResult = await this.storage.downloadFileAsStream(file.id);
 
-      if (!downloadResult.buffer) {
+      if (downloadResult.error) {
         return ProcessingResultFactory.failure(
           file.name,
           downloadResult.error!,
         );
       }
+      // 3. Consumir stream a buffer (necesario para detectar tipo + processar)
+      const buffer = await this.streamToBuffer(downloadResult.stream);
+      const excelType = await this.excelService.detectExcelType(buffer);
+      logger.info(`Tipo de Excel detectado: ${excelType} para ${file.name}`);
+      if (excelType === 'addendum') {
+        return await this.processAddendumFile(
+          file,
+          buffer,
+          browser,
+          outPutfolder,
+        );
+      }
+
       // 3 parsear excel una sola vez
       const parserResult = await this.excelService.processingExcel(
-        downloadResult.buffer,
+        buffer,
         file.name,
       );
       const employees = parserResult.employees;
@@ -150,12 +172,14 @@ export class FileProcessingOrchestrator {
         sctrApeResult,
         lawlifeResult,
         cardIdResult,
+        insurancesFolaResult,
       ] = await Promise.all([
         this.excelToContractProcessor.processEmployees!(employees, browser),
         this.sctrProcessor.processEmployees!(employees, browser),
         this.sctrApeProcessor.processEmployees!(employees, browser),
         this.lawlifeProcessor.processEmployees!(employees, browser),
         this.cardIdProcessor.processEmployees!(employees, browser),
+        this.insurancesFolaProcessor.processEmployees!(employees, browser),
         this.salaryAccountProcessor.processEmployees!(employees, browser),
       ]);
 
@@ -166,19 +190,22 @@ export class FileProcessingOrchestrator {
         ...sctrApeResult.contracts,
         ...lawlifeResult.contracts,
         ...cardIdResult.contracts,
+        ...insurancesFolaResult.contracts,
       ];
       const uploadResults: ItemProcessingResult[] = [];
 
       const folder = getOutPutFolders(outPutfolder);
 
       for (const contract of allResults) {
-        if (contract.success && contract.buffer) {
+        if (contract.success && contract.stream) {
           try {
             let targetFolder: string;
             const subFolder: string =
               contract.contractType === 'PLANILLA'
                 ? 'FULL TIME'
-                : contract.contractType || 'OTROS';
+                : contract.contractType === 'PRACTICANTE'
+                  ? 'PRACTICANTE'
+                  : contract.contractType || 'OTROS';
             switch (contract.documentType) {
               case 'anexos':
                 targetFolder = `${folder.contracts}/${subFolder}/anexos`;
@@ -202,14 +229,16 @@ export class FileProcessingOrchestrator {
               case 'no-subject-to-control':
                 targetFolder = folder.noSubjectToControl;
                 break;
-
+              case 'insurances-fola':
+                targetFolder = folder.insuranceFola;
+                break;
               case 'salary-account':
                 continue;
               default:
                 targetFolder = `${folder.contracts}/${subFolder}/contratos`;
             }
             await this.storage.uploadFile(
-              contract.buffer,
+              contract.stream,
               targetFolder,
               contract.filename,
             );
@@ -238,11 +267,19 @@ export class FileProcessingOrchestrator {
         }
       }
       // 6. ENVIAR EMAILS CON REPORTES
+      const sctrStream = sctrResult.contracts[0]?.stream;
+      const sctrApeStream = sctrApeResult.contracts[0]?.stream;
+      const sctrBuffer = sctrStream
+        ? await this.streamToBuffer(sctrStream)
+        : undefined;
+      const sctrApeBuffer = sctrApeStream
+        ? await this.streamToBuffer(sctrApeStream)
+        : undefined;
       await this.sendNotificationEmail({
         recipientEmail: file.createdByEmail,
         employeesCount: employees.length,
-        sctrBuffer: sctrResult.contracts[0]?.buffer,
-        sctrApeBuffer: sctrApeResult.contracts[0]?.buffer,
+        sctrBuffer,
+        sctrApeBuffer,
         uploadResults,
       });
       // 7. CREAR RESULTADO
@@ -315,6 +352,88 @@ export class FileProcessingOrchestrator {
         error instanceof Error ? error.message : String(error),
       );
     }
+  }
+  private async processAddendumFile(
+    file: FileToProcess,
+    buffer: Buffer,
+    browser: Browser,
+    outPutfolder: string,
+  ): Promise<ProcessingResult> {
+    const startTime = Date.now();
+
+    // 1. Parsear Excel de adendas
+    const addendumResult = await this.excelService.processAddendumExcel(buffer);
+    const addendums = addendumResult.employees;
+
+    logger.info(`Excel de adendas parseado: ${addendums.length} renovaciones`);
+    const processorResult =
+      await this.addendumContractProcessor.processAddendums(addendums, browser);
+    const uploadResults: ItemProcessingResult[] = [];
+    const folder = getOutPutFolders(outPutfolder);
+    for (const contract of processorResult.contracts) {
+      if (contract.success && contract.stream) {
+        try {
+          const subFolder =
+            contract.addendumType === 'DE SUPLENCIA'
+              ? 'DE SUPLENCIA'
+              : 'POR INICIO O INCREMENTO DE ACTIVIDAD';
+          const targetFolder = `${folder.contracts}/ADENDAS/${subFolder}`;
+          await this.storage.uploadFile(
+            contract.stream,
+            targetFolder,
+            contract.filename,
+          );
+          uploadResults.push({
+            success: true,
+            filename: contract.filename,
+          });
+          logger.info(`Subido: ${targetFolder}/${contract.filename}`);
+        } catch (uploadError) {
+          uploadResults.push({
+            success: false,
+            filename: contract.filename,
+            error:
+              uploadError instanceof Error
+                ? uploadError.message
+                : String(uploadError),
+          });
+          logger.error(`Error subiendo ${contract.filename}: ${uploadError}`);
+        }
+      } else {
+        uploadResults.push({
+          success: false,
+          filename: contract.filename || '',
+          error: contract.error || '',
+        });
+      }
+    }
+    // 4. Resultado
+    const result = ProcessingResultFactory.success(file.name, uploadResults);
+    result.processingTimeMs = Date.now() - startTime;
+    // 5. Política de eliminación
+    if (this.policy.shouldDeleteOriginal(result)) {
+      await this.storage.deleteFile(file.id);
+      logger.info(`Archivo de adendas eliminado: ${file.name}`);
+    }
+    // 6. Notificación
+    if (result.failureCount === 0) {
+      await this.emailNotificationService.sendSuccessNotificacion({
+        userName: file.createdByEmail.split('@')[0],
+        createdByEmail: file.createdByEmail,
+        fileName: file.name,
+        totalEmployees: addendums.length,
+        contracts: {
+          fullTime: 0,
+          partTime: 0,
+          subsidio: 0,
+          apeTratamientoDatos: 0,
+        },
+      });
+    }
+    logger.info(
+      `Adendas completadas: ${result.successCount}/${result.totalProcessed} exitosas en ${result.processingTimeMs}ms`,
+    );
+    return result;
   }
   /**
    * Envía email con los reportes generados (SCTR, SCTR APE, etc.)
@@ -414,7 +533,13 @@ export class FileProcessingOrchestrator {
       });
     }
   }
-
+  private async streamToBuffer(stream: Readable): Promise<Buffer> {
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks);
+  }
   /**
    * Construye el cuerpo HTML del email
    */

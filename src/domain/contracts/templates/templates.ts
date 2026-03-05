@@ -2701,7 +2701,7 @@ export const NO_SUBJECT_TO_CONTROL = `
      <title>{{dni}}</title>
     <style>
         body {
-            font-family: 'Calibri', sans-serif;
+            font-family: 'Arial', sans-serif;
             font-size: 11pt;
             line-height: 1.3;
             text-align: justify;
@@ -2849,4 +2849,519 @@ export const NO_SUBJECT_TO_CONTROL = `
         </div>
 
 </body>
-</html>`;
+</html>
+`;
+export const CONTRACT_ADDENDUM_INCREMENTO_ACTIVIDADES = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>{{dni}}</title>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                font-size: 8pt;
+                line-height: 1.3;
+                text-align: justify;
+                text-justify: inter-word;
+                margin-left: 1.49cm;
+                margin-right: 0.98cm;
+            }
+            .intro-paragraph {
+                margin-bottom: 16px;
+            }
+            .text-center { text-align: center; }
+            .text-justify { text-align: justify; }
+            .bold { font-weight: bold; }
+            .underline { text-decoration: underline; }
+
+            /* Títulos de las cláusulas */
+            .clause-title {
+                font-size: 8pt;
+                font-weight: bold;
+                text-decoration: underline;
+                margin-top: 12px;
+                display: block;
+                text-align: left;
+            }
+
+            /* Estructura Flex para párrafos numerados (ej: 6.1 Texto) */
+            .clause-row {
+                display: flex;
+            }
+            .clause-num {
+                min-width: 35px;
+                font-weight: normal;
+            }
+            .clause-text {
+                width: 100%;
+                text-align: justify;
+            }
+
+            /* Listas indentadas */
+            .list-row {
+                display: flex;
+                margin-left: 35px;
+            }
+            .list-bullet {
+                min-width: 30px;
+            }
+
+            /* Sección de Firmas */
+            .signatures-wrapper {
+                margin-top: 50px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                page-break-inside: avoid;
+            }
+            .signature-col {
+                width: 31%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .signature-img {
+                height: 50px;
+                width: 85px;
+                object-fit: contain;
+                margin-bottom: 5px;
+            }
+            .signature-line {
+                width: 100%;
+                border-top: 1px solid #000;
+                margin-bottom: 5px;
+            }
+            .signature-text {
+                font-size: 8pt;
+                width: 100%;
+                text-align: left;
+                line-height: 1.2;
+            }
+
+            /* Espaciadores */
+            .mt-1 { margin-top: 1em; }
+            .mb-1 { margin-bottom: 1em; }
+        </style>
+    </head>
+    <body>
+
+        <div class="text-center bold underline" style="font-size: 8pt; margin-bottom: 15px;">
+            ADENDA AL CONTRATO POR INCREMENTO ACTIVIDADES
+        </div>
+
+        <div class="intro-paragraph">
+            Conste por el presente documento la Adenda al Contrato de Trabajo por <span class="bold">INCREMENTO ACTIVIDADES</span> celebrado el
+            <span class="bold">{{entryDate}}</span>, en las partes que se detallan a continuación:
+        </div>
+
+        <div class="clause-row">
+            <div class="clause-num">1.</div>
+            <div class="clause-text">
+                <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA S.A</span>, con R.U.C. Nº 20603381697, con domicilio en Calle Dean Valdivia N°148 Int.1401 Urb. Jardín (Edificio Platinium), Distrito de San Isidro, Provincia y Departamento de Lima, debidamente representada por la Sra. Catherine Susan Chang López identificado con D.N.I. Nº 42933662 y por la Sra. Maria Estela Guillen Cubas, identificada con DNI Nº 10346833, según poderes inscritos en la Partida Electrónica 14130887 del Registro de Personas Jurídicas de Lima.
+            </div>
+        </div>
+
+        <div class="clause-row">
+            <div class="clause-num">2.</div>
+            <div class="clause-text">
+                <span class="bold">{{fullName}}</span> (en adelante <span class="bold">EL TRABAJADOR</span>) identificado con <span class="bold">D.N.I. Nº {{dni}}</span>, con domicilio en <span class="bold">{{address}}</span>, distrito de <span class="bold">{{district}}</span>, Provincia de <span class="bold">{{province}}</span> Departamento de <span class="bold">{{department}}</span>.
+            </div>
+        </div>
+
+        <div style="margin-top: 10px; margin-bottom: 10px;">
+            La misma que celebran las partes indicadas en los puntos 1 y 2 precedentes, en los términos y condiciones siguientes:
+        </div>
+
+        <div class="clause-title">PRIMERA.-</div>
+        <div class="clause-text">
+            <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> han suscrito el <span class="bold">{{entryDate}}</span> un Contrato de Trabajo por <span class="bold">INCREMENTO ACTIVIDADES</span>, en los términos y condiciones que constan en el documento indicado (en adelante EL CONTRATO).
+        </div>
+        <div class="clause-text" style="margin-top: 8px;">
+            Al respecto, las partes precisan que en virtud de su objeto social, <span class="bold">EL EMPLEADOR</span> ha asumido la administración de una serie de playas de estacionamiento en la ciudad de Lima y provincias, así como la implementación de negocios colaterales en las playas de estacionamiento que ya vienen siendo administradas, situación que genera un incremento considerable de sus actividades – directa o indirectamente vinculadas al giro del negocio de estacionamientos, con la consecuente necesidad de contratar personal para concretar sus operaciones en las referidas playas de estacionamiento.
+        </div>
+
+        <div class="clause-title">SEGUNDA.-</div>
+        <div class="clause-text">
+            <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> pactaron que el <span class="bold">CONTRATO</span> se mantendría vigente hasta el
+            <span class="bold">{{end}}</span>, atendiendo a las razones objetivas expresadas en el mismo.
+        </div>
+
+        <div class="clause-title">TERCERA.-</div>
+        <div class="clause-text">
+            Debido a que el aumento de la carga laboral persiste como consecuencia del aumento de las actividades de <span class="bold">EL EMPLEADOR</span> en la división de <span class="bold">{{division}}</span>, de acuerdo a lo establecido en la cláusula primera precedente y al correspondiente Informe del Área de Operaciones, lo que ha ocasionado que las actividades que se relacionan con el área de <span class="bold">{{subDivision}}</span> hayan incrementado su labor, se requiere seguir contando temporalmente con un mayor número de personal para el cabal desempeño de sus funciones, en tanto dichas actividades no pueden ser satisfechas con el personal permanente, por lo que <span class="bold">EL EMPLEADOR</span> requiere renovar la contratación temporal del <span class="bold">TRABAJADOR</span> para desempeñarse como <span class="bold">{{position}}</span>.
+        </div>
+        <div class="clause-text" style="margin-top: 8px;">
+            En dicho sentido, en tanto las condiciones objetivas que motivaron la celebración del <span class="bold">CONTRATO</span> aún subsisten, <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> conviene en ampliar el plazo del <span class="bold">CONTRATO</span>, el mismo que en mérito a la presente Adenda se encuentra vigente desde el <span class="bold">{{startAddendum}}</span> hasta el <span class="bold">{{endAddendum}}</span>.
+        </div>
+
+        <div class="clause-title">CUARTA.-</div>
+        <div class="clause-text">
+            Mediante la presente Adenda, las partes acuerdan modificar la Cláusula Sexta del <span class="bold">CONTRATO</span> referida a la Remuneración de <span class="bold">EL TRABAJADOR</span>, la misma que tendrá el siguiente tenor:
+        </div>
+
+        <div class="clause-title">SEXTO: REMUNERACIÓN</div>
+        <div class="clause-row">
+            <div class="clause-num">6.1.</div>
+            <div class="clause-text">
+                Las partes dejan expresa constancia que la retribución que perciba <span class="bold">EL TRABAJADOR</span> estará compuesta por una remuneración fija Mensual ascendente al monto bruto de <span class="bold">S/ {{salary}} ({{salaryInWords}})</span>.
+            </div>
+        </div>
+        <div class="clause-row">
+            <div class="clause-num">6.2.</div>
+            <div class="clause-text">
+                Asimismo, <span class="bold">EL TRABAJADOR</span> podrá percibir una remuneración variable sobre la base de condiciones de venta y/o en función al cumplimiento de indicadores de gestión y resultados, bajo los términos y condiciones establecidos en las políticas que determine <span class="bold">EL EMPLEADOR</span> de forma unilateral, las mismas que podrán ser modificadas o suprimidas en cualquier momento y a sola decisión de <span class="bold">EL EMPLEADOR</span>, lo cual es aceptado por <span class="bold">EL TRABAJADOR</span>.
+                <div>
+                    El pago de dicha remuneración variable se encuentra sujeto a la vigencia de la relación laboral, es decir, sólo se abonarán las comisiones a los trabajadores con vínculo laboral vigente a la fecha de pago de las mismas.
+                </div>
+            </div>
+        </div>
+        <div class="clause-row">
+            <div class="clause-num">6.3.</div>
+            <div class="clause-text">
+                A la remuneración mensual de <span class="bold">EL TRABAJADOR</span> se agregará la Asignación Familiar correspondiente de ser el caso, deduciéndose las aportaciones y descuentos por tributos establecidos en la ley que resulten aplicables.
+            </div>
+        </div>
+        <div class="clause-row">
+            <div class="clause-num">6.4.</div>
+            <div class="clause-text">
+                Adicionalmente, <span class="bold">EL TRABAJADOR</span> tendrá derecho al pago de beneficios tales como las gratificaciones legales en los meses de julio y diciembre, la compensación por tiempo de servicios y demás que pudieran corresponderle, de acuerdo a la legislación laboral vigente y sus respectivas modificaciones.
+            </div>
+        </div>
+        <div class="clause-row">
+            <div class="clause-num">6.5.</div>
+            <div class="clause-text">
+                Será de cargo de <span class="bold">EL TRABAJADOR</span> el pago del Impuesto a la Renta y los aportes al Sistema Nacional o Privado de Pensiones, los que serán retenidos por <span class="bold">EL EMPLEADOR</span>, así como cualquier otro tributo o carga social que grave las remuneraciones del personal dependiente en el país.
+            </div>
+        </div>
+        <div class="clause-row" style="margin-bottom: 20px;">
+            <div class="clause-num">6.6.</div>
+            <div class="clause-text">
+                Ambas partes acuerdan que la forma y fecha de pago de la remuneración será determinada por <span class="bold">EL EMPLEADOR</span> y podrá ser modificada de acuerdo con sus necesidades operativas.
+            </div>
+        </div>
+
+        <div class="clause-title">QUINTA.-</div>
+        <div class="clause-text">
+            Las partes dejan constancia que en la redacción y suscripción de la presente Adenda al <span class="bold">CONTRATO</span> no ha mediado error, lesión o vicio de voluntad alguno capaz de invalidarlo en forma parcial o total. Asimismo, <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> se ratifican las demás estipulaciones del <span class="bold">CONTRATO</span> referido en la cláusula primera, limitándose la presente adenda a la ampliación del plazo de vigencia del mismo y el incremento de remuneración.
+        </div>
+
+        <div class="clause-title">SEXTA.-</div>
+        <div class="clause-text">
+            El <span class="bold">TRABAJADOR</span> declara que a conveniencia y conocimiento propio suscriben la presente Adenda de manera libre y voluntaria. Asimismo, declara que al suscribir el presente documento no lesiona ninguna norma de carácter imperativo o derecho que tenga carácter irrenunciable.
+        </div>
+
+        <div class="clause-title">SEPTIMA.-</div>
+        <div class="clause-text">
+            El <span class="bold">TRABAJADOR</span> deberá cumplir con las siguientes normas de conducta ética, responsabilidad administrativa de las personas jurídicas y prevención de lavado de activos y financiamiento del terrorismo y normas que sancionan delitos de corrupción cometidos entre privados que afecten el normal desarrollo de las relaciones comerciales y la competencia leal entre empresas:
+        </div>
+
+        <div class="clause-row" style="margin-top: 8px;">
+            <div class="clause-num">7.1.</div>
+            <div class="clause-text">
+                Lo establecido en la presente cláusula seguirá las disposiciones contenidas en la normativa de Responsabilidad Administrativa de las Personas Jurídicas, aprobada por la Ley N° 30424, con las modificaciones incorporadas por el Decreto Legislativo N° 1352 y la Ley 30835, y de las normas sobre Prevención del Lavado de Activos y Financiamiento del Terrorismo, aprobadas por la Ley N° 27693, y su reglamento, aprobado por el Decreto Supremo N° 018-2006-JUS (en adelante, PLAFT), así como el correcto cumplimiento de la legislación peruana vigente en general, incluyendo reglamentos, directivas, regulaciones, jurisprudencia vinculante, decisiones, decretos, órdenes, instrumentos y cualquier otra medida legislativa o decisión con fuerza de ley en el Perú de obligatorio cumplimiento para <span class="bold">EL EMPLEADOR</span> o <span class="bold">EL TRABAJADOR</span> o cualquiera de ellas.
+            </div>
+        </div>
+
+        <div class="clause-row">
+            <div class="clause-num">7.2.</div>
+            <div class="clause-text">
+                <span class="bold">El TRABAJADOR</span> declara que no ha incumplido las normas anticorrupción vigentes, ni ofrecido, pagado o comprometido a pagar, autorizado el pago de cualquier dinero directa o indirectamente, u ofrecido, entregado o comprometido a entregar, autorizado a entregar directa o indirectamente, cualquier objeto de valor, a cualquier funcionario gubernamental o a cualquier persona que busque el beneficio de un funcionario gubernamental. Asimismo, declara que no ha sido sancionado ni investigado por la comisión de los delitos de lavado de activos, financiamiento del terrorismo, corrupción de funcionarios, apropiación ilícita, fraude financiero, defraudación tributaria. <span class="bold">EL TRABAJADOR</span> se compromete a no incurrir en ninguno de los delitos mencionados ni ningún otro ilícito penal en el desarrollo de sus labores, ni siquiera cuando sea o pueda ser en beneficio de <span class="bold">EL EMPLEADOR</span>.
+            </div>
+        </div>
+
+        <div class="clause-row">
+            <div class="clause-num">7.3.</div>
+            <div class="clause-text">
+                Asimismo, mediante Decreto Legislativo N° 1385 ha sido modificado el Código Penal, a fin de sancionar penalmente los actos de corrupción cometidos entre privados que afectan el normal desarrollo de las relaciones comerciales y la competencia leal entre empresas.
+                <div style="margin-top: 4px;">
+                    Al respecto, <span class="bold">EL TRABAJADOR</span> declara conocer que está impedido de, directa o indirectamente, aceptar, recibir o solicitar donativo, promesa o cualquier otra ventaja o beneficio indebido de cualquier naturaleza, para sí o para un tercero para realizar u omitir un acto que permita favorecer a otro en la adquisición o comercialización de bienes o mercancías, en la contratación de servicios comerciales o en las relaciones comerciales de su <span class="bold">EMPLEADOR</span>. Asimismo, <span class="bold">EL TRABAJADOR</span> declara conocer que está impedido de, directa o indirectamente, prometer, ofrecer o conceder a accionistas, gerentes, directores, administradores, representantes legales, apoderados, empleados o asesores de una persona jurídica de derecho privado, organización no gubernamental, asociación, fundación, comité, incluidos los entes no inscritos o sociedades irregulares, una ventaja o beneficio indebido de cualquier naturaleza, para ellos o para un tercero, como contraprestación para realizar u omitir un acto que permita favorecer a éste u otro en la adquisición o comercialización de bienes o mercancías, en la contratación de servicios comerciales o en las relaciones comerciales de su <span class="bold">EMPLEADOR</span>.
+                </div>
+                <div style="margin-top: 4px;">
+                    Asimismo, <span class="bold">EL TRABAJADOR</span> declara conocer que está impedido de, directa o indirectamente, aceptar, recibir o solicitar donativo, promesa o cualquier otra ventaja o beneficio indebido de cualquier naturaleza para sí o para un tercero para realizar u omitir un acto en perjuicio de su <span class="bold">EMPLEADOR</span>. Asimismo, <span class="bold">EL TRABAJADOR</span> declara conocer que está impedido de, directa o indirectamente, prometer, ofrecer o conceder a accionistas, gerentes, directores, administradores, representantes legales, apoderados, empleados o asesores de una persona jurídica de derecho privado, organización no gubernamental, asociación, fundación, comité, incluidos los entes no inscritos o sociedades irregulares, una ventaja o beneficio indebido de cualquier naturaleza, para ellos o para un tercero, como contraprestación para realizar u omitir un acto en perjuicio de su <span class="bold">EMPLEADOR</span>.
+                </div>
+            </div>
+        </div>
+
+        <div class="clause-row">
+            <div class="clause-num">7.4.</div>
+            <div class="clause-text">
+                Las Partes acuerdan que, durante el periodo de vigencia del Contrato, estarán obligadas a actuar en estricto cumplimiento de la legislación vigente, quedando completamente prohibido, bajo cualquier circunstancia, realizar actos que impliquen la vulneración de la ley penal.
+            </div>
+        </div>
+
+        <div class="clause-title">OCTAVA.-</div>
+        <div class="clause-text" style="margin-bottom: 20px;>
+            Las partes dejan constancia que en la redacción y suscripción de la presente Adenda al <span class="bold">CONTRATO</span> no ha mediado error, lesión o vicio de voluntad alguno capaz de invalidarlo en forma parcial o total. Asimismo, <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> se ratifican las demás estipulaciones del <span class="bold">CONTRATO</span> referido en la cláusula primera, limitándose la presente adenda a la modificación de la Cláusula de Remuneración establecida en el <span class="bold">CONTRATO</span>.
+        </div>
+
+        <div class="clause-title">NOVENA.-</div>
+        <div class="clause-text">
+            <span class="bold">El TRABAJADOR</span> declara que a conveniencia y conocimiento propio suscriben la presente Adenda de manera libre y voluntaria. Asimismo, declara que al suscribir el presente documento no lesiona ninguna norma de carácter imperativo o derecho que tenga carácter irrenunciable.
+        </div>
+
+        <div class="text-justify" style="margin-top: 30px;">
+            En señal de conformidad, las partes suscriben dos (02) ejemplares del presente contrato en la ciudad de <span class="bold">{{province}}</span>, el día <span class="bold">{{startAddendum}}</span>, quedando un ejemplar en poder del empleador y otro en poder del trabajador, quien declara haber recibido una copia del contrato y estar de acuerdo con su contenido.
+        </div>
+
+        <div class="signatures-wrapper">
+            <div class="signature-col">
+                {{#if signature1}}
+                    <img src="{{signature1}}" class="signature-img" />
+                {{else}}
+                    <div style="height: 55px;"></div>
+                {{/if}}
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL EMPLEADOR</div>
+                <div class="signature-text">NOMBRE: {{signer1Name}}</div>
+                <div class="signature-text">DNI N°: {{signer1DNI}}</div>
+            </div>
+
+            <div class="signature-col">
+                {{#if signature2}}
+                    <img src="{{signature2}}" class="signature-img" />
+                {{else}}
+                    <div style="height: 55px;"></div>
+                {{/if}}
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL EMPLEADOR</div>
+                <div class="signature-text">NOMBRE: {{signer2Name}}</div>
+                <div class="signature-text">DNI N°: {{signer2DNI}}</div>
+            </div>
+
+            <div class="signature-col">
+                <div style="height: 55px;"></div>
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL TRABAJADOR</div>
+                <div class="signature-text">NOMBRE: {{fullName}}</div>
+                <div class="signature-text">D.N.I.: {{dni}}</div>
+                <div class="signature-text">DIVISION: {{division}}</div>
+            </div>
+        </div>
+
+    </body>
+    </html>
+    `;
+export const CONTRACT_ADDENDUM_POR_SUPLENCIA = `
+ <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>{{dni}}</title>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                font-size: 10pt;
+                line-height: 1.3;
+                text-align: justify;
+                text-justify: inter-word;
+                margin-left: 0.64cm;
+                margin-right: 0cm;
+            }
+            .intro-paragraph {
+                margin-bottom: 16px;
+            }
+            .text-center { text-align: center; }
+            .text-justify { text-align: justify; }
+            .bold { font-weight: bold; }
+            .underline { text-decoration: underline; }
+
+            /* Títulos de las cláusulas */
+            .clause-title {
+                font-size: 10pt;
+                font-weight: bold;
+                text-decoration: underline;
+                margin-top: 12px;
+                display: block;
+                text-align: left;
+            }
+
+            /* Estructura Flex para párrafos numerados (ej: 6.1 Texto) */
+            .clause-row {
+                display: flex;
+            }
+            .clause-num {
+                min-width: 35px;
+                font-weight: normal;
+            }
+            .clause-text {
+                width: 100%;
+                text-align: justify;
+            }
+
+            /* Listas indentadas */
+            .list-row {
+                display: flex;
+                margin-left: 35px;
+            }
+            .list-bullet {
+                min-width: 30px;
+            }
+
+            /* Sección de Firmas */
+            .signatures-wrapper {
+                margin-top: 50px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                page-break-inside: avoid;
+            }
+            .signature-col {
+                width: 31%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .signature-img {
+                height: 50px;
+                width: 85px;
+                object-fit: contain;
+                margin-bottom: 5px;
+            }
+            .signature-line {
+                width: 100%;
+                border-top: 1px solid #000;
+                margin-bottom: 5px;
+            }
+            .signature-text {
+                font-size: 8pt;
+                width: 100%;
+                text-align: left;
+                line-height: 1.2;
+            }
+
+            /* Espaciadores */
+            .mt-1 { margin-top: 1em; }
+            .mb-1 { margin-bottom: 1em; }
+        </style>
+    </head>
+    <body>
+        <div class="text-center bold underline" style="font-size: 10pt; margin-bottom: 15px;">
+            PRIMERA ADENDA AL CONTRATO DE TRABAJO DE SUPLENCIA
+        </div>
+         <div class="intro-paragraph">
+            Conste por el presente documento la Adenda al Contrato de Trabajo por <strong>Trabajo de Suplencia</strong> celebrado el <span class="bold">{{entryDate}}</span> que celebran:
+        </div>
+        <div class="clause-row">
+            <div class="clause-num">1.</div>
+            <div class="clause-text">
+                <span class="bold">INVERSIONES URBANÍSTICAS OPERADORA S.A.</span> (en adelante  <span class="bold">EL EMPLEADOR</span>) identificada con R.U.C. Nº <span class="bold">20603381697</span>, con domicilio en Calle Dean Valdivia N°148 Int.1401 Urb. Jardín (Edificio Platinium), Distrito de San Isidro, Provincia y Departamento de Lima, debidamente representada por la Sra. Catherine Susan Chang López identificado con D.N.I. Nº 42933662 y por la Sra. Maria Estela Guillen Cubas, identificada con DNI Nº 10346833, según poderes inscritos en la Partida Electrónica 14130887 del Registro de Personas Jurídicas de Lima.
+            </div>
+        </div>
+         <div class="clause-row">
+            <div class="clause-num">2.</div>
+            <div class="clause-text">
+                <span class="bold">{{fullName}}</span> (en adelante <span class="bold">EL TRABAJADOR</span>) identificado con <span class="bold">D.N.I. Nº {{dni}}</span>, con domicilio en <span class="bold">{{address}}</span>, distrito de <span class="bold">{{district}}</span>, Provincia de <span class="bold">{{province}}</span> Departamento de <span class="bold">{{department}}</span>.
+            </div>
+        </div>
+        <div style="margin-top: 10px; margin-bottom: 10px;">
+            La misma que celebran las partes indicadas en los puntos 1 y 2 precedentes, en los términos y condiciones siguientes:
+        </div>
+
+        <div class="clause-title">PRIMERA.-</div>
+        <div class="clause-text">
+            <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> han suscrito el <span class="bold">{{entryDate}}</span> un Contrato de Trabajo de Suplencia, en mérito del cual <span class="bold">EL TRABAJADOR</span> cubrió la ausencia del trabajador <span class="bold">{{replacementFor}}</span> en el cargo de <span class="bold">{{position}}</span> debido <span class="bold">{{unit}}</span>.
+        </div>
+        <div class="clause-title">SEGUNDA.-</div>
+        <div class="clause-text">
+            <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> pactaron que el <span class="bold">CONTRATO DE SUPLENCIA</span> tenía vigencia desde el <span class="bold">{{start}}</span> hasta el
+            <span class="bold">{{end}}</span>, atendiendo a las razones objetivas expresadas en el mismo.
+        </div>
+
+        <div class="clause-title">TERCERA.-</div>
+        <div class="clause-text">
+            Debido a que el trabajador <span class="bold">{{replacementFor}}</span> a la fecha no se ha podido reincorporar a su puesto de trabajo, <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> conviene en ampliar el plazo de vigencia del Contrato de Suplencia desde el <span class="bold">{{startAddendum}}</span> hasta el
+            <span class="bold">{{endAddendum}}</span>.
+        </div>
+        <div class="clause-title">CUARTA.-</div>
+        <div class="clause-text">
+            <span class="bold">EL TRABAJADOR</span> recibirá por la prestación íntegra y oportuna de sus servicios, una remuneración bruta mensual de <span class="bold">{{salary}}</span> (<span class="bold">{{salaryInWords}}</span>), más la asignación familiar correspondiente de ser el caso, de la cual se deducirán las aportaciones y descuentos por tributos establecidos en la ley que resulten aplicables.
+        </div>
+        <div class="clause-title">QUINTA.-</div>
+        <div class="clause-text" style="margin-bottom: 20px;">
+            Las partes dejan constancia que en la redacción y suscripción del presente Convenio no ha mediado error, lesión o vicio de voluntad alguno capaz de invalidarlo en forma parcial o total. Asimismo, declaran que ratifican las demás estipulaciones del Contrato de Trabajo por Suplencia referido en la cláusula primera, limitándose la presente adenda a la ampliación del plazo de vigencia del mismo.
+        </div>
+        <div class="clause-title">SEXTA.-</div>
+        <div class="clause-text">
+            <span class="bold">EL TRABAJADOR</span> declara que a conveniencia y conocimiento propio suscriben la presente Adenda de manera libre y voluntaria. Asimismo, declara que al suscribir el presente documento no lesiona ninguna norma de carácter imperativo o derecho que tenga carácter irrenunciable.
+        </div>
+        <div class="clause-title">SEPTIMA.-</div>
+        <div class="clause-text">
+            <span class="bold">EL TRABAJADOR</span> deberá cumplir con las siguientes normas de conducta ética, responsabilidad administrativa de las personas jurídicas y prevención de lavado de activos y financiamiento del terrorismo y normas que sancionan delitos de corrupción cometidos entre privados que afecten el normal desarrollo de las relaciones comerciales y la competencia leal entre empresas:
+        </div>
+        <div class="clause-row" style="margin-top: 8px;">
+            <div class="clause-num">7.1.</div>
+            <div class="clause-text">
+                Lo establecido en la presente cláusula seguirá las disposiciones contenidas en la normativa de Responsabilidad Administrativa de las Personas Jurídicas, aprobada por la Ley N° 30424, con las modificaciones incorporadas por el Decreto Legislativo N° 1352 y la Ley 30835, y de las normas sobre Prevención del Lavado de Activos y Financiamiento del Terrorismo, aprobadas por la Ley N° 27693, y su reglamento, aprobado por el Decreto Supremo N° 018-2006-JUS (en adelante, PLAFT), así como el correcto cumplimiento de la legislación peruana vigente en general, incluyendo reglamentos, directivas, regulaciones, jurisprudencia vinculante, decisiones, decretos, órdenes, instrumentos y cualquier otra medida legislativa o decisión con fuerza de ley en el Perú de obligatorio cumplimiento para <span class="bold">EL EMPLEADOR</span> o <span class="bold">EL TRABAJADOR</span> o cualquiera de ellas.
+            </div>
+        </div>
+
+        <div class="clause-row">
+            <div class="clause-num">7.2.</div>
+            <div class="clause-text">
+                <span class="bold">EL TRABAJADOR</span> declara que no ha incumplido las normas anticorrupción vigentes, ni ofrecido, pagado o comprometido a pagar, autorizado el pago de cualquier dinero directa o indirectamente, u ofrecido, entregado o comprometido a entregar, autorizado a entregar directa o indirectamente, cualquier objeto de valor, a cualquier funcionario gubernamental o a cualquier persona que busque el beneficio de un funcionario gubernamental. Asimismo, declara que no ha sido sancionado ni investigado por la comisión de los delitos de lavado de activos, financiamiento del terrorismo, corrupción de funcionarios, apropiación ilícita, fraude financiero, defraudación tributaria. <span class="bold">EL TRABAJADOR</span> se compromete a no incurrir en ninguno de los delitos mencionados ni ningún otro ilícito penal en el desarrollo de sus labores, ni siquiera cuando sea o pueda ser en beneficio de <span class="bold">EL EMPLEADOR</span>.
+            </div>
+        </div>
+
+        <div class="clause-row">
+            <div class="clause-num">7.3.</div>
+            <div class="clause-text">
+                Asimismo, mediante Decreto Legislativo N° 1385 ha sido modificado el Código Penal, a fin de sancionar penalmente los actos de corrupción cometidos entre privados que afectan el normal desarrollo de las relaciones comerciales y la competencia leal entre empresas.
+                <div style="margin-top: 4px;">
+                    Al respecto, <span class="bold">EL TRABAJADOR</span> declara conocer que está impedido de, directa o indirectamente, aceptar, recibir o solicitar donativo, promesa o cualquier otra ventaja o beneficio indebido de cualquier naturaleza, para sí o para un tercero para realizar u omitir un acto que permita favorecer a otro en la adquisición o comercialización de bienes o mercancías, en la contratación de servicios comerciales o en las relaciones comerciales de su <span class="bold">EMPLEADOR</span>. Asimismo, <span class="bold">EL TRABAJADOR</span> declara conocer que está impedido de, directa o indirectamente, prometer, ofrecer o conceder a accionistas, gerentes, directores, administradores, representantes legales, apoderados, empleados o asesores de una persona jurídica de derecho privado, organización no gubernamental, asociación, fundación, comité, incluidos los entes no inscritos o sociedades irregulares, una ventaja o beneficio indebido de cualquier naturaleza, para ellos o para un tercero, como contraprestación para realizar u omitir un acto que permita favorecer a éste u otro en la adquisición o comercialización de bienes o mercancías, en la contratación de servicios comerciales o en las relaciones comerciales de su <span class="bold">EMPLEADOR</span>.
+                </div>
+                <div style="margin-top: 4px;">
+                    Asimismo, <span class="bold">EL TRABAJADOR</span> declara conocer que está impedido de, directa o indirectamente, aceptar, recibir o solicitar donativo, promesa o cualquier otra ventaja o beneficio indebido de cualquier naturaleza para sí o para un tercero para realizar u omitir un acto en perjuicio de su <span class="bold">EMPLEADOR</span>. Asimismo, <span class="bold">EL TRABAJADOR</span> declara conocer que está impedido de, directa o indirectamente, prometer, ofrecer o conceder a accionistas, gerentes, directores, administradores, representantes legales, apoderados, empleados o asesores de una persona jurídica de derecho privado, organización no gubernamental, asociación, fundación, comité, incluidos los entes no inscritos o sociedades irregulares, una ventaja o beneficio indebido de cualquier naturaleza, para ellos o para un tercero, como contraprestación para realizar u omitir un acto en perjuicio de su <span class="bold">EMPLEADOR</span>.
+                </div>
+            </div>
+        </div>
+
+        <div class="clause-row">
+            <div class="clause-num">7.4.</div>
+            <div class="clause-text">
+                Las Partes acuerdan que, durante el periodo de vigencia del Contrato, estarán obligadas a actuar en estricto cumplimiento de la legislación vigente, quedando completamente prohibido, bajo cualquier circunstancia, realizar actos que impliquen la vulneración de la ley penal.
+            </div>
+        </div>
+        <div class="text-justify" style="margin-top: 30px;">
+            En señal de conformidad, las partes suscriben dos (02) ejemplares del presente contrato en la ciudad de <span class="bold">{{province}}</span>, el día <span class="bold">{{startAddendum}}</span>, quedando un ejemplar en poder del empleador y otro en poder del trabajador, quien declara haber recibido una copia del contrato y estar de acuerdo con su contenido.
+        </div>
+
+        <div class="signatures-wrapper">
+            <div class="signature-col">
+                {{#if signature1}}
+                    <img src="{{signature1}}" class="signature-img" />
+                {{else}}
+                    <div style="height: 55px;"></div>
+                {{/if}}
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL EMPLEADOR</div>
+                <div class="signature-text">NOMBRE: {{signer1Name}}</div>
+                <div class="signature-text">DNI N°: {{signer1DNI}}</div>
+            </div>
+
+            <div class="signature-col">
+                {{#if signature2}}
+                    <img src="{{signature2}}" class="signature-img" />
+                {{else}}
+                    <div style="height: 55px;"></div>
+                {{/if}}
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL EMPLEADOR</div>
+                <div class="signature-text">NOMBRE: {{signer2Name}}</div>
+                <div class="signature-text">DNI N°: {{signer2DNI}}</div>
+            </div>
+
+            <div class="signature-col">
+                <div style="height: 55px;"></div>
+                <div class="signature-line"></div>
+                <div class="signature-text text-center bold">EL TRABAJADOR</div>
+                <div class="signature-text">NOMBRE: {{fullName}}</div>
+                <div class="signature-text">D.N.I.: {{dni}}</div>
+                <div class="signature-text">DIVISION: {{division}}</div>
+            </div>
+        </div>
+    </body>
+    </html>
+`;
