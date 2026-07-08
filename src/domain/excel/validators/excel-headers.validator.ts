@@ -154,8 +154,6 @@ export function validateAndGetHeaderMapping(
       { validationErrors: headerErrors },
     );
   }
-  logger.info(
-    `✅ Excel válido. ${result.headerMapping.size} campos reconocidos`,
-  );
+  logger.info(`Excel valido. ${result.headerMapping.size} campos reconocidos`);
   return result.headerMapping;
 }

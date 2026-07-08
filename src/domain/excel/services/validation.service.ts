@@ -38,7 +38,15 @@ export class ValidationService {
     }
 
     if (!CONTRACT_TYPES.includes(rawContractType as ContractType)) {
-      return { errors: [] };
+      errors.push({
+        error: new AppError(
+          `El tipo de contrato "${rowData.contractType}" no es valido. Valores permitidos: ${CONTRACT_TYPES.join(', ')}`,
+          BAD_REQUEST,
+        ),
+        row: rowNumber,
+        field: 'contractType',
+      });
+      return { errors };
     }
     if (rowData.dni && typeof rowData.dni === 'string') {
       const dni = rowData.dni.trim();
