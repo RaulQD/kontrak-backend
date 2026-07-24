@@ -12,3 +12,4 @@ generated_contracts/
 *.xls
 *.zip
 *.pdf
+/src/generated/prisma

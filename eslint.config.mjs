@@ -5,7 +5,7 @@ import prettierConfig from "eslint-config-prettier";
 
 export default [
   {
-    ignores: ["dist/**", "node_modules/**", "*.js", "*.mjs",'*.log']
+    ignores: ["dist/**", "node_modules/**", "*.js", "*.mjs", "*.log", "prisma.config.ts"]
   },
   {
     files: ["**/*.ts"],
