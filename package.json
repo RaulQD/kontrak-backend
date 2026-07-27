@@ -4,9 +4,9 @@
   "description": "Sistema de generador de contratos automaticos",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "test:onedrive": "ts-node src/module/test/index.test.ts",
-    "dev": "nodemon --exec ts-node src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed": "prisma db seed",
     "build": "tsc",
     "start": "node ./dist/index.js",
     "prepare": "husky",
@@ -26,18 +26,24 @@
     ]
   },
   "keywords": [],
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=24.11.1"
+  },
   "author": "Raul Kevin Quispe Diaz",
   "license": "ISC",
   "dependencies": {
     "@azure/identity": "^4.13.0",
     "@getbrevo/brevo": "^3.0.1",
     "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.9.0",
     "archiver": "^7.0.1",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.4.2",
     "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "handlebars": "^4.7.8",
@@ -48,6 +54,7 @@
     "nodemailer": "^7.0.12",
     "pdf-lib": "^1.17.1",
     "pdfkit": "^0.17.2",
+    "pg": "^8.22.0",
     "pino": "^10.1.0",
     "puppeteer": "^24.34.0",
     "typescript": "^5.9.3",
@@ -62,11 +69,14 @@
     "@types/express": "^5.0.5",
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
+    "@types/node": "^26.1.1",
     "@types/nodemailer": "^7.0.4",
     "@types/pdfkit": "^0.17.3",
+    "@types/pdfmake": "^0.3.2",
+    "@types/pg": "^8.20.0",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
-    "eslint": "^9.39.1",
+    "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "husky": "^9.1.7",
@@ -74,6 +84,9 @@
     "nodemon": "^3.1.11",
     "pino-pretty": "^13.1.2",
     "prettier": "^3.6.2",
-    "ts-node": "^10.9.2"
+    "prisma": "^7.9.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.23.1",
+    "vitest": "^4.1.10"
   }
 }

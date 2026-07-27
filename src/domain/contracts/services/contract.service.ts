@@ -13,7 +13,6 @@ import {
   generateDocAnexo,
   generateProcessingOfPersonalDataPDF,
 } from '../templates/contracts';
-import { ValidationService } from '../../excel/services/validation.service';
 import puppeteer from 'puppeteer';
 import { chunk } from '../../../shared/utils/array.utits';
 import { PDFPreviewBase64 } from '../../../shared/types/contract.interface';

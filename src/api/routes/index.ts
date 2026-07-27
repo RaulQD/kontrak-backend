@@ -4,7 +4,7 @@ import excelRoutes from './excel.route';
 import addendumRoutes from './addendum.route';
 import { logger } from '../../shared/utils/logger';
 
-const router = Router();
+const router: Router = Router();
 
 // Health check endpoint
 router.get('/health', (req, res) => {

@@ -1,6 +1,5 @@
 import { Readable } from 'node:stream';
 import { Browser } from 'puppeteer';
-import { EmployeeData } from '../../shared/types/employees.interface';
 import {
   ContractProcessor,
   ContractProcessorResult,

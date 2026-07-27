@@ -139,10 +139,7 @@ export class FileProcessingOrchestrator {
       const downloadResult = await this.storage.downloadFileAsStream(file.id);
 
       if (downloadResult.error) {
-        return ProcessingResultFactory.failure(
-          file.name,
-          downloadResult.error!,
-        );
+        return ProcessingResultFactory.failure(file.name, downloadResult.error);
       }
       // 3. Consumir stream a buffer (necesario para detectar tipo + processar)
       const buffer = await this.streamToBuffer(downloadResult.stream);
@@ -173,14 +170,15 @@ export class FileProcessingOrchestrator {
         lawlifeResult,
         cardIdResult,
         insurancesFolaResult,
+        salaryAccountResult,
       ] = await Promise.all([
-        this.excelToContractProcessor.processEmployees!(employees, browser),
-        this.sctrProcessor.processEmployees!(employees, browser),
-        this.sctrApeProcessor.processEmployees!(employees, browser),
-        this.lawlifeProcessor.processEmployees!(employees, browser),
-        this.cardIdProcessor.processEmployees!(employees, browser),
-        this.insurancesFolaProcessor.processEmployees!(employees, browser),
-        this.salaryAccountProcessor.processEmployees!(employees, browser),
+        this.excelToContractProcessor.processEmployees(employees, browser),
+        this.sctrProcessor.processEmployees(employees, browser),
+        this.sctrApeProcessor.processEmployees(employees, browser),
+        this.lawlifeProcessor.processEmployees(employees, browser),
+        this.cardIdProcessor.processEmployees(employees, browser),
+        this.insurancesFolaProcessor.processEmployees(employees, browser),
+        this.salaryAccountProcessor.processEmployees(employees, browser),
       ]);
 
       // 5. COMBINAR RESULTADOS
@@ -191,15 +189,28 @@ export class FileProcessingOrchestrator {
         ...lawlifeResult.contracts,
         ...cardIdResult.contracts,
         ...insurancesFolaResult.contracts,
+        ...salaryAccountResult.contracts,
       ];
       const uploadResults: ItemProcessingResult[] = [];
 
       const folder = getOutPutFolders(outPutfolder);
+      let sctrBuffer: Buffer | undefined;
+      let sctrApeBuffer: Buffer | undefined;
 
       for (const contract of allResults) {
+        if (contract.documentType === 'salary-account') {
+          uploadResults.push({
+            success: contract.success,
+            filename: contract.filename,
+            ...(contract.error && { error: contract.error }),
+          });
+          continue;
+        }
+
         if (contract.success && contract.stream) {
           try {
             let targetFolder: string;
+            let fileToUpload: Buffer | Readable = contract.stream;
             const subFolder: string =
               contract.contractType === 'PLANILLA'
                 ? 'FULL TIME'
@@ -215,9 +226,23 @@ export class FileProcessingOrchestrator {
                 break;
               case 'sctr-reports':
                 targetFolder = folder.sctr;
+                {
+                  const reportBuffer = await this.streamToBuffer(
+                    contract.stream,
+                  );
+                  sctrBuffer ??= reportBuffer;
+                  fileToUpload = reportBuffer;
+                }
                 break;
               case 'sctr-ape-reports':
                 targetFolder = folder.sctrApe;
+                {
+                  const reportBuffer = await this.streamToBuffer(
+                    contract.stream,
+                  );
+                  sctrApeBuffer ??= reportBuffer;
+                  fileToUpload = reportBuffer;
+                }
                 break;
               case 'lawlife-reports':
                 targetFolder = folder.lawlife;
@@ -232,13 +257,11 @@ export class FileProcessingOrchestrator {
               case 'insurances-fola':
                 targetFolder = folder.insuranceFola;
                 break;
-              case 'salary-account':
-                continue;
               default:
                 targetFolder = `${folder.contracts}/${subFolder}/contratos`;
             }
             await this.storage.uploadFile(
-              contract.stream,
+              fileToUpload,
               targetFolder,
               contract.filename,
             );
@@ -267,14 +290,6 @@ export class FileProcessingOrchestrator {
         }
       }
       // 6. ENVIAR EMAILS CON REPORTES
-      const sctrStream = sctrResult.contracts[0]?.stream;
-      const sctrApeStream = sctrApeResult.contracts[0]?.stream;
-      const sctrBuffer = sctrStream
-        ? await this.streamToBuffer(sctrStream)
-        : undefined;
-      const sctrApeBuffer = sctrApeStream
-        ? await this.streamToBuffer(sctrApeStream)
-        : undefined;
       await this.sendNotificationEmail({
         recipientEmail: file.createdByEmail,
         employeesCount: employees.length,

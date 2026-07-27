@@ -5,7 +5,7 @@ import { schemaValidatorMiddleware } from '../middlewares/schema-validator.middl
 import { EmployeeBatchSchema } from '../../domain/contracts/validators/employee.validator';
 import { ContractController } from '../controllers/contract.controller';
 
-const router = Router();
+const router: Router = Router();
 const contractController = new ContractController();
 
 router.post(

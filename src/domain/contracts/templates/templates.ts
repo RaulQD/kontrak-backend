@@ -2719,7 +2719,7 @@ export const NO_SUBJECT_TO_CONTROL = `
             object-fit: contain; 
         }
         .header-date {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: left; 
         }
         .recipient-section {

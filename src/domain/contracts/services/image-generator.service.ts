@@ -88,7 +88,7 @@ export class ImageGeneratorService {
 
     // Capturar solo la tabla, no toda la página
     const table = await page.$('table');
-    const screenshot = await table!.screenshot();
+    const screenshot = await table?.screenshot();
 
     await browser.close();
     return screenshot as Buffer;

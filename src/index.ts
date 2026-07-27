@@ -1,4 +1,4 @@
-import { createApp } from './app';
+import { createApp } from './services/app';
 import { config } from './config';
 import { OneDriveScheduler } from './infrastructure/onedrive/scheduler/onedrive.scheduler';
 import { Server } from './server';

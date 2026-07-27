@@ -5,7 +5,7 @@ import { excelUpload } from '../middlewares/upload.middleware';
 import { ExcelController } from '../controllers/excel.controller';
 import { EmployeeBatchSchema } from '../../domain/contracts/validators/employee.validator';
 
-const router = Router();
+const router: Router = Router();
 const excelController = new ExcelController();
 
 router.post(

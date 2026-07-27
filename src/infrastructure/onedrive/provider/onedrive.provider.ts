@@ -16,7 +16,7 @@ export class OneDriveProvider {
       process.env;
 
     if (!AZURE_TENANT_ID || !AZURE_CLIENT_ID || !AZURE_CLIENT_SECRET) {
-      throw new Error('❌ Faltan variables de entorno de Azure');
+      throw new Error('Faltan variables de entorno de Azure');
     }
     try {
       const credential = new ClientSecretCredential(
@@ -37,10 +37,10 @@ export class OneDriveProvider {
         authProvider,
       });
 
-      logger.info('✅ Cliente Microsoft Graph inicializado');
+      logger.info('Cliente Microsoft Graph inicializado');
       return this.client;
     } catch (error) {
-      logger.error({ error }, '❌ Error inicializando cliente Graph');
+      logger.error({ error }, 'Error inicializando cliente Graph');
       throw error;
     }
   }

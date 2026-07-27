@@ -3,7 +3,7 @@ import { ErrorHandleMulter } from '../middlewares/error-handler-multer.middlewar
 import { excelUpload } from '../middlewares/upload.middleware';
 import { AddendumController } from '../controllers/addendum.controller';
 
-const router = Router();
+const router: Router = Router();
 const addendumController = new AddendumController();
 
 router.post(
