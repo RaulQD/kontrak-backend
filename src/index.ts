@@ -16,8 +16,10 @@ async function main(): Promise<void> {
     logger.info('Inicializando servidor...');
     const server = new Server(app);
     server.listen(Number(config.server.port));
-    const oneDriveScheduler = new OneDriveScheduler();
-    oneDriveScheduler.start();
+    if (process.env.ONEDRIVE_ENABLED === 'true') {
+      const oneDriveScheduler = new OneDriveScheduler();
+      oneDriveScheduler.start();
+    }
   } catch (error: unknown) {
     logger.error({ error }, 'Error during application initialization');
     process.exit(1);
