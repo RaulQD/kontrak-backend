@@ -1,6 +1,6 @@
 export type AccessPayload = { sub: string };
 
-export type authenticatedUser = {
+export type AuthenticatedUser = {
   id: string;
   email: string;
   roles: string[];
