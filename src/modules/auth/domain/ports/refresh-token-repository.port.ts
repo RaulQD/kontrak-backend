@@ -1,4 +1,7 @@
+import { RefreshToken } from '../entities/refresh-token.entity';
+
 export interface IRefreshTokenRepository {
-  save(): Promise<void>;
-  findByHash(tokenHash: string): Promise<void>;
+  save(token: RefreshToken): Promise<void>;
+  findByHash(tokenHash: string): Promise<RefreshToken | null>;
+  revokeFamily(tokenFamilyId: string): Promise<void>;
 }

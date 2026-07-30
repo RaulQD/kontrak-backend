@@ -1,5 +1,5 @@
 import { prisma } from '../src/platform/database/prisma';
-
+import bcrypt from 'bcryptjs';
 // ═══════════════════════════════════════════════════════════
 // 1. CATÁLOGO DE ROLES
 // ═══════════════════════════════════════════════════════════
@@ -202,15 +202,50 @@ async function seedRolePermissions() {
   console.info(`✅ ${count} role_permissions`);
 }
 
+async function seedAdminUser() {
+  const email = process.env.BOOTSTRAP_ADMIN_EMAIL;
+  const password = process.env.BOOTSTRAP_ADMIN_PASSWORD;
+  if (!email || !password) {
+    console.warn(
+      '⚠️  BOOTSTRAP_ADMIN_EMAIL/PASSWORD no definidos; se omite admin',
+    );
+    return;
+  }
+  // email no tiene @unique (índice parcial), así que no se puede upsert por email
+  const existing = await prisma.user.findFirst({
+    where: { email: email.toLowerCase(), deletedAt: null },
+  });
+  const passwordHash = await bcrypt.hash(password, 12);
+  const user =
+    existing ??
+    (await prisma.user.create({
+      data: { email: email.toLowerCase(), passwordHash },
+    }));
+
+  const superAdmin = await prisma.role.findUnique({
+    where: { name: 'SUPER_ADMIN' },
+  });
+  if (superAdmin) {
+    await prisma.userRole.upsert({
+      where: { userId_roleId: { userId: user.id, roleId: superAdmin.id } },
+      update: {},
+      create: { userId: user.id, roleId: superAdmin.id },
+    });
+  }
+  console.info(`✅ admin bootstrap: ${email}`);
+}
+
 async function main() {
   console.info('🌱 Iniciando seed...');
   await seedRoles();
   await seedPermissions();
   await seedRolePermissions();
+  await seedAdminUser();
   // await seedContractTypes();
   // await seedLegalParameters();
   console.info('✅ Seed completado');
 }
+
 main()
   .catch((e) => {
     console.error('Seed falló:', e);

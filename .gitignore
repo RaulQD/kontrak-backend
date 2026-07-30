@@ -13,3 +13,6 @@ generated_contracts/
 *.zip
 *.pdf
 /src/generated/prisma
+dist/
+.claude/
+.agents/
