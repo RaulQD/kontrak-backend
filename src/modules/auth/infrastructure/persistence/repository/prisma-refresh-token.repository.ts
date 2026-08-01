@@ -4,6 +4,17 @@ import { IRefreshTokenRepository } from '../../../domain/ports/refresh-token-rep
 
 export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly prisma: PrismaClient) {}
+
+  async markReplaced(
+    tokenId: string,
+    replacedByTokenId: string,
+  ): Promise<void> {
+    await this.prisma.refreshToken.update({
+      where: { id: tokenId },
+      data: { replacedBy: replacedByTokenId, revokedAt: new Date() },
+    });
+  }
+
   async save(token: RefreshToken): Promise<void> {
     await this.prisma.refreshToken.create({
       data: {
@@ -19,6 +30,7 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
       },
     });
   }
+
   async findByHash(tokenHash: string): Promise<RefreshToken | null> {
     const row = await this.prisma.refreshToken.findUnique({
       where: { tokenHash },

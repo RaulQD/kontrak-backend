@@ -1,4 +1,5 @@
 import express, { Express } from 'express';
+import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import cors from 'cors';
 import { errorMiddleware } from '../api/middlewares/error-handle.middleware';
@@ -13,6 +14,7 @@ export const createApp = async (): Promise<Express> => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cors(corsConfig));
+  app.use(cookieParser());
 
   // Health check - Endpoint raíz
   logger.info('Registrando ruta GET /');

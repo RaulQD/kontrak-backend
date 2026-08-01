@@ -1,6 +1,7 @@
 import { env } from '../../config/env';
 import { prisma } from '../../platform/database/prisma';
 import { LoginUseCase } from './application/login.use-case';
+import { RefreshSessionUseCase } from './application/refresh-session.use-case';
 import { PrismaRefreshTokenRepository } from './infrastructure/persistence/repository/prisma-refresh-token.repository';
 import { PrismaUserRepository } from './infrastructure/persistence/repository/prisma-user.repository';
 import { BcryptPasswordHasher } from './infrastructure/security/bcrypt-password-hasher';
@@ -24,7 +25,13 @@ const loginUserCase = new LoginUseCase(
   refreshGen,
   { accessTtlSeconds: Number(env.JWT_ACCESS_EXPIRES), refreshTtlDays: 7 },
 );
-
-const authController = new AuthController(loginUserCase);
+const refreshSessionUseCase = new RefreshSessionUseCase(
+  useRepo,
+  refreshRepo,
+  signer,
+  refreshGen,
+  { accessTtlSeconds: Number(env.JWT_ACCESS_EXPIRES), refreshTtlDays: 7 },
+);
+const authController = new AuthController(loginUserCase, refreshSessionUseCase);
 
 export const authRouter = AuthRouter(authController);
