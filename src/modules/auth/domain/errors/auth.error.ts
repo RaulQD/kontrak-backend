@@ -27,3 +27,9 @@ export class AccountInactiveError extends ForbiddenError {
     super('La cuenta está desactivada');
   }
 }
+
+export class InvalidRefreshTokenError extends UnauthorizedError {
+  constructor() {
+    super('Sesión inválida. Inicia sesión nuevamente');
+  }
+}

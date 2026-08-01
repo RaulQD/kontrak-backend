@@ -10,6 +10,7 @@ export const AuthRouter = (controller: AuthController): Router => {
     validationErrorMiddleware(loginSchema),
     controller.login,
   );
+  router.post('/refresh', controller.refreshTOken);
 
   return router;
 };
