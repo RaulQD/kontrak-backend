@@ -4,6 +4,13 @@ import { IRefreshTokenRepository } from '../../../domain/ports/refresh-token-rep
 
 export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly prisma: PrismaClient) {}
+  async revokedAllByUser(userId: string): Promise<number> {
+    const result = await this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    return result.count;
+  }
 
   async markReplaced(
     tokenId: string,

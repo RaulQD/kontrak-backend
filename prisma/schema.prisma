@@ -4,8 +4,8 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -277,6 +277,7 @@ model User {
   lockedUntil         DateTime? @map("locked_until") @db.Timestamptz(6)
   lastFailedLoginAt   DateTime? @map("last_failed_login_at") @db.Timestamptz(6)
   lockoutsCount       Int       @default(0) @map("lockouts_count") @db.SmallInt
+  tokensRevokedAt     DateTime? @map("tokens_revoked_at") @db.Timestamptz(6)
   isActive            Boolean   @default(true) @map("is_active")
   createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)

@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { z } from 'zod';
+import { toSeconds } from '../shared/utils/durations';
 
 /**
  * Validación de variables de entorno con fail-fast.
@@ -35,8 +36,8 @@ const EnvSchema = z.object({
   JWT_REFRESH_SECRET: z
     .string()
     .min(32, 'JWT_REFRESH_SECRET debe tener al menos 32 caracteres'),
-  JWT_ACCESS_EXPIRES: z.string().default('15m'),
-  JWT_REFRESH_EXPIRES: z.string().default('7d'),
+  JWT_ACCESS_EXPIRES: z.string().default('15m').transform(toSeconds), // → 900
+  JWT_REFRESH_EXPIRES: z.string().default('7d').transform(toSeconds), // → 604800
 });
 
 const parsed = EnvSchema.safeParse(process.env);

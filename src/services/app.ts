@@ -6,7 +6,7 @@ import { errorMiddleware } from '../api/middlewares/error-handle.middleware';
 import { corsConfig } from '../config/cors.config';
 import { logger } from '../shared/utils/logger';
 import router from '../api/routes';
-import { authRouter } from '../modules/auth';
+import { authRouter, userSessionsRouter } from '../modules/auth';
 
 export const createApp = async (): Promise<Express> => {
   const app = express();
@@ -40,6 +40,7 @@ export const createApp = async (): Promise<Express> => {
   logger.info('Rutas registradas correctamente en /api');
 
   app.use('/api/auth', authRouter);
+  app.use('/api/users', userSessionsRouter);
   // Manejar rutas no encontradas (404) - debe ir ANTES del errorHandler
   app.use((req, res, _next) => {
     logger.warn({ path: req.path, method: req.method }, 'Ruta no encontrada');
