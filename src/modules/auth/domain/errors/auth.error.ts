@@ -33,3 +33,15 @@ export class InvalidRefreshTokenError extends UnauthorizedError {
     super('Sesión inválida. Inicia sesión nuevamente');
   }
 }
+
+export class AccessTokenExpiredError extends UnauthorizedError {
+  constructor() {
+    super('EL token de acceso ha expirado.');
+  }
+}
+
+export class InvalidAccessTokenError extends UnauthorizedError {
+  constructor() {
+    super('EL token de acceso es inválido.');
+  }
+}

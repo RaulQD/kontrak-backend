@@ -24,7 +24,7 @@ export interface LoginOutput {
 
 export interface AuthTokenConfig {
   accessTtlSeconds: number; // 900(15 min)
-  refreshTtlDays: number; // 7
+  refreshTtlSeconds: number; // 7
 }
 
 export class LoginUseCase {
@@ -70,9 +70,7 @@ export class LoginUseCase {
     const refreshToken = RefreshToken.issue({
       userId: user.id,
       tokenHash: this.refreshGen.hash(refreshPlain),
-      expiresAt: new Date(
-        now.getTime() + this.config.refreshTtlDays * 86_400_000,
-      ),
+      expiresAt: new Date(now.getTime() + this.config.refreshTtlSeconds * 1000),
       ipAddress: input.ipAddress,
       userAgent: input.userAgent,
     });

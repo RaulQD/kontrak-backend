@@ -1,4 +1,3 @@
-import { is, no } from 'zod/v4/locales';
 import { InvalidRefreshTokenError } from '../domain/errors/auth.error';
 import { IRefreshTokenRepository } from '../domain/ports/refresh-token-repository.port';
 import { IRefreshTokenGenerator } from '../domain/ports/token-generator.port';
@@ -55,9 +54,7 @@ export class RefreshSessionUseCase {
       userId: stored.userId,
       tokenHash: this.refreshGen.hash(newPlain),
       tokenFamilyId: stored.tokenFamilyId,
-      expiresAt: new Date(
-        now.getTime() + this.config.refreshTtlDays * 86_400_000,
-      ),
+      expiresAt: new Date(now.getTime() + this.config.refreshTtlSeconds * 1000),
       ipAddress: input.ipAddress,
       userAgent: input.userAgent,
     });
