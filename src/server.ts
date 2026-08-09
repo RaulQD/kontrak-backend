@@ -8,11 +8,22 @@ export class Server {
     this.app = app;
   }
   public listen(port: number): void {
-    this.app.listen(port, () => {
+    const server = this.app.listen(port, () => {
       this.logger.info(`=========== Server running on port ${port} ==========`);
       this.logger.info(
         `=========== Environment: ${process.env.NODE_ENV || 'development'} ==========`,
       );
+    });
+
+    server.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        this.logger.error(
+          `Port ${port} is already in use. Please choose a different port.`,
+        );
+      } else {
+        this.logger.error({ err }, 'Error al iniciar el servidor HTTP');
+      }
+      process.exit(1);
     });
   }
   public close(): void {

@@ -13,7 +13,7 @@ export class DeleteSessionUseCase {
     if (user === null) {
       throw new NotFoundError(`User with id ${userId} not found`);
     }
-    const revokedCount = await this.refreshRepo.revokedAllByUser(userId);
+    const revokedCount = await this.refreshRepo.revokeAllForUser(userId);
     return { revokedCount };
   }
 }

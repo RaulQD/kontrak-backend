@@ -24,7 +24,7 @@ export interface LoginOutput {
 
 export interface AuthTokenConfig {
   accessTtlSeconds: number; // 900(15 min)
-  refreshTtlSeconds: number; // 7
+  refreshTtlSeconds: number; // 604800 (7 días)
 }
 
 export class LoginUseCase {

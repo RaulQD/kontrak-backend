@@ -14,6 +14,7 @@ export default [
       'prisma.config.ts',
       'prisma/seed.ts',
       'vitest.config.ts',
+      'src/generated/**',
     ],
   },
   {
