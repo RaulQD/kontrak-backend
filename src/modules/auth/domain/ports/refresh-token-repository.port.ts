@@ -5,5 +5,5 @@ export interface IRefreshTokenRepository {
   findByHash(tokenHash: string): Promise<RefreshToken | null>;
   revokeFamily(tokenFamilyId: string): Promise<void>;
   markReplaced(tokenId: string, replacedByTokenId: string): Promise<void>;
-  revokedAllByUser(userId: string): Promise<number>;
+  revokeAllForUser(userId: string): Promise<number>;
 }

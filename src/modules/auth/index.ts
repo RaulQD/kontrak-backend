@@ -1,6 +1,6 @@
 import { env } from '../../config/env';
 import { prisma } from '../../platform/database/prisma';
-import { authenticateMiddleware } from '../../shared/middleware/autenticate.middleware';
+import { authenticateMiddleware } from '../../shared/middleware/authenticate.middleware';
 import { DeleteSessionUseCase } from './application/delete-session.use-case';
 import { AuthTokenConfig, LoginUseCase } from './application/login.use-case';
 import { LogoutUseCase } from './application/logout.use-case';
@@ -24,7 +24,7 @@ const refreshGen = new CryptoRefreshTokenGenerator();
 
 const tokenConfig: AuthTokenConfig = {
   accessTtlSeconds: env.JWT_ACCESS_EXPIRES, // 900
-  refreshTtlSeconds: env.JWT_REFRESH_EXPIRES, // 7
+  refreshTtlSeconds: env.JWT_REFRESH_EXPIRES, // 604800 (7 días)
 };
 const loginUserCase = new LoginUseCase(
   useRepo,
@@ -53,4 +53,7 @@ const authController = new AuthController(
 const deleteSessionUseCase = new DeleteSessionUseCase(useRepo, refreshRepo);
 const userSessionsController = new UserSessionsController(deleteSessionUseCase);
 export const authRouter = AuthRouter(authController);
-export const userSessionsRouter = UserSessionsRouter(userSessionsController);
+export const userSessionsRouter = UserSessionsRouter(
+  userSessionsController,
+  authenticate,
+);
