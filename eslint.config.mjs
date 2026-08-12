@@ -14,6 +14,7 @@ export default [
       'prisma.config.ts',
       'prisma/seed.ts',
       'vitest.config.ts',
+      'vitest.e2e.config.ts',
       'src/generated/**',
     ],
   },
@@ -24,7 +25,7 @@ export default [
       parserOptions: {
         ecmaVersion: 2020,
         sourceType: 'module',
-        project: './tsconfig.json',
+        project: './tsconfig.eslint.json'
       },
       globals: {
         console: 'readonly',
