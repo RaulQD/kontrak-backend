@@ -52,7 +52,6 @@ export const createApp = async (): Promise<Express> => {
       availableEndpoints: {
         root: 'GET /',
         health: 'GET /api/health',
-        uploadExcel: 'POST /api/contracts/upload',
       },
     });
   });
