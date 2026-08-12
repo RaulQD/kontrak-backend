@@ -60,9 +60,13 @@ export class RefreshSessionUseCase {
     });
     await this.refreshRepo.save(newToken);
     await this.refreshRepo.markReplaced(stored.id, newToken.id);
+
+    const permissions = await this.userRepo.findPermissionsByUserId(user.id);
     const accessToken = this.signer.signAccess(
       {
         sub: user.id,
+        email: user.email,
+        permissions,
       },
       this.config.accessTtlSeconds,
     );

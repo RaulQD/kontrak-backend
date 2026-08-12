@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { UnauthorizedError } from '../utils/app-error-v2';
 
 export const changeStringToDate = (date: string) => {
   const fechaString = date.split('/');
@@ -8,7 +9,7 @@ export const changeStringToDate = (date: string) => {
 
 export const getAuth = (req: Request) => {
   if (!req.auth) {
-    throw new Error('User not authenticated');
+    throw new UnauthorizedError('Token de acceso');
   }
   return req.auth;
 };
