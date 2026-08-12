@@ -18,7 +18,7 @@ Para **gerentes de RRHH y jefes de área en empresas medianas peruanas**, que **
 ## 2. Personas y Roles de Usuario
 
 | Rol | Descripción | Necesidades clave | Permiso mínimo |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Administrador RRHH** | Responsable de toda la operación de nómina, contratos y seguros. Gestiona usuarios, accede a datos sensibles. | Crear/editar empleados y contratos, calcular planilla, ver históricos, generar reportes SUNAT, gestionar usuarios. | `SUPER_ADMIN` o `HR_ADMIN` |
 | **Asistente RRHH** | Apoyo administrativo: captura de datos, control de documentos, seguimiento de procesos. Acceso limitado a datos de bajo riesgo. | Cargar empleados por lote, ver estado de contratos/documentos, crear reportes. | `HR_ANALYST` |
 | **Jefe de Área / Supervisor** | Valida asistencia de su equipo, autoriza licencias/vacaciones, ve información no sensible de su división. | Aprobar solicitudes de ausencia, ver asistencia de su equipo, alertas de vencimiento de contratos del área. | `MANAGER` (scoped a su división) |
@@ -31,7 +31,7 @@ Para **gerentes de RRHH y jefes de área en empresas medianas peruanas**, que **
 ## 3. Mapa de Épicas
 
 | EP-# | Nombre | Fase(s) | Objetivo de Negocio | Prioridad MoSCoW | # US esperadas |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **EP-01** | Fundaciones técnicas: BD, auth, Docker, CI | Fase 0 | Plataforma estable, segura y desplegable para todas las demás épicas. Reemplaza scripts y monolito frágil. | **MUST** | 9 |
 | **EP-02** | Autenticación, RBAC y auditoría | Fase 0 | Seguridad: solo usuarios autorizados acceden a datos según su rol. Trazabilidad legal de cambios. | **MUST** | 6 |
 | **EP-03** | Migración: generación de contratos y adendas | Fase 1 | Reutilizar inversión existente (templates, processors). Reducir riesgo de migración. | **MUST** | 7 |
@@ -58,6 +58,7 @@ Para **gerentes de RRHH y jefes de área en empresas medianas peruanas**, que **
 ### Nivel de Detalle Progresivo
 
 **Importante:** Este backlog sigue una estrategia de refinamiento realista de Scrum:
+
 - **Épicas de Fase 0 y 1:** detalle COMPLETO (narrativa + 2–5 criterios de aceptación Gherkin completos + dependencias + notas técnicas).
 - **Épicas de Fase 2 y 3:** detalle MEDIO (narrativa + 2–3 criterios de aceptación Gherkin + dependencias críticas).
 - **Épicas de Fase 4, 5 y 6:** detalle MINIMAL (ID, título, narrativa de una línea + prioridad MoSCoW). Se refinará cuando la fase se acerque (típicamente 2–3 sprints antes de su inicio).
@@ -108,6 +109,7 @@ Escenario 4: Índices y optimización
 ```
 
 **Notas técnicas:**
+
 - Usar `@prisma/adapter-pg` + `pg` driver.
 - Crear archivo `prisma/schema.prisma` con las 16 tablas; usar `prisma migrate dev --create-only` para inspeccionar SQL antes de aplicar.
 - Agregar extensiones PostgreSQL con `CREATE EXTENSION btree_gist` en migración de seed.
@@ -115,6 +117,7 @@ Escenario 4: Índices y optimización
 - No incluir datos seed reales en esta US (ver US-004 para seed de catálogos).
 
 **Definición de Hecho:**
+
 - [ ] `prisma/schema.prisma` compila sin errores.
 - [ ] `npm run prisma:migrate:dev` crea BD fresh.
 - [ ] Vitest + Testcontainers pueden correr un test que inserta un empleado.
@@ -163,6 +166,7 @@ Escenario 4: Multi-stage build reduce tamaño de imagen
 ```
 
 **Notas técnicas:**
+
 - Dockerfile con stage `builder` (instala deps, compila TS) + stage `runtime` (solo node y dist/).
 - `docker-compose.yml` con servicios: `api`, `worker`, `postgres`, `redis`.
 - Usar `COPY --chown` para permisos correctos; `USER node` (no root) en runtime.
@@ -171,6 +175,7 @@ Escenario 4: Multi-stage build reduce tamaño de imagen
 - No incluir Chrome/Puppeteer en imagen (usar pdfmake).
 
 **Definición de Hecho:**
+
 - [ ] Dockerfile multiestage sin vulnerabilidades (escanear con Trivy).
 - [ ] docker-compose.yml con volúmenes nombrados y networks.
 - [ ] README con instrucciones "docker-compose up" probadas en máquina limpia.
@@ -216,12 +221,14 @@ Escenario 4: Configuración cargada desde múltiples fuentes
 ```
 
 **Notas técnicas:**
+
 - Crear `src/config/env.ts` con Zod schema: `const ConfigSchema = z.object({ DATABASE_URL: z.string().url(), ...})`.
 - Invocar validación en `src/index.ts` línea 1 con `parseConfig()`, que lanza si hay error.
 - Usar `process.exit(1)` si falla.
 - No loguear valores sensibles (JWT_SECRET, API keys) en el log, solo presencia/ausencia.
 
 **Definición de Hecho:**
+
 - [ ] `src/config/env.ts` con validación Zod de al menos 15 variables críticas.
 - [ ] Test que simula variable faltante y verifica exit code.
 - [ ] `.env.example` con todos los templates de variables.
@@ -276,12 +283,14 @@ Escenario 5: Seed idempotente (se ejecuta 2 veces sin fallar)
 ```
 
 **Notas técnicas:**
+
 - Crear archivo `prisma/seed.ts` que importa Prisma.
 - No incluir datos reales de empleados (eso viene en US-006: importador de Excel).
 - Ubigeo: cargar desde CSV o JSON en `src/assets/ubigeo.json` (gobierno INEI público).
 - Usar `upsert` en lugar de create para idempotencia.
 
 **Definición de Hecho:**
+
 - [ ] `prisma/seed.ts` compilado y sin errores TypeScript.
 - [ ] `npm run seed` carga en <10 segundos.
 - [ ] `package.json` con script `"seed": "prisma db seed"`.
@@ -329,11 +338,13 @@ Escenario 4: Platform no conoce los módulos
 ```
 
 **Notas técnicas:**
+
 - Configurar path aliases en `tsconfig.json`: `@modules/*`, `@platform/*`, `@shared/*`.
 - Crear `.eslintrc.js` con regla `eslint-plugin-boundaries`.
 - Empezar con módulos vacíos para Fase 1 (contracts) y mantener código antiguo en `legacy/` para no romper nada.
 
 **Definición de Hecho:**
+
 - [ ] Todas las carpetas creadas vacías.
 - [ ] ESLint configurado y pasa `npm run lint` (regla de límites no lo rompe).
 - [ ] README en `src/modules/` explicando la arquitectura.
@@ -386,12 +397,14 @@ Escenario 5: Rate limiting en endpoints pesados
 ```
 
 **Notas técnicas:**
+
 - Archivo `platform/http/server.ts` que construye app Express.
 - Middleware order: `morgan` → `json` → `requestId` (AsyncLocalStorage) → `pino-http` → `cors` → `helmet` → rutas → error handler.
 - Error handler debe capturar `AppError` typed y genérico `Error`, loguear y responder RFC 7807.
 - Rate limiting con `express-rate-limit`, keyed by IP o JWT sub.
 
 **Definición de Hecho:**
+
 - [ ] `npm start` levanta servidor en puerto 3000.
 - [ ] GET /health retorna 200.
 - [ ] Tests con Supertest verifican: logging, CORS, error handler, rate limit.
@@ -446,6 +459,7 @@ Escenario 5: Contraseña incorrecta
 ```
 
 **Notas técnicas:**
+
 - Usar `jsonwebtoken` (ya instalado) para crear JWT.
 - Contraseñas hasheadas con `bcryptjs` o `argon2id` (mejor, pero bcryptjs es más común).
 - Tabla `refresh_tokens` con PK compuesto (user_id, token_hash) + `revoked_at` nullable.
@@ -453,11 +467,12 @@ Escenario 5: Contraseña incorrecta
 - Cookie httpOnly + secure en producción; SameSite=Strict.
 
 **Definición de Hecho:**
-- [ ] Endpoint POST /auth/login testeado con Supertest.
-- [ ] Endpoint POST /auth/refresh testeado con token expirado y válido.
-- [ ] Endpoint DELETE /users/:id/sessions revoca todas las sesiones.
-- [ ] Tests verifican hasheo de contraseña (nunca en texto plano).
-- [ ] Documentación JWT en `docs/auth/jwt.md`.
+
+- [x] Endpoint POST /auth/login testeado con Supertest.
+- [x] Endpoint POST /auth/refresh testeado con token expirado y válido.
+- [x] Endpoint DELETE /users/:id/sessions revoca todas las sesiones.
+- [x] Tests verifican hasheo de contraseña (nunca en texto plano).
+- [x] Documentación JWT en `docs/auth/jwt.md`.
 
 ---
 
@@ -498,13 +513,15 @@ Escenario 4: Roles editables en BD sin redeployar
 ```
 
 **Notas técnicas:**
+
 - Tabla `users` + `roles` + `permissions` + `role_permissions` + `user_roles` (con scope opcional por company_id).
 - Middleware `requirePermission(code)` que lee `req.user.permissions` (array en JWT).
 - Casos de uso deben hacer filtro adicional de alcance (no solo middleware).
 - Nunca confiar en claims del JWT solos; re-validar alcance en la capa de aplicación.
 
 **Definición de Hecho:**
-- [ ] Tablas RBAC creadas con seed de 5 roles + 30 permisos.
+
+- [x] Tablas RBAC creadas con seed de 5 roles + 29 permisos.
 - [ ] Middleware `requirePermission` probado con tests.
 - [ ] Filtro de alcance implementado en repositorios (Prisma).
 - [ ] Test E2E: MANAGER intenta leer salario de otra división, rechazado.
@@ -545,6 +562,7 @@ Escenario 4: Auditoría no ralentiza requests
 ```
 
 **Notas técnicas:**
+
 - Usar triggers PostgreSQL AFTER INSERT/UPDATE/DELETE en tablas sensibles.
 - Trigger lee `current_setting('app.current_user_id')` inyectado por Prisma middleware.
 - `audit_logs` con columnas: `user_id`, `action`, `table_name`, `record_id`, `old_data`, `new_data`, `ip`, `occurred_at`.
@@ -552,6 +570,7 @@ Escenario 4: Auditoría no ralentiza requests
 - No loguear PII completa en old_data, solo campos que cambiaron.
 
 **Definición de Hecho:**
+
 - [ ] Triggers creados en migración Prisma.
 - [ ] Tabla audit_logs poblada después de operaciones CRUD.
 - [ ] API GET /audit-logs?table=employees&record_id=123 para investigación.
@@ -592,11 +611,13 @@ Escenario 3: Cambio de contraseña
 ```
 
 **Notas técnicas:**
+
 - Tabla `password_resets` con token_hash, user_id, expires_at.
 - Email desde Brevo (ya integrado).
 - Frontend no está en scope, pero backend debe servir una página simple de reset si es SPA.
 
 **Definición de Hecho:**
+
 - [ ] Endpoint POST /auth/forgot-password.
 - [ ] Endpoint POST /auth/reset-password con token validation.
 - [ ] Email enviado verificado en test (mockeado).
@@ -647,12 +668,14 @@ Escenario 5: Errores manejados consistentemente
 ```
 
 **Notas técnicas:**
+
 - Crear `platform/storage/port.ts` con interfaz.
 - `platform/storage/adapters/onedrive.adapter.ts` envolviendo `OneDriveProvider` actual.
 - `platform/storage/adapters/local.adapter.ts` escribiendo a `/tmp` o carpeta configurable.
 - Metadatos siempre en Postgres (documento.ts con hash, mime, tamaño, storage_provider, storage_path).
 
 **Definición de Hecho:**
+
 - [ ] Interfaz FileStorage definida en TS.
 - [ ] OneDriveStorageAdapter implementado (wrapping código existente).
 - [ ] LocalStorageAdapter para tests.
@@ -696,6 +719,7 @@ Escenario 4: Docker sin Chrome
 ```
 
 **Notas técnicas:**
+
 - Usar `pdfmake` v10+ (ya en devDependencies).
 - Convertir Handlebars + HTML a definición de documento pdfmake (arrays y objetos JS).
 - Crear `platform/pdf/pdfmake.generator.ts` con métodos `generateContractPdf(data): Buffer`.
@@ -703,6 +727,7 @@ Escenario 4: Docker sin Chrome
 - Archivo `docs/migration_to_pdfmake.md` ya existe; completarlo.
 
 **Definición de Hecho:**
+
 - [ ] `platform/pdf/pdfmake.generator.ts` compilado.
 - [ ] Todos los tipos de contrato generados sin error.
 - [ ] PDF visual pass (inspección manual de 3 documentos tipo).
@@ -754,6 +779,7 @@ Escenario 4: Manejo de errores granular
 ```
 
 **Notas técnicas:**
+
 - `modules/contracts/application/contract-generation.service.ts`.
 - Delega en `platform/pdf/pdfmake.generator.ts` para PDF.
 - Delega en `platform/storage` para almacenamiento.
@@ -761,6 +787,7 @@ Escenario 4: Manejo de errores granular
 - `domain/contracts/entities/contract.ts` con validaciones de negocio puras.
 
 **Definición de Hecho:**
+
 - [ ] `ContractGenerationService` implementado.
 - [ ] Tests unitarios de validación sin BD.
 - [ ] Tests de integración con Testcontainers (Postgres + Redis).
@@ -815,6 +842,7 @@ Escenario 5: Reintentos automáticos en falla temporal
 ```
 
 **Notas técnicas:**
+
 - Job repetible con BullMQ: `bull.addRepeatableJob('ingest-onedrive', every: 10 * 60 * 1000)`.
 - Tabla `import_batches` con status: PROCESSING, COMPLETED, FAILED.
 - Tabla `import_batch_rows` con raw_data, errors JSONB por fila.
@@ -822,6 +850,7 @@ Escenario 5: Reintentos automáticos en falla temporal
 - Política de borrado: nunca borrar en error; opcional borrar en success después de N días.
 
 **Definición de Hecho:**
+
 - [ ] Job "ingest-onedrive" en worker.
 - [ ] import_batches y import_batch_rows pobladas en tests.
 - [ ] Email de notificación enviado (verificado en tests con mock).
@@ -860,11 +889,13 @@ Escenario 3: Adenda de incremento de actividad tiene tope de 36 meses
 ```
 
 **Notas técnicas:**
+
 - `modules/contracts/application/addendum-generation.service.ts`.
 - Validación con EXCLUDE constraint en BD (vigencias no solapadas).
 - Enumeración de tipos: SUPLENCIA, INCREMENTO_ACTIVIDAD, PRORROGA, CAMBIO_REMUNERACION, CAMBIO_PUESTO.
 
 **Definición de Hecho:**
+
 - [ ] `AddendumGenerationService` con validaciones.
 - [ ] Tests de solape de fechas y límite de 36 meses.
 - [ ] Endpoint POST /contracts/:id/addendums.
@@ -905,11 +936,13 @@ Escenario 3: Legajo por empleado
 ```
 
 **Notas técnicas:**
+
 - Tabla `generated_documents` con: id, company_id, kind (enum), entity_table, entity_id, employee_id FK, file_name, mime_type, size_bytes, sha256 CHAR(64), storage_provider, storage_path, generation_snapshot JSONB, created_at, created_by.
 - Índice en (entity_table, entity_id) para queries rápidas.
 - SHA256 de binario calculado en plataforma/pdf o plataforma/storage.
 
 **Definición de Hecho:**
+
 - [ ] Tabla created en migración Prisma.
 - [ ] Test de insert y query por hash.
 
@@ -949,11 +982,13 @@ Escenario 3: Empleado ve su legajo
 ```
 
 **Notas técnicas:**
+
 - Tabla `employee_documents` con (employee_id, document_kind, file_name, storage_path, uploaded_at, expires_at, created_by).
 - Middelware Multer con límite 10MB y whitelist MIME.
 - No borrar documento, marcar como superseded si se sube uno nuevo del mismo kind.
 
 **Definición de Hecho:**
+
 - [ ] Endpoint POST /employees/:id/documents.
 - [ ] Validación de MIME y tamaño.
 - [ ] Test de upload y descarga.
@@ -999,11 +1034,13 @@ Escenario 4: Vigencia de póliza no se solapa
 ```
 
 **Notas técnicas:**
+
 - Tabla `insurance_providers` con nombre, ruc, email de contacto (para reportes).
 - EXCLUDE USING gist en (employee_id, policy_id, daterange) para prevenir solapamiento.
 - `declared_salary` por enrollment (puede variar con adendas, se snapshotea en reporte mensual).
 
 **Definición de Hecho:**
+
 - [ ] Endpoints CRUD de pólizas y enrollments.
 - [ ] Test de EXCLUDE constraint.
 
@@ -1050,11 +1087,13 @@ Escenario 4: Reporte se regenera si se añaden empleados
 ```
 
 **Notas técnicas:**
+
 - Reutilizar `SctrReportProcessor` de la capa actual como `sctr.report-generator.ts`.
 - Job enqeudo desde endpoint, estado consultable vía GET /jobs/:jobId.
 - `sctr_declarations` con documento_id FK a `generated_documents` (trazabilidad).
 
 **Definición de Hecho:**
+
 - [ ] Endpoint POST /insurance/reports/sctr.
 - [ ] Job genera Excel con estructura correcta.
 - [ ] Email enviado (verificado en mock).
@@ -1069,7 +1108,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 **Narrativa general:** Como **administrador**, quiero **gestionar empleados: crear, editar, ver histórico de puestos/salarios, cargar por lote desde Excel**, para que **tengan datos actualizados en la BD y no dependa 100% del Excel manual**.
 
 | US | Título | Narrativa (1 línea) | CA (2–3) | Prioridad | Dependencias |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | **US-020** | CRUD de empleados completo | Crear, actualizar, buscar, listar empleados con filtros | `Dado dato_nuevo Cuando POST Entonces registra con auditoría` | MUST | US-009 |
 | **US-021** | Datos bancarios y afiliaciones | Múltiples cuentas sueldo/CTS, sistemas de pensión (AFP/ONP), comisión | `Dado afiliación_nueva Cuando se guarda Entonces EXCLUDE previene solapamiento` | MUST | US-020 |
 | **US-022** | Cese de empleado con propagación | Marcar como CESADO, disparar eventos (contratos, seguros, planilla) | `Dado cese Cuando POST Entonces disparar eventos` | MUST | US-020 |
@@ -1087,7 +1126,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 #### US-031 a US-045: EP-07 (Organización) — Detalle medio
 
 | US | Título | Narrativa | CA (2–3) | Prioridad |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **US-031** | Gestionar empresas (companies) | Crear/editar razón social, RUC, representante legal | `Dado empresa Cuando CRUD Entonces audita` | MUST |
 | **US-032** | Multi-RUC en la misma empresa | Mismo tenant, múltiples RUC con independencia fiscal | `Dado RUC1, RUC2 Cuando ambos en BD Entonces reportes por RUC` | MUST |
 | **US-033** | Sedes/sucursales (branches) | Crear sedes con código, ubicación INEI, anexo SUNAT | `Dado sede Cuando POST Entonces con anexo T-Registro` | MUST |
@@ -1102,7 +1141,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 #### US-046 a US-065: EP-08 (Asistencia) — Detalle medio; EP-09 (Vacaciones) — Detalle medio
 
 | US | Título | Narrativa | CA (2–3) | Prioridad |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **US-046** | Conector GeoVictoria: sincronizar marcaciones | Job BullMQ que importa diarios desde API REST | `Dado marcaciones_nuevas Cuando job ejecuta Entonces INSERT attendance_records` | MUST |
 | **US-047** | Turnos y horarios | Crear turnos rotativos, asignar a empleados con vigencia | `Dado turno Cuando asigno Entonces vigencia con EXCLUDE` | MUST |
 | **US-048** | Cálculo de tardanzas | Comparar check_in vs horario programado | `Dado entrada_tarde Cuando calcula Entonces es_late=true` | MUST |
@@ -1122,7 +1161,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 #### US-057 a US-085 (Fases 4–6): ID, Título, Narrativa de una línea, Prioridad MoSCoW
 
 | US | Título | Narrativa (1 línea) | Prioridad | Fase |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **US-057** | Conceptos de planilla CRUD | Crear/editar conceptos remunerativos, descuentos, aportes | MUST | 4 |
 | **US-058** | Parámetros legales versionados | UIT, RMV, tasas AFP/ONP por vigencia | MUST | 4 |
 | **US-059** | Abrir período de planilla | Crear payroll_period MENSUAL, GRATIFICACION, CTS, LIQUIDACION | MUST | 4 |
@@ -1158,7 +1197,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 ## 5. Requisitos No Funcionales
 
 | Categoría | Requisito | Métrica | Validación |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Seguridad** | PII cifrado en reposo (si requiere) | AES-256 o TDE de Postgres | Audit trail de accesos |
 | **Seguridad** | HTTPS/TLS 1.2+ obligatorio en producción | Certificado válido | SSL Labs A+ |
 | **Seguridad** | Rate limiting en endpoints | 100 req/min por IP, 10 req/min por usuario | Test de carga |
@@ -1228,7 +1267,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 ## 8. Métricas de Éxito del Producto
 
 | Métrica | Target v1 | Validación |
-|---|---|---|
+| --- | --- | --- |
 | **Reducción de tiempo RRHH en procesamiento mensual** | 80% (15–20 horas → 2–3) | Encuesta post-deployment |
 | **Precisión de cálculo de planilla** | 100% (0 errores manuales) | Comparación celda por celda con planilla antigua |
 | **Disponibilidad del sistema** | 99.5% (horas de negocio) | Uptime monitoring |
@@ -1255,7 +1294,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 ## 10. Plan de Comunicación con Stakeholders
 
 | Stakeholder | Frecuencia | Canal | Contenido |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Dueño del proyecto** | Semanal (viernes) | Video sync 30 min | Avance, blockers, decisiones pendientes |
 | **Equipo RRHH** | Bi-semanal | Sprint review (prod/staging) | Demo de features, solicitud de feedback |
 | **C-level (ejecutivos)** | Mensual | Email + dashboard | Hitos, inversión, ROI, timeline |
@@ -1287,7 +1326,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 ### A. Matriz de Trazabilidad: Épicas → OKRs de Negocio
 
 | OKR de Negocio | Épicas que lo cumplen | Métrica |
-|---|---|---|
+| --- | --- | --- |
 | **O1: Eliminar Excel como fuente de verdad de empleados** | EP-02, EP-06, EP-07 | 100% de datos en BD, cero Excels vivos |
 | **O2: Automatizar 100% la nómina mensual** | EP-04, EP-10, EP-11 | Cero ajustes manuales, error zero vs real |
 | **O3: Cumplimiento automático SUNAT** | EP-11, EP-12 | PLAME/T-Registro generados sin revisar |
@@ -1306,7 +1345,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 ### C. Comparativa con Stack Alternativo Descartado
 
 | Aspecto | Stack Recomendado | NestJS (descartado) | Razón |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Setup inicial | <2 días (Express + TS) | 1 semana (decoradores, DI) | Velocidad de time-to-value |
 | Curva de aprendizaje | Media (Express conocido) | Alta (NestJS + dominio) | 1 dev, deadline ajustado |
 | Reporte de errores | Simple (middleware centralizado) | Complejo (filters + interceptors) | Mantenibilidad |
