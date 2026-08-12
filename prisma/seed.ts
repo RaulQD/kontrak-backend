@@ -1,5 +1,11 @@
+import { createHash } from 'node:crypto';
 import { prisma } from '../src/platform/database/prisma';
 import bcrypt from 'bcryptjs';
+import { PERMISSIONS } from '../src/shared/constants/permissions';
+// Catálogo real de puestos con su nivel de riesgo SCTR, hoy en el sistema
+// actual. Al sembrarlo, la BD pasa a ser la fuente de verdad y
+// `risk-level.helper.ts` debería leer de aquí en vez de la constante.
+import { SCTR_RISK_LEVELS } from '../src/domain/excel/constants/positions';
 // ═══════════════════════════════════════════════════════════
 // 1. CATÁLOGO DE ROLES
 // ═══════════════════════════════════════════════════════════
@@ -12,76 +18,151 @@ const ROLES = [
 ] as const;
 
 // ═══════════════════════════════════════════════════════════
-// 2. CATÁLOGO DE PERMISOS
+// 2. CATÁLOGO DE TIPOS DE CONTRATO (US-004, escenario 2)
+//    `sunatPlameCode` queda en null a propósito: los códigos de la
+//    Tabla 8 del PLAME deben copiarse de la fuente oficial de SUNAT,
+//    no estimarse — un código errado distorsiona la declaración mensual.
 // ═══════════════════════════════════════════════════════════
-const PERMISSIONS = [
-  // Colaboradores (legajo)
-  { code: 'colaborador:leer', description: 'Ver legajo de colaboradores' },
-  { code: 'colaborador:crear', description: 'Crear legajo' },
-  { code: 'colaborador:editar', description: 'Editar legajo' },
+const CONTRACT_TYPES = [
   {
-    code: 'colaborador:leer_sensible',
-    description: 'Ver datos sensibles (salud, derechohabientes)',
-  },
-  { code: 'colaborador:cesar', description: 'Dar de baja / cese' },
-  // Estructura organizacional
-  { code: 'organizacion:leer', description: 'Ver sedes, áreas, puestos' },
-  {
-    code: 'organizacion:editar',
-    description: 'Crear/editar estructura organizacional',
-  },
-  // Contratos
-  { code: 'contrato:leer', description: 'Ver contratos' },
-  { code: 'contrato:crear', description: 'Crear / renovar contrato' },
-  {
-    code: 'contrato:firmar_empleador',
-    description: 'Firmar contrato como empleador',
+    code: 'INDETERMINADO',
+    name: 'Contrato a plazo indeterminado',
+    legalBasis: 'D. Leg. 728 — TUO D.S. 003-97-TR, art. 4',
+    isFixedTerm: false,
+    maxDurationMonths: null,
+    requiresReplacement: false,
+    isPartTime: false,
   },
   {
-    code: 'contrato:firmar_propio',
-    description: 'Firmar contrato propio (trabajador)',
-  },
-  // Documentos laborales
-  { code: 'documento:generar', description: 'Generar documentos laborales' },
-  { code: 'documento:leer', description: 'Ver documentos' },
-  {
-    code: 'documento:firmar_empleador',
-    description: 'Firmar documentos como empleador',
+    code: 'INICIO_ACTIVIDAD',
+    name: 'Contrato por inicio o incremento de actividad',
+    legalBasis: 'D. Leg. 728 — TUO D.S. 003-97-TR, art. 57',
+    isFixedTerm: true,
+    maxDurationMonths: 36,
+    requiresReplacement: false,
+    isPartTime: false,
   },
   {
-    code: 'documento:acuse_propio',
-    description: 'Dar acuse de recepción propio',
+    code: 'NECESIDADES_MERCADO',
+    name: 'Contrato por necesidades del mercado',
+    legalBasis: 'D. Leg. 728 — TUO D.S. 003-97-TR, art. 58',
+    isFixedTerm: true,
+    maxDurationMonths: 60,
+    requiresReplacement: false,
+    isPartTime: false,
   },
-  // Beneficios y cálculos
   {
-    code: 'calculo:leer',
-    description: 'Ver cálculos (CTS, grati, liquidación)',
+    code: 'SUPLENCIA',
+    name: 'Contrato de suplencia',
+    legalBasis: 'D. Leg. 728 — TUO D.S. 003-97-TR, art. 61',
+    isFixedTerm: true,
+    // La duración la marca la ausencia del titular, no un tope legal fijo.
+    maxDurationMonths: null,
+    requiresReplacement: true,
+    isPartTime: false,
   },
   {
-    code: 'calculo:ejecutar_borrador',
-    description: 'Ejecutar cálculo en borrador',
+    code: 'PART_TIME',
+    name: 'Contrato a tiempo parcial',
+    legalBasis:
+      'D. Leg. 728 — TUO D.S. 003-97-TR, art. 4 (jornada menor a 4 h diarias en promedio)',
+    isFixedTerm: false,
+    maxDurationMonths: null,
+    requiresReplacement: false,
+    isPartTime: true,
   },
-  { code: 'calculo:aprobar', description: 'Aprobar / ejecutar planilla final' },
-  // Vacaciones / ausencias
-  { code: 'vacaciones:leer', description: 'Ver saldo y solicitudes' },
-  { code: 'vacaciones:solicitar', description: 'Solicitar vacaciones' },
-  { code: 'vacaciones:aprobar', description: 'Aprobar / rechazar solicitudes' },
-  // Parámetros legales
-  { code: 'parametro:leer', description: 'Ver parámetros legales' },
-  { code: 'parametro:editar', description: 'Editar parámetros legales' },
-  // Usuarios y accesos
-  { code: 'usuario:gestionar', description: 'Crear usuarios / asignar roles' },
-  // Auditoría
-  { code: 'auditoria:leer_rrhh', description: 'Ver logs de auditoría de RRHH' },
-  { code: 'auditoria:leer_sistema', description: 'Ver logs del sistema' },
-  // Perfil propio (autoservicio)
-  { code: 'perfil:leer', description: 'Ver perfil propio' },
   {
-    code: 'perfil:editar_contacto',
-    description: 'Editar datos de contacto propios',
+    code: 'PRACTICANTE',
+    name: 'Convenio de modalidad formativa laboral',
+    legalBasis: 'Ley 28518 — Modalidades Formativas Laborales',
+    isFixedTerm: true,
+    maxDurationMonths: null,
+    requiresReplacement: false,
+    isPartTime: false,
   },
-  { code: 'boleta:leer', description: 'Ver boletas propias' },
 ] as const;
+
+// ═══════════════════════════════════════════════════════════
+// 2b. PARÁMETROS LEGALES VERSIONADOS (US-004, DoD)
+//
+//     ⚠️ VALORES PROVISIONALES. El backlog los declara como pregunta
+//     abierta #5 ("¿Cuál es la UIT y RMV vigentes para 2026?") y no
+//     coinciden con la serie histórica conocida (UIT 4,600 corresponde
+//     a 2022). Confirmar contra el Decreto Supremo vigente ANTES de
+//     que cualquier cálculo de planilla los consuma.
+//
+//     Para corregirlos basta cambiar el valor aquí y re-ejecutar el
+//     seed: la fila se actualiza en sitio. Si el cambio es por un
+//     nuevo periodo, agrega una entrada con otro validFrom y cierra
+//     la anterior con validTo (la restricción EXCLUDE impide solapes).
+// ═══════════════════════════════════════════════════════════
+const LEGAL_PARAMETERS = [
+  {
+    code: 'UIT',
+    value: '5500',
+    unit: 'PEN',
+    validFrom: new Date('2026-01-01T00:00:00-05:00'),
+    validTo: null,
+    legalReference: 'La UIT para el 2026 es de 5,500 soles',
+  },
+  {
+    code: 'RMV',
+    value: '1130',
+    unit: 'PEN',
+    validFrom: new Date('2026-01-01T00:00:00-05:00'),
+    validTo: null,
+    legalReference: 'El RMV para el 2026 es de 1,130 soles',
+  },
+] as const;
+
+// ═══════════════════════════════════════════════════════════
+// 2c. ORGANIZACIÓN MÍNIMA (empresa, sede, división, puestos)
+//
+//     Sin estas filas es imposible insertar un empleado
+//     (employees.company_id es NOT NULL) ni un contrato
+//     (exige company + contract_type + position + branch + division).
+//
+//     Los datos de la empresa salen de las plantillas de contrato del
+//     sistema actual (src/domain/contracts/templates/templates.ts),
+//     que es la fuente de verdad hoy.
+// ═══════════════════════════════════════════════════════════
+const COMPANY = {
+  ruc: '20603381697',
+  legalName: 'INVERSIONES URBANÍSTICAS OPERADORA S.A.',
+  address:
+    'Calle Dean Valdivia N° 148 Int. 1401 Urb. Jardín (Edificio Platinium), San Isidro, Lima',
+  legalRepName: 'Catherine Susan Chang López',
+  legalRepDoc: '42933662',
+  // ubigeoId queda null: la tabla `ubigeo` aún no está sembrada.
+};
+
+// ⚠️ PROVISIONALES. El repositorio no contiene el catálogo real de sedes
+//    ni de divisiones — en el Excel ambos son texto libre. Reemplazar con
+//    los datos del cliente (pregunta abierta #8 del backlog).
+const BRANCHES = [
+  {
+    code: 'OFICINA-PRINCIPAL',
+    name: 'Oficina Principal — San Isidro',
+    kind: 'OFICINA',
+    address: COMPANY.address,
+  },
+];
+
+const DIVISIONS = [{ code: 'ESTACIONAMIENTOS', name: 'Estacionamientos' }];
+
+/**
+ * Código estable para un puesto: slug del nombre + hash corto.
+ * El hash evita colisiones entre variantes que sí son distintas para el
+ * Excel ("ANFITRION(A) C" vs "ANFITRION(A)C") y mantiene el largo ≤ 20.
+ */
+const positionCode = (name: string): string => {
+  const slug = name
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  const hash = createHash('sha1').update(name).digest('hex').slice(0, 4);
+  return `${slug.slice(0, 15)}_${hash}`;
+};
 
 // ═══════════════════════════════════════════════════════════
 // 3. ASIGNACIÓN ROL → PERMISOS (la matriz acordada)
@@ -162,7 +243,7 @@ async function seedPermissions() {
     await prisma.permission.upsert({
       where: { code: permission.code },
       update: { description: permission.description },
-      create: permission,
+      create: { code: permission.code, description: permission.description },
     });
   }
   console.info(`✅ ${PERMISSIONS.length} permisos`);
@@ -234,6 +315,105 @@ async function seedAdminUser() {
   }
   console.info(`✅ admin bootstrap: ${email}`);
 }
+async function seedContractTypes() {
+  for (const type of CONTRACT_TYPES) {
+    await prisma.contractType.upsert({
+      where: { code: type.code },
+      update: {
+        name: type.name,
+        legalBasis: type.legalBasis,
+        isFixedTerm: type.isFixedTerm,
+        maxDurationMonths: type.maxDurationMonths,
+        requiresReplacement: type.requiresReplacement,
+        isPartTime: type.isPartTime,
+      },
+      create: { ...type },
+    });
+  }
+  console.info(`✅ ${CONTRACT_TYPES.length} tipos de contrato`);
+}
+
+async function seedLegalParameters() {
+  // `code` no es UNIQUE: la unicidad real es code + vigencia, impuesta por el
+  // EXCLUDE de la tabla. Por eso no se puede usar upsert y se busca a mano.
+  for (const param of LEGAL_PARAMETERS) {
+    const existente = await prisma.legalParameters.findFirst({
+      where: { code: param.code, validFrom: param.validFrom },
+    });
+    if (existente) {
+      await prisma.legalParameters.update({
+        where: { id: existente.id },
+        data: {
+          value: param.value,
+          unit: param.unit,
+          validTo: param.validTo,
+          legalReference: param.legalReference,
+        },
+      });
+    } else {
+      await prisma.legalParameters.create({ data: { ...param } });
+    }
+  }
+  console.info(`✅ ${LEGAL_PARAMETERS.length} parámetros legales`);
+}
+
+async function seedCompany(): Promise<string> {
+  const company = await prisma.company.upsert({
+    where: { ruc: COMPANY.ruc },
+    update: {
+      legalName: COMPANY.legalName,
+      address: COMPANY.address,
+      legalRepName: COMPANY.legalRepName,
+      legalRepDoc: COMPANY.legalRepDoc,
+    },
+    create: { ...COMPANY },
+  });
+  console.info(`✅ empresa: ${company.legalName}`);
+  return company.id;
+}
+
+async function seedBranches(companyId: string) {
+  for (const branch of BRANCHES) {
+    await prisma.branch.upsert({
+      where: { companyId_code: { companyId, code: branch.code } },
+      update: { name: branch.name, kind: branch.kind, address: branch.address },
+      create: { companyId, ...branch },
+    });
+  }
+  console.info(`✅ ${BRANCHES.length} sede(s)`);
+}
+
+async function seedDivisions(companyId: string) {
+  for (const division of DIVISIONS) {
+    await prisma.division.upsert({
+      where: { companyId_code: { companyId, code: division.code } },
+      update: { name: division.name },
+      create: { companyId, ...division },
+    });
+  }
+  console.info(`✅ ${DIVISIONS.length} división(es)`);
+}
+
+async function seedPositions(companyId: string) {
+  const entries = Object.entries(SCTR_RISK_LEVELS);
+  for (const [name, risk] of entries) {
+    const sctrRiskLevel = risk === 'ALTO' ? 'ALTO' : 'BAJO';
+    await prisma.position.upsert({
+      // El único unique es (company, name): el nombre es la llave natural
+      // porque es lo que llega en el Excel.
+      where: { companyId_name: { companyId, name } },
+      update: { sctrRiskLevel, requiresSctr: sctrRiskLevel === 'ALTO' },
+      create: {
+        companyId,
+        code: positionCode(name),
+        name,
+        sctrRiskLevel,
+        requiresSctr: sctrRiskLevel === 'ALTO',
+      },
+    });
+  }
+  console.info(`✅ ${entries.length} puestos (con nivel de riesgo SCTR)`);
+}
 
 async function main() {
   console.info('🌱 Iniciando seed...');
@@ -241,8 +421,12 @@ async function main() {
   await seedPermissions();
   await seedRolePermissions();
   await seedAdminUser();
-  // await seedContractTypes();
-  // await seedLegalParameters();
+  await seedContractTypes();
+  await seedLegalParameters();
+  const companyId = await seedCompany();
+  await seedBranches(companyId);
+  await seedDivisions(companyId);
+  await seedPositions(companyId);
   console.info('✅ Seed completado');
 }
 
