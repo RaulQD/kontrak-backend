@@ -120,7 +120,7 @@
   ] /* Specify the folder to exclude from compilation. */,
   "include": [
     "src/**/*.ts",
-    "test/*.*.ts",
+    "tests/**/*.ts",
     "src/modules/auth/controller"
   ] /* Specify the files to be included in the program. */
 }

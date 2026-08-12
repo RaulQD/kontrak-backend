@@ -14,7 +14,11 @@ export const authenticateMiddleware = (signer: ITokenSigner) =>
       throw new UnauthorizedError('Token de acceso requerido');
     }
     const payload = signer.verifyAccess(token);
-    req.auth = { userId: payload.sub };
+    req.auth = {
+      userId: payload.sub,
+      email: payload.email,
+      permissions: payload.permissions,
+    };
 
     next();
   });

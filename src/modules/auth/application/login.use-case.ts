@@ -62,8 +62,9 @@ export class LoginUseCase {
     user.registerSuccessfulLogin();
     await this.userRepo.save(user);
 
+    const permissions = await this.userRepo.findPermissionsByUserId(user.id);
     const accessToken = this.signer.signAccess(
-      { sub: user.id },
+      { sub: user.id, email: user.email, permissions },
       this.config.accessTtlSeconds,
     );
     const refreshPlain = this.refreshGen.generate();
