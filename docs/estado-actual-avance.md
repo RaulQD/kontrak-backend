@@ -51,7 +51,7 @@ La planificación oficial (source of truth) es:
 
 | US | Historia | Pts | Estado real |
 |---|---|---|---|
-| **US-001** | PostgreSQL 16 + Prisma | 3 | 🟡 **~80%** — schema y migraciones sólidos; faltan tests, doc ER y empresa test |
+| **US-001** | PostgreSQL 16 + Prisma | 3 | 🟡 **~80%** — schema y migraciones sólidos; faltan tests y doc ER |
 | **US-002** | Docker multi-stage + compose | 3 | 🔴 **~40%** — solo Postgres+Redis de dev; sin Dockerfile de la app |
 | **US-003** | Validación env con Zod | 2 | 🟡 **~60%** — `env.ts` bien hecho pero **no cableado al arranque**; `.env.example` desactualizado |
 | **US-004** | Seed de catálogos | 2 | 🟡 **~50%** — RBAC completo; contract_types y legal_parameters comentados; sin ubigeo |
@@ -68,7 +68,7 @@ La planificación oficial (source of truth) es:
 - ✅ `.gitignore` correcto (.env, node_modules, prisma generated).
 - ❌ Sin `docs/database/schema.md` ni diagrama ER.
 - ❌ Sin test de constraints (insertar empleado/contrato). El único test del repo es `formatCurrency.test.ts`.
-- ❌ Seed no incluye la "1 empresa test".
+- ~~❌ Seed no incluye la "1 empresa test".~~ Sin objeto desde el 13/08/2026: no existe tabla `companies` (migración `drop_companies`).
 
 **US-002 — Docker** 🔴
 - ✅ `docker-compose.yaml`: `postgres:16-alpine` + `redis:7-alpine`, volúmenes nombrados, healthchecks, restart policy.

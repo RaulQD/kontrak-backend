@@ -18,7 +18,6 @@ export type MaritalStatus =
   | 'VIUDO';
 
 export interface EmployeeFilters {
-  companyId?: string;
   status?: EmployeeStatus;
   /** Coincidencia parcial sobre nombre completo o número de documento. */
   search?: string;

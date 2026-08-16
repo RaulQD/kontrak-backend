@@ -241,8 +241,8 @@ Un item se marca "DONE" cuando **todos estos checks** están verdes:
 | **US-028** | Datos de pensión vinculados | EP-06 | MUST | 2 | US-021 | **3** | AFPs vigentes, comisión, CUSPP |
 | **US-029** | Catálogo ubigeo y direcciones | EP-06 | SHOULD | 2 | US-004 | **2** | normalizar departamento/provincia/distrito |
 | **US-030** | Estados de empleado (ACTIVO/CESADO) | EP-06 | SHOULD | 2 | US-020 | **1** | status enum |
-| **US-031** | Gestionar empresas (companies) | EP-07 | MUST | 2 | US-001 | **3** | CRUD razón social, RUC, representante legal |
-| **US-032** | Multi-RUC en la misma empresa | EP-07 | MUST | 2 | US-031 | **2** | independencia fiscal de RUCs |
+| **US-031** | Datos del empleador (singleton) | EP-07 | MUST | 2 | US-001 | **2** | editar razón social, RUC, representante legal; una sola fila |
+| ~~**US-032**~~ | ~~Multi-RUC en la misma empresa~~ | EP-07 | — | — | — | **0** | **eliminada 13/08/2026**: un solo RUC (migración `drop_companies`) |
 | **US-033** | Sedes/sucursales (branches) | EP-07 | MUST | 2 | US-031 | **3** | CRUD sedes, anexo SUNAT, ubicación INEI |
 | **US-034** | Divisiones/áreas | EP-07 | SHOULD | 2 | US-031 | **3** | jerarquía opcional, manager por división |
 | **US-035** | Puestos con riesgo SCTR | EP-07 | MUST | 2 | US-031 | **2** | catálogo con nivel ALTO/BAJO |
@@ -502,7 +502,7 @@ Review + Retro: viernes última semana, 16:00–17:30
 - [ ] Filtro de alcance en repositorios (ej. MANAGER solo ve su división)
 - [ ] Test: EMPLOYEE intenta acceder a recursos de otra división → 403
 - [ ] Test: SUPER_ADMIN puede acceder a todo
-- [ ] Implementar scope por company_id en `user_roles`
+- [x] ~~Implementar scope por company_id en `user_roles`~~ — **sin objeto desde el 13/08/2026**: una sola razón social (migración `drop_companies`)
 
 **US-009: Auditoría (2 pts)**
 - [ ] Trigger PostgreSQL AFTER INSERT/UPDATE/DELETE en tablas sensibles (employees, contracts, payslips)
@@ -598,7 +598,7 @@ Review + Retro: viernes última semana, 16:00–17:30
 - [ ] Test E2E: subir Excel a OneDrive → esperar 15 min → verificar import_batches
 
 **US-016: Modelo documentos (1 pt)**
-- [ ] Tabla `generated_documents`: id, company_id, kind, entity_table, entity_id, employee_id, file_name, mime_type, size_bytes, sha256, storage_provider, storage_path, generation_snapshot JSONB, created_at, created_by
+- [ ] Tabla `generated_documents`: id, kind, entity_table, entity_id, employee_id, file_name, mime_type, size_bytes, sha256, storage_provider, storage_path, generation_snapshot JSONB, created_at, created_by
 - [ ] Índice (entity_table, entity_id)
 - [ ] Función para calcular SHA256 de buffer
 - [ ] Test: registrar contrato generado, query por hash para detectar duplicados

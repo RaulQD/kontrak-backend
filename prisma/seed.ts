@@ -116,24 +116,29 @@ const LEGAL_PARAMETERS = [
 ] as const;
 
 // ═══════════════════════════════════════════════════════════
-// 2c. ORGANIZACIÓN MÍNIMA (empresa, sede, división, puestos)
+// 2c. ORGANIZACIÓN MÍNIMA (sede, división, puestos)
 //
-//     Sin estas filas es imposible insertar un empleado
-//     (employees.company_id es NOT NULL) ni un contrato
-//     (exige company + contract_type + position + branch + division).
+//     Un contrato exige contract_type + position + branch + division,
+//     así que sin estas filas no se puede insertar ninguno.
 //
-//     Los datos de la empresa salen de las plantillas de contrato del
-//     sistema actual (src/domain/contracts/templates/templates.ts),
-//     que es la fuente de verdad hoy.
+//     Ya no hay tabla `companies`: el sistema opera bajo una sola razón
+//     social. Ver la migración `drop_companies`.
 // ═══════════════════════════════════════════════════════════
-const COMPANY = {
+
+/**
+ * Identidad del empleador. NO se persiste: hoy su fuente de verdad son las
+ * plantillas de contrato (src/domain/contracts/templates/templates.ts), donde
+ * el RUC y el domicilio están embebidos en el texto legal. Se conserva aquí
+ * como dato estructurado porque `EMPLOYER.address` alimenta la sede semilla y
+ * porque es el único lugar del repositorio donde estos campos están separados.
+ */
+const EMPLOYER = {
   ruc: '20603381697',
   legalName: 'INVERSIONES URBANÍSTICAS OPERADORA S.A.',
   address:
     'Calle Dean Valdivia N° 148 Int. 1401 Urb. Jardín (Edificio Platinium), San Isidro, Lima',
   legalRepName: 'Catherine Susan Chang López',
   legalRepDoc: '42933662',
-  // ubigeoId queda null: la tabla `ubigeo` aún no está sembrada.
 };
 
 // ⚠️ PROVISIONALES. El repositorio no contiene el catálogo real de sedes
@@ -144,7 +149,7 @@ const BRANCHES = [
     code: 'OFICINA-PRINCIPAL',
     name: 'Oficina Principal — San Isidro',
     kind: 'OFICINA',
-    address: COMPANY.address,
+    address: EMPLOYER.address,
   },
 ];
 
@@ -357,54 +362,38 @@ async function seedLegalParameters() {
   console.info(`✅ ${LEGAL_PARAMETERS.length} parámetros legales`);
 }
 
-async function seedCompany(): Promise<string> {
-  const company = await prisma.company.upsert({
-    where: { ruc: COMPANY.ruc },
-    update: {
-      legalName: COMPANY.legalName,
-      address: COMPANY.address,
-      legalRepName: COMPANY.legalRepName,
-      legalRepDoc: COMPANY.legalRepDoc,
-    },
-    create: { ...COMPANY },
-  });
-  console.info(`✅ empresa: ${company.legalName}`);
-  return company.id;
-}
-
-async function seedBranches(companyId: string) {
+async function seedBranches() {
   for (const branch of BRANCHES) {
     await prisma.branch.upsert({
-      where: { companyId_code: { companyId, code: branch.code } },
+      where: { code: branch.code },
       update: { name: branch.name, kind: branch.kind, address: branch.address },
-      create: { companyId, ...branch },
+      create: { ...branch },
     });
   }
-  console.info(`✅ ${BRANCHES.length} sede(s)`);
+  console.info(`✅ ${BRANCHES.length} sede(s) — empleador: ${EMPLOYER.ruc}`);
 }
 
-async function seedDivisions(companyId: string) {
+async function seedDivisions() {
   for (const division of DIVISIONS) {
     await prisma.division.upsert({
-      where: { companyId_code: { companyId, code: division.code } },
+      where: { code: division.code },
       update: { name: division.name },
-      create: { companyId, ...division },
+      create: { ...division },
     });
   }
   console.info(`✅ ${DIVISIONS.length} división(es)`);
 }
 
-async function seedPositions(companyId: string) {
+async function seedPositions() {
   const entries = Object.entries(SCTR_RISK_LEVELS);
   for (const [name, risk] of entries) {
     const sctrRiskLevel = risk === 'ALTO' ? 'ALTO' : 'BAJO';
     await prisma.position.upsert({
-      // El único unique es (company, name): el nombre es la llave natural
-      // porque es lo que llega en el Excel.
-      where: { companyId_name: { companyId, name } },
+      // El único unique es `name`: el nombre es la llave natural porque es lo
+      // que llega en el Excel.
+      where: { name },
       update: { sctrRiskLevel, requiresSctr: sctrRiskLevel === 'ALTO' },
       create: {
-        companyId,
         code: positionCode(name),
         name,
         sctrRiskLevel,
@@ -423,10 +412,9 @@ async function main() {
   await seedAdminUser();
   await seedContractTypes();
   await seedLegalParameters();
-  const companyId = await seedCompany();
-  await seedBranches(companyId);
-  await seedDivisions(companyId);
-  await seedPositions(companyId);
+  await seedBranches();
+  await seedDivisions();
+  await seedPositions();
   console.info('✅ Seed completado');
 }
 

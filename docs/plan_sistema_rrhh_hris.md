@@ -4,6 +4,14 @@
 **Fecha:** 2026-07-07
 **Elaborado con los agentes de `.claude/agents`:** `backend-developer` (análisis de código), `database-administrator` + `sql-pro` (diseño de BD), `microservices-architect` + `project-manager` (arquitectura y plan)
 
+> ### ⚠️ Corrección posterior — 2026-08-13: se eliminó el multi-RUC
+>
+> Este documento fue escrito asumiendo que el cliente podía tener **varias razones sociales**. El 13/08/2026 se confirmó con el cliente que tiene **una sola empresa con un solo RUC**, y la migración `20260813234937_drop_companies` eliminó la tabla `companies` y la columna `company_id` de `branches`, `divisions`, `positions`, `employees` y `contracts`.
+>
+> **Cómo leer el resto del documento:** en todo el DDL y los diagramas de aquí en adelante, **ignorá `company_id` y las claves foráneas hacia `companies`**; los `UNIQUE (company_id, …)` pasan a ser únicos globales. El texto se conserva sin reescribir porque describe también tablas que todavía no existen. La decisión vigente está en §7.2 punto 1.
+>
+> Los datos del empleador (RUC, razón social, domicilio, representante legal) no se perdieron: viven en las plantillas de contrato (`src/domain/contracts/templates/templates.ts`) y como constante `EMPLOYER` en `prisma/seed.ts`. US-031 los volverá editables en una tabla singleton sin relaciones.
+
 ---
 
 ## Resumen ejecutivo
@@ -317,7 +325,7 @@ Convenciones globales: PK `id UUID DEFAULT gen_random_uuid()`; nombres `snake_ca
 ### Módulo 1 — Organización
 | Tabla | Propósito |
 |---|---|
-| `companies` | Empresas/razones sociales (RUC). Multi-empresa desde el día 1 |
+| ~~`companies`~~ | ~~Empresas/razones sociales (RUC). Multi-empresa desde el día 1~~ — **eliminada el 2026-08-13**: un solo RUC (migración `drop_companies`) |
 | `branches` | Sedes / sub-divisiones / **playas de estacionamiento** (el `subDivisionOrParking` actual) |
 | `divisions` | Divisiones/áreas (el `division` actual), jerarquía opcional |
 | `positions` | Puestos/cargos con **nivel de riesgo SCTR** (hoy hardcodeado en `positions.ts`) |
@@ -1615,6 +1623,7 @@ Pregunta al dueño: ¿el sistema es para **una** empresa o se venderá a **varia
 - **Una empresa (recomendado asumir hoy):** sin tenancy. Pero añadir `company_id` a las tablas raíz desde el día 1 cuesta casi nada y deja la puerta abierta.
 - **Varias empresas (SaaS futuro):** *shared database, shared schema* con columna `tenant_id` + middleware que la inyecta desde el JWT + (opcional) Row-Level Security de Postgres como red de seguridad. **No** schema-per-tenant ni DB-per-tenant para 1 dev.
 - Nota peruana: si una misma organización tiene varios RUC (empresa + empresa de intermediación), eso es "multi-compañía", no multi-tenant — se modela como catálogo `companies` dentro del mismo tenant. Los archivos actuales (SCTR por empresa, formatos de banco) sugieren que este caso es probable: **modelar `companies` desde el inicio.**
+  - **Corregido el 2026-08-13:** esa inferencia sobre los archivos no se verificó con el cliente y resultó equivocada. El cliente tiene **un solo RUC**; `companies` y `company_id` se eliminaron. Lección aplicable a futuras decisiones de modelado: un supuesto que añade una dimensión al esquema hay que confirmarlo, no inferirlo de los nombres de archivo.
 
 ### 5.2 Auditoría
 - Tabla `audit_logs`: `actor_user_id`, `action`, `entity_type`, `entity_id`, `before/after` (JSONB), `ip`, `request_id`, `created_at`. Se escribe desde la capa de aplicación (no triggers al inicio: más simple de testear).
@@ -1751,7 +1760,8 @@ Regla de gestión: el flujo actual de contratos sigue en producción durante tod
 
 Las 8 decisiones fueron respondidas por el dueño del proyecto. Se registran aquí como acuerdos vigentes; revisitarlas tiene costo y requiere justificación.
 
-1. **¿Una empresa o SaaS multi-empresa?** → **Una sola empresa (single-tenant).** Se mantiene el catálogo `companies` (multi-RUC) desde el día 1 porque el cliente puede tener más de una razón social; NO se implementa `tenant_id` ni RLS multi-tenant ni features SaaS (registro de tenants, facturación, panel multi-cliente). Si algún día se vende a un segundo cliente, se evaluará el retrofit — decisión consciente de simplicidad sobre opcionalidad.
+1. **¿Una empresa o SaaS multi-empresa?** → **Una sola empresa (single-tenant).** NO se implementa `tenant_id` ni RLS multi-tenant ni features SaaS (registro de tenants, facturación, panel multi-cliente). Si algún día se vende a un segundo cliente, se evaluará el retrofit — decisión consciente de simplicidad sobre opcionalidad.
+   **Revisada el 2026-08-13:** la parte «se mantiene el catálogo `companies` (multi-RUC) porque el cliente puede tener más de una razón social» era un **supuesto sin verificar, y resultó falso**. Confirmado con el cliente: **un solo RUC**. Se eliminaron la tabla `companies` y la columna `company_id` (migración `20260813234937_drop_companies`), aprovechando que `employees` y `contracts` estaban vacías y no hacía falta backfill. Si algún día apareciera una segunda razón social, el retrofit exige repoblar `company_id` en 5 tablas con historia ya cargada y rehacer los reportes fiscales, que se presentan por RUC.
 2. **¿Dónde se despliega?** → **VPS o Azure; lo administra la empresa cliente.** Implicancia: empaquetar TODO container-first (Docker multi-stage + docker-compose con API, worker, PostgreSQL y Redis) para que funcione igual en ambos destinos. Si eligen Azure, el mapeo natural es App Service/Container Apps + Azure Database for PostgreSQL + Azure Cache for Redis; en VPS, compose con volúmenes y backups a storage externo. No condicionar el código a ninguno de los dos.
 3. **¿Alcance de planilla v1?** → **Régimen laboral general (D.Leg. 728 con todos los beneficios: CTS, gratificaciones, asignación familiar, AFP/ONP, EsSalud) + practicantes (Ley 28518).** Los practicantes NO van por planilla regular: perciben subvención económica (no remuneración), no generan CTS ni asignación familiar, tienen media subvención por cada 6 meses (análogo a gratificación), seguro (EsSalud o privado) y aportes previsionales opcionales. El motor de cálculo debe modelar `payroll_regime` desde el inicio con estos dos regímenes; MYPE y recibos por honorarios quedan fuera del alcance v1.
 4. **¿OneDrive sigue siendo canal a largo plazo?** → **Sí — el cliente opera sobre el ecosistema Microsoft 365.** La ingestión OneDrive/Graph es feature permanente, no puente temporal: se invierte en robustecerla (reintentos, no borrar el original ante error, trazabilidad en BD). Implicancia adicional valiosa: evaluar **SSO con Microsoft Entra ID** para el login del personal administrativo (ya tienen cuentas M365) en lugar de solo usuario/contraseña local — reduce gestión de credenciales y es un argumento de venta.

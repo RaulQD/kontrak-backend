@@ -4,7 +4,7 @@ import { UNPROCESSABLE_CONTENT } from '../constants/http';
 
 type ValidatedRequestData = Partial<{
   body: unknown;
-  query: Request['query'];
+  query: unknown;
   params: Request['params'];
 }>;
 

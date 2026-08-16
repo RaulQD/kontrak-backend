@@ -4,6 +4,8 @@
 > Fecha: 2026-07-11
 > Alcance: (1) diseño de BD del `plan_sistema_rrhh_hris.md`, (2) esquema alternativo propuesto externamente, (3) comparación y recomendación final.
 
+> **⚠️ 2026-08-13 — el multi-RUC dejó de existir.** El cliente confirmó una sola empresa con un solo RUC: la migración `20260813234937_drop_companies` eliminó la tabla `companies` y la columna `company_id`. **Los hallazgos C2 e I5 quedaron obsoletos** (marcados abajo), y en el resto del documento hay que leer los `UNIQUE (company_id, …)` como únicos globales. Los demás hallazgos siguen vigentes.
+
 ---
 
 # PARTE 1 — Review del diseño en `plan_sistema_rrhh_hris.md`
@@ -23,7 +25,12 @@ full_name VARCHAR(240) GENERATED ALWAYS AS
 
 > ⚠️ Esta tabla **ya está aplicada** en la BD real → requiere migración `ALTER` (las columnas generadas se recrean: `DROP COLUMN` + `ADD COLUMN`).
 
-### C2 — `user_roles` con PK `(user_id, role_id)` contradice el multi-RUC
+### ~~C2 — `user_roles` con PK `(user_id, role_id)` contradice el multi-RUC~~ — **OBSOLETO (2026-08-13)**
+
+No hay multi-RUC: `user_roles` con PK `(user_id, role_id)` es exactamente lo correcto. **No aplicar este fix.**
+
+<details><summary>Hallazgo original</summary>
+
 Impide que un mismo usuario tenga el mismo rol en dos razones sociales distintas.
 
 ```sql
@@ -31,6 +38,8 @@ Impide que un mismo usuario tenga el mismo rol en dos razones sociales distintas
 ALTER TABLE user_roles
   ADD CONSTRAINT ux_user_roles UNIQUE NULLS NOT DISTINCT (user_id, role_id, company_id);
 ```
+
+</details>
 
 ### C3 — `UNIQUE (company_id, code)` con `company_id NULL` no previene duplicados
 En PostgreSQL los NULL son distintos entre sí en un índice único → dos conceptos/plantillas "de sistema" con el mismo `code` pasan. Afecta a `payroll_concepts` y `document_templates`.
@@ -115,7 +124,12 @@ ALTER TABLE contract_renewals ADD CONSTRAINT ux_renewal_chain
   UNIQUE (source_contract_id, renewal_number);
 ```
 
-### I5 — Coherencia multi-RUC entre `contracts` y `employees`
+### ~~I5 — Coherencia multi-RUC entre `contracts` y `employees`~~ — **OBSOLETO (2026-08-13)**
+
+Ninguna de las dos tablas tiene ya `company_id`: no hay incoherencia posible. **No aplicar este fix.**
+
+<details><summary>Hallazgo original</summary>
+
 Nada garantiza que `contracts.company_id` = empresa del empleado.
 
 ```sql
@@ -124,6 +138,8 @@ ALTER TABLE contracts
   ADD CONSTRAINT fk_contracts_employee_company
   FOREIGN KEY (employee_id, company_id) REFERENCES employees (id, company_id);
 ```
+
+</details>
 
 ### I6 — Brecha RLS/PII
 El plan justifica PostgreSQL citando RLS para confidencialidad salarial, pero no hay ni un `CREATE POLICY` en el DDL. Peor: el trigger de auditoría vuelca sueldos, DNI y cuentas bancarias **en claro** a `audit_logs` (sin protección propia).
@@ -279,7 +295,7 @@ ALTER TABLE leave_requests ADD CONSTRAINT ex_leaves_no_overlap
 - `document_signatures` sin `UNIQUE (document_id, sign_order)` — órdenes de firma duplicables.
 - Nada valida que `generated_documents.document_type` coincida con el tipo de la plantilla de `template_version_id` (se puede emitir un CONTRATO con plantilla de MEMORANDO) → trigger o FK compuesta.
 - CHECKs de rango faltantes: `disciplinary_actions (effective_to >= effective_from)`, `medical_exams (expires_at >= exam_date)`.
-- `user_roles` sin `company_id` (roles globales; impide acotar por razón social).
+- `user_roles` sin `company_id` (roles globales; impide acotar por razón social). **Ya no es un defecto: hay una sola razón social (2026-08-13).**
 - `leave_requests.days` redundante (derivable del rango).
 
 ## ✅ Aciertos del esquema alternativo

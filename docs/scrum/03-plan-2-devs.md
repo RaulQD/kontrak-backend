@@ -75,9 +75,9 @@ El criterio de reordenamiento es uno solo: **adelantar la ruta crítica (US-020)
 
 | US / Tarea | Título | Pts | Dev | ¿Migración? |
 |---|---|---|---|---|
-| **US-008b** | RBAC rebanada B: filtros de alcance (escenarios 2 y 3) | *sin puntos propios* ⚠️ | A | **Sí** — M2 |
+| **US-008b** | RBAC rebanada B: filtros de alcance **por división** (escenarios 2 y 3) — el alcance por empresa desapareció el 13/08 con `drop_companies` | *sin puntos propios* ⚠️ | A | **Sí** — M2 |
 | **US-009b** | Triggers de auditoría + `GET /audit-logs` | *sin puntos propios* ⚠️ | A | **Sí** — M3 |
-| **US-031** | Gestionar empresas (companies) | **3** | B | No |
+| **US-031** | Datos del empleador (singleton) | **2** | B | No |
 | **US-033** | Sedes/sucursales (branches) | **3** | B | No |
 | **US-035** | Puestos con riesgo SCTR | **2** | B | No |
 | **US-038** | Catálogos activos/inactivos (`is_active`) | **1** | B | No |
@@ -100,7 +100,7 @@ El criterio de reordenamiento es uno solo: **adelantar la ruta crítica (US-020)
 
 ### 1.4 Fuera de estos 3 sprints (visibilidad, no compromiso)
 
-Queda pendiente y se planifica en la revisión del 19/09: **US-012** (5, condicionada al SPIKE-PDF), **US-013** (3), **US-014** (3, condicionada a decidir infraestructura asíncrona), **US-015** (2), **US-017** (2), **US-018** (2), **US-019** (3), **US-021** (3), **US-024** a **US-030**, **US-032**, **US-036**, **US-037**, y los escenarios 2 y 3 de **US-004** (payroll_concepts, pension_systems), que son prerrequisito de EP-10.
+Queda pendiente y se planifica en la revisión del 19/09: **US-012** (5, condicionada al SPIKE-PDF), **US-013** (3), **US-014** (3, condicionada a decidir infraestructura asíncrona), **US-015** (2), **US-017** (2), **US-018** (2), **US-019** (3), **US-021** (3), **US-024** a **US-030**, **US-036**, **US-037**, y los escenarios 2 y 3 de **US-004** (payroll_concepts, pension_systems), que son prerrequisito de EP-10.
 
 ### 1.5 Nota sobre velocidad — no planificar 2 devs como 2×
 
@@ -426,7 +426,7 @@ Estas cuatro decisiones **bloquean la planificación**, no solo la implementaci�
 | Sprint | Fechas | Dev A | Dev B | Pts conocidos | Migraciones |
 |---|---|---|---|---|---|
 | **S3** | 11–22 ago | US-009a, **US-020** (5) | TASK-CI, US-004 esc.4, US-010 (2) | 7 + a estimar | M1 (Dev B) |
-| **S4** | 25 ago–5 sep | US-008b, US-009b | US-031 (3), US-033 (3), US-035 (2), US-038 (1), SPIKE-PDF | 9 + a estimar | M2, M3 (Dev A) |
+| **S4** | 25 ago–5 sep | US-008b, US-009b | US-031 (2), US-033 (3), US-035 (2), US-038 (1), SPIKE-PDF | 8 + a estimar | M2, M3 (Dev A) |
 | **S5** | 8–19 sep | US-022 (3), US-023 (5) | US-034 (3), US-011 (3), US-016 (1) | 15 | M4 (Dev B) |
 
 ### 9.2 Checklist de arranque — hoy, 11/08

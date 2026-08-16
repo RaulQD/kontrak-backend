@@ -13,38 +13,16 @@ datasource db {
   provider = "postgresql"
 }
 
-/// Razones sociales del cliente (multi-RUC, single-tenant). Ver docs/plan_sistema_rrhh_hris.md §5.
-model Company {
-  id           String    @id @default(uuid()) @db.Uuid
-  ruc          String    @unique @db.Char(11)
-  legalName    String    @map("legal_name") @db.VarChar(200)
-  tradeName    String?   @map("trade_name") @db.VarChar(200)
-  address      String?   @db.VarChar(300)
-  ubigeoId     String?   @map("ubigeo_id") @db.Char(6) // Código de ubigeo (6 dígitos)
-  legalRepName String?   @map("legal_rep_name") @db.VarChar(200)
-  legalRepDoc  String?   @map("legal_rep_document") @db.VarChar(15)
-  industryCode String?   @map("industry_code") @db.VarChar(10)
-  isMicroSmall Boolean   @default(false) @map("is_micro_small")
-  isActive     Boolean   @default(true) @map("is_active")
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(6)
-
-  ubigeo Ubigeo? @relation(fields: [ubigeoId], references: [id])
-
-  employees Employee[]
-  branches  Branch[]
-  division  Division[]
-  positions Position[]
-  contracts Contract[]
-
-  @@map("companies")
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// Sistema de una sola empresa (un solo RUC). El catálogo `companies` y la
+// columna `company_id` se eliminaron en la migración `drop_companies`: no hay
+// multi-RUC. Los datos del empleador (RUC, razón social, representante legal)
+// viven hoy en las plantillas de contrato, src/domain/contracts/templates/.
+// ─────────────────────────────────────────────────────────────────────────────
 
 model Branch {
   id                     String    @id @default(uuid()) @db.Uuid
-  companyId              String    @map("company_id") @db.Uuid
-  code                   String    @db.VarChar(20)
+  code                   String    @unique @db.VarChar(20)
   name                   String    @db.VarChar(200)
   address                String?   @db.VarChar(300)
   ubigeoId               String?   @map("ubigeo_id") @db.Char(6)
@@ -55,19 +33,16 @@ model Branch {
   updatedAt              DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt              DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  company   Company    @relation(fields: [companyId], references: [id])
   ubigeo    Ubigeo?    @relation(fields: [ubigeoId], references: [id])
   contracts Contract[]
 
-  @@unique([companyId, code])
   @@map("branches")
 }
 
 model Division {
   id        String    @id @default(uuid()) @db.Uuid
-  companyId String    @map("company_id") @db.Uuid
   // parentId          String?   @map("parent_id") @db.Uuid
-  code      String    @db.VarChar(20)
+  code      String    @unique @db.VarChar(20)
   name      String    @db.VarChar(200)
   // managerEmployeeId String?   @map("manager_employee_id") @db.Uuid
   isActive  Boolean   @default(true) @map("is_active")
@@ -75,11 +50,9 @@ model Division {
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  company   Company    @relation(fields: [companyId], references: [id])
   positions Position[]
   contracts Contract[]
 
-  @@unique([companyId, code])
   @@map("divisions")
 }
 
@@ -92,9 +65,8 @@ enum SctrRiskLevel {
 
 model Position {
   id                  String        @id @default(uuid()) @db.Uuid
-  companyId           String        @map("company_id") @db.Uuid
   code                String        @db.VarChar(20)
-  name                String        @db.VarChar(200)
+  name                String        @unique @db.VarChar(200)
   canonicalName       String?       @map("canonical_name") @db.VarChar(200)
   divisionId          String?       @map("division_id") @db.Uuid
   sctrRiskLevel       SctrRiskLevel @default(BAJO) @map("sctr_risk_level") // BAJO, ALTO
@@ -107,11 +79,9 @@ model Position {
   updatedAt           DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt           DateTime?     @map("deleted_at") @db.Timestamptz(6)
 
-  company   Company    @relation(fields: [companyId], references: [id])
   division  Division?  @relation(fields: [divisionId], references: [id])
   contracts Contract[]
 
-  @@unique([companyId, name])
   @@map("positions")
 }
 
@@ -120,7 +90,6 @@ model Ubigeo {
   department String     @db.VarChar(80)
   province   String     @db.VarChar(80)
   district   String     @db.VarChar(80)
-  companies  Company[]
   branches   Branch[]
   employees  Employee[]
 
@@ -167,7 +136,6 @@ enum MaritalStatus {
 /// Ficha maestra del trabajador. Ver docs/plan_sistema_rrhh_hris.md §5.
 model Employee {
   id                   String         @id @default(uuid()) @db.Uuid
-  companyId            String         @map("company_id") @db.Uuid
   employeeCode         String?        @map("employee_code") @db.VarChar(20)
   documentType         DocumentType   @default(DNI) @map("document_type")
   documentNumber       String         @map("document_number") @db.VarChar(15)
@@ -194,7 +162,6 @@ model Employee {
   updatedAt            DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt            DateTime?      @map("deleted_at") @db.Timestamptz(6)
 
-  company   Company    @relation(fields: [companyId], references: [id])
   ubigeo    Ubigeo?    @relation(fields: [ubigeoId], references: [id])
   contracts Contract[]
 
@@ -234,7 +201,6 @@ enum ContractStatus {
 model Contract {
   id                 String         @id @default(uuid()) @db.Uuid
   employeeId         String         @map("employee_id") @db.Uuid
-  companyId          String         @map("company_id") @db.Uuid
   contractTypeId     String         @map("contract_type_id") @db.Uuid
   positionId         String         @map("position_id") @db.Uuid
   branchId           String         @map("branch_id") @db.Uuid
@@ -257,7 +223,6 @@ model Contract {
   deletedAt          DateTime?      @map("deleted_at") @db.Timestamptz(6)
 
   employee     Employee     @relation(fields: [employeeId], references: [id])
-  company      Company      @relation(fields: [companyId], references: [id])
   contractType ContractType @relation(fields: [contractTypeId], references: [id])
   position     Position     @relation(fields: [positionId], references: [id])
   branch       Branch       @relation(fields: [branchId], references: [id])

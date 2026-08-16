@@ -38,7 +38,7 @@ Para **gerentes de RRHH y jefes de área en empresas medianas peruanas**, que **
 | **EP-04** | Documentos y legajo digital | Fase 1 | Centralizar archivos de empleados (PDF contratos, certificados, DNI) con versionado e inmutabilidad. Reemplazar OneDrive desordenado. | **MUST** | 4 |
 | **EP-05** | Seguros: SCTR, EPS, Ley de Vida | Fase 1 | Migrar processors SCTR/EPS/Ley de Vida. Automatizar declaraciones mensuales a aseguradoras. | **MUST** | 5 |
 | **EP-06** | Maestro de empleados | Fase 2 | Fuente única de verdad de datos personales, bancarios, de pensión y histórico laboral. Base para todos los cálculos futuros. | **MUST** | 8 |
-| **EP-07** | Organización (companies, sedes, puestos, divisiones) | Fase 2 | Estructurar la empresa en unidades: sedes, áreas, puestos con riesgos SCTR. Multi-RUC desde inicio. | **MUST** | 5 |
+| **EP-07** | Organización (sedes, puestos, divisiones) | Fase 2 | Estructurar la empresa en unidades: sedes, áreas, puestos con riesgos SCTR. Una sola razón social (ver migración `drop_companies`). | **MUST** | 3 |
 | **EP-08** | Conector GeoVictoria y gestión de asistencia | Fase 3 | Sincronizar marcaciones de reloj biométrico. Calcular tardanzas, HE y cierre de periodo (insumo de planilla). | **MUST** | 6 |
 | **EP-09** | Vacaciones y licencias | Fase 3 | Cumplimiento legal: récord vacacional de 30 días/año, devengue automático, solicitudes con flujo de aprobación. | **MUST** | 5 |
 | **EP-10** | Motor de planilla (régimen general + practicantes) | Fase 4 | Cálculo automático de nómina: AFP/ONP, CTS, gratificaciones, asignación familiar, 5.ª categoría, EsSalud, SCTR. Reproducir 100% exacto. | **MUST** | 12 |
@@ -90,8 +90,8 @@ Escenario 1: Inicializar PostgreSQL y crear tablas núcleo
     Y no hay registro en "deleted_at" (NULL por defecto)
 
 Escenario 2: Validar integridad referencial
-  Dado que existe una empresa en "companies"
-  Cuando intento insertar un "employee" sin company_id
+  Dado que existe un tipo de contrato en "contract_types"
+  Cuando intento insertar un "contract" con un contract_type_id inexistente
   Entonces la BD rechaza con error FK
     Y no se crea el registro
 
@@ -514,7 +514,7 @@ Escenario 4: Roles editables en BD sin redeployar
 
 **Notas técnicas:**
 
-- Tabla `users` + `roles` + `permissions` + `role_permissions` + `user_roles` (con scope opcional por company_id).
+- Tabla `users` + `roles` + `permissions` + `role_permissions` + `user_roles`. (El scope opcional por `company_id` quedó sin objeto: una sola razón social — ver migración `drop_companies`.)
 - Middleware `requirePermission(code)` que lee `req.user.permissions` (array en JWT).
 - Casos de uso deben hacer filtro adicional de alcance (no solo middleware).
 - Nunca confiar en claims del JWT solos; re-validar alcance en la capa de aplicación.
@@ -937,7 +937,7 @@ Escenario 3: Legajo por empleado
 
 **Notas técnicas:**
 
-- Tabla `generated_documents` con: id, company_id, kind (enum), entity_table, entity_id, employee_id FK, file_name, mime_type, size_bytes, sha256 CHAR(64), storage_provider, storage_path, generation_snapshot JSONB, created_at, created_by.
+- Tabla `generated_documents` con: id, kind (enum), entity_table, entity_id, employee_id FK, file_name, mime_type, size_bytes, sha256 CHAR(64), storage_provider, storage_path, generation_snapshot JSONB, created_at, created_by.
 - Índice en (entity_table, entity_id) para queries rápidas.
 - SHA256 de binario calculado en plataforma/pdf o plataforma/storage.
 
@@ -1127,8 +1127,8 @@ Escenario 4: Reporte se regenera si se añaden empleados
 
 | US | Título | Narrativa | CA (2–3) | Prioridad |
 | --- | --- | --- | --- | --- |
-| **US-031** | Gestionar empresas (companies) | Crear/editar razón social, RUC, representante legal | `Dado empresa Cuando CRUD Entonces audita` | MUST |
-| **US-032** | Multi-RUC en la misma empresa | Mismo tenant, múltiples RUC con independencia fiscal | `Dado RUC1, RUC2 Cuando ambos en BD Entonces reportes por RUC` | MUST |
+| **US-031** | Datos del empleador | Editar razón social, RUC, domicilio y representante legal. **Singleton**: una sola fila, sin relaciones hacia el resto del modelo. Hoy esos datos están embebidos en las plantillas de contrato | `Dado los datos del empleador Cuando se editan Entonces audita` | MUST |
+| ~~**US-032**~~ | ~~Multi-RUC en la misma empresa~~ | **Eliminada el 13/08/2026**: el cliente tiene un solo RUC. Ver migración `drop_companies` | — | — |
 | **US-033** | Sedes/sucursales (branches) | Crear sedes con código, ubicación INEI, anexo SUNAT | `Dado sede Cuando POST Entonces con anexo T-Registro` | MUST |
 | **US-034** | Divisiones/áreas | Jerarquía opcional, manager por división | `Dado división Cuando asigno manager Entonces ve empleados` | SHOULD |
 | **US-035** | Puestos con riesgo SCTR | Catálogo: VALET, ANFITRION(A), etc. con nivel ALTO/BAJO | `Dado puesto Cuando SCTR requiere ENTONCES incluir en póliza` | MUST |
@@ -1243,7 +1243,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 
 ### Supuestos (aceptados)
 
-1. **Única empresa, múltiples RUC:** el cliente tiene o puede tener varias razones sociales bajo el mismo sistema. No es multi-tenant SaaS.
+1. ~~**Única empresa, múltiples RUC:** el cliente tiene o puede tener varias razones sociales bajo el mismo sistema.~~ **Corregido el 13/08/2026 tras confirmarlo con el cliente: una sola empresa con un solo RUC.** El supuesto del multi-RUC nunca se verificó y resultó falso. La migración `20260813234937_drop_companies` eliminó la tabla `companies` y la columna `company_id` de `branches`, `divisions`, `positions`, `employees` y `contracts`. Sigue sin ser multi-tenant SaaS.
 2. **OneDrive es canal permanente:** Microsoft 365 es la herramienta corporativa; la ingestión de Excel seguirá siendo central.
 3. **GeoVictoria para marcaciones:** la API REST ya está contratada y es confiable para traer datos diarios.
 4. **Normativa peruana estable (v1):** D.Leg. 728, Ley 28518, tasas AFP/ONP no cambiarán drásticamente en 6 meses. Pueden actualizarse pero con parámetro de BD.
@@ -1258,7 +1258,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 5. **¿Cuál es la UIT y RMV vigentes para 2026?** (valores para seed inicial)
 6. **¿Existen otros proveedores de seguros además de SCTR?** (EPS, Ley de Vida: quiénes son)
 7. **¿Número máximo de empleados esperados en v1?** (para sizing de BD y estimación de performance)
-8. **¿Cuántos RUC/sedes/divisiones en el catálogo inicial?**
+8. **¿Cuántas sedes/divisiones en el catálogo inicial?** *(La parte de RUC quedó respondida el 13/08/2026: uno solo.)*
 9. **¿Se requiere SSO con Microsoft Entra ID para RRHH?** (decidir en Fase 0 si lo incluimos o queda Fase 6)
 10. **¿Dónde se desplegará (VPS específico, Azure, hosted service)?** (para provisioning de BD, backups, etc.)
 
@@ -1363,6 +1363,7 @@ Escenario 4: Reporte se regenera si se añaden empleados
 | Versión | Fecha | Cambios |
 |---|---|---|
 | 1.0 | 2026-07-08 | Documento inicial completo: 85 historias, 15 épicas, roadmap 9–11 meses |
+| 1.1 | 2026-08-13 | **Fin del multi-RUC.** El cliente confirmó una sola empresa con un solo RUC: se eliminó la tabla `companies` y la columna `company_id` (migración `20260813234937_drop_companies`). US-032 eliminada, US-031 pasa a «datos del empleador» (singleton), EP-07 baja de 5 a 3 puntos, supuesto #1 corregido, US-020 baja de 8 a 6 puntos |
 
 ---
 

@@ -12,21 +12,13 @@ export class EmployeeNotFoundError extends NotFoundError {
 
 export class DuplicateDocumentError extends ConflictError {
   constructor(documentType: string, documentNumber: string) {
-    super(
-      `Ya existe un colaborador con ${documentType} ${documentNumber} en esta empresa`,
-    );
+    super(`Ya existe un colaborador con ${documentType} ${documentNumber}`);
   }
 }
 
 export class DuplicateEmployeeCodeError extends ConflictError {
   constructor(employeeCode: string) {
     super(`Ya existe un colaborador con el código ${employeeCode}`);
-  }
-}
-
-export class CompanyNotFoundError extends ValidationError {
-  constructor(companyId: string) {
-    super(`La empresa ${companyId} no existe`);
   }
 }
 

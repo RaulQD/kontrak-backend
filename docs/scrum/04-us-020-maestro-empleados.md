@@ -6,8 +6,8 @@
 | | |
 | --- | --- |
 | **Prioridad** | MUST |
-| **Esfuerzo** | 8 puntos (el backlog la tenía en 5) |
-| **Dependencias** | US-007 y US-008 (ambas en `main`) · **US-009a** (rebanada de auditoría) · D1 resuelta |
+| **Esfuerzo** | 6 puntos (el backlog la tenía en 5; llegó a estimarse en 8 cuando existía el multi-RUC) |
+| **Dependencias** | US-007 y US-008 (ambas en `main`) · **US-009a** (rebanada de auditoría) |
 | **Rama base** | `develop` |
 
 **Leyenda de confianza usada en este documento:**
@@ -40,7 +40,7 @@ asignación directa    → TypeError: Cannot set property query of
 Object.defineProperty → ok, {"page":1,"limit":20}
 ```
 
-El arreglo aprovecha que el descriptor es `configurable: true`. Una línea, y merece commit propio:
+El arreglo usa `Object.defineProperty`, que no pasa por `[[Set]]` sino por `[[DefineOwnProperty]]`: crea una propiedad **propia** sobre `req` que tapa al getter heredado del prototipo. (No depende de que el descriptor del prototipo sea `configurable: true` —aunque lo sea—, sino de que `req` sea extensible.)
 
 ```ts
 if (result.data.query !== undefined) {
@@ -50,6 +50,25 @@ if (result.data.query !== undefined) {
   });
 }
 ```
+
+**El arreglo tiene una segunda mitad, de tipos.** `ValidatedRequestData.query` estaba declarado como `Request['query']`, es decir `ParsedQs`, cuya index signature solo admite `string | string[] | ParsedQs`. Cualquier schema con `z.coerce.number()` produce `number` y no compila:
+
+```
+TS2379: ... Type '{ page: number; limit: number; ... }' is not assignable to type 'ParsedQs'.
+  Property 'page' is incompatible with index signature.
+```
+
+Se resuelve declarando `query: unknown` — cada schema define su propia forma. `params` **no** se afloja: la línea `req.params = result.data.params` es una asignación normal y necesita el tipo real.
+
+Consecuencia en el controlador: TypeScript sigue viendo `req.query` como `ParsedQs`, así que la lectura necesita un cast explícito, seguro porque el middleware ya validó en runtime:
+
+```ts
+const { page, limit, search } = req.query as unknown as ListEmployeesQuery;
+```
+
+El doble `as unknown as` es obligatorio: TS rechaza el cast directo entre `ParsedQs` y el tipo del schema porque no se solapan (TS2352). Deriva `ListEmployeesQuery` con `z.infer<typeof listEmployeesSchema>['query']` para que nunca se desincronice.
+
+**Estado: aplicado.** Runtime y tipo están en el árbol de trabajo.
 
 ### 1.2 🛑✅ Prisma te deja escribir `full_name`, y Postgres lo rechaza
 
@@ -70,46 +89,47 @@ Si el mapper la incluye —aunque sea con `null`— Postgres responde `428C9: ca
 
 - **Al leer:** formatear a `YYYY-MM-DD` en el DTO, con `toISOString().slice(0,10)`.
 - **Al escribir:** construir con `new Date('2026-08-01T00:00:00.000Z')`, nunca con fecha local.
-- **En Zod:** no uses `z.coerce.date()` a secas — acepta `"2026-13-45"` y timestamps completos. Usá un validador propio con `regex(/^\d{4}-\d{2}-\d{2}$/)` y transformá a medianoche UTC.
+- **En Zod:** no uses `z.coerce.date()` a secas — acepta timestamps completos y fechas imposibles.
 
-El test e2e que lo caza es un `expect(data.hireDate).toBe('2026-08-01')` — string, no ISO con Z.
+⚠️ **La trampa que no es obvia: `regex` + `Number.isNaN` no alcanza.** Comprobado ejecutando el código: `new Date('2026-02-31T00:00:00.000Z')` **no** devuelve `Invalid Date` — JavaScript hace rollover silencioso y da el **3 de marzo**. En cambio `'2026-13-45'` sí falla, lo que hace creer que la validación funciona. La verificación correcta es de ida y vuelta:
+
+```ts
+const isRealDate = (s: string): boolean => {
+  const d = new Date(`${s}T00:00:00.000Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+};
+
+export const dateOnly = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha debe tener el formato YYYY-MM-DD')
+  .refine(isRealDate, 'La fecha no existe en el calendario')
+  .transform((s) => new Date(`${s}T00:00:00.000Z`));
+```
+
+El `refine` va **antes** del `transform` porque necesita el string original para compararlo. Los años bisiestos salen gratis: `2028-02-29` pasa, `2026-02-29` no.
+
+El test e2e que caza el defecto original es un `expect(data.hireDate).toBe('2026-08-01')` — string, no ISO con Z.
 
 ---
 
-## 2. Cuatro decisiones que cambian los casos de uso
+## 2. Decisiones que cambian los casos de uso
 
-Dos análisis independientes de la misma historia llegaron a conclusiones **opuestas** en estos cuatro puntos. Si no quedan decididos antes de codificar, hay que rehacer los cinco casos de uso.
+Dos análisis independientes de la misma historia llegaron a conclusiones **opuestas** en estos puntos. Si no quedan decididos antes de codificar, hay que rehacer los cinco casos de uso. D1 ya está cerrada; D2, D3 y D4 siguen abiertas.
 
-### 🟡 D1 · ¿De dónde sale la empresa? (el más importante)
+### ✅ D1 · ¿De dónde sale la empresa? — **resuelta: no hay empresa**
 
-No existe forma de derivar la empresa del usuario autenticado:
+El cliente opera bajo **una sola razón social, un solo RUC**. La migración `20260813234937_drop_companies` eliminó la tabla `companies` y la columna `company_id` de `branches`, `divisions`, `positions`, `employees` y `contracts`. El debate original —cabecera `X-Company-Id` contra `companyId` en el body, más un tipo `EmployeeScope` como costura— quedó sin objeto: no hay dimensión sobre la cual acotar.
 
-- `authenticate.middleware.ts:17-21` pone `{ userId, email, permissions }` y nada más.
-- `AccessPayload` (`auth/domain/types.ts:1-5`) no lleva empresa.
-- `UserRole` (`schema.prisma:330-343`) **no tiene `companyId`**, aunque la nota técnica de US-008 (`01-product-backlog.md:517`) dé por hecho que sí.
+Lo que esto elimina de US-020:
 
-El mecanismo de alcance **no existe**: US-020 tiene que construirlo.
+- `POST /api/employees` **no recibe `companyId`**, y `GET /api/employees` **no lo acepta como filtro**.
+- No existe `EmployeeScope`, ni `domain/employee-scope.ts`, ni filtro de alcance dentro de los casos de uso, ni el puerto `ICompanyReader`, ni `CompanyOutOfScopeError`.
+- `ux_employees_doc` pasa a ser `(document_type, document_number) WHERE deleted_at IS NULL`: **un documento es único en todo el sistema**.
+- Desaparecen dos criterios de aceptación completos: «el mismo documento en otra razón social» y «colaborador fuera de alcance».
 
-| Posición A | Posición B |
-| --- | --- |
-| Cabecera `X-Company-Id` obligatoria en todas las rutas, resuelta por un middleware que valida que la empresa existe y está activa. | `companyId` en el body del POST y como filtro opcional de query en el GET, más un tipo `EmployeeScope` como costura. |
+Lo que **no** cambia: el 404 de un id inexistente, el soft delete, la máscara de campos sensibles, la auditoría atómica y las invariantes de dominio.
 
-**Recomiendo B.** La posición A admite ella misma que «la cabecera selecciona, no autoriza» — entonces no aporta seguridad, solo un mecanismo paralelo que duplica lo que el body ya dice. Y `companyId` es un atributo *del empleado que se está creando*, no de la sesión: su lugar natural es el body, donde además ya lo exige la clave foránea.
-
-La costura tipada es lo que hace esto barato en el futuro:
-
-```ts
-export type EmployeeScope =
-  | { kind: 'ALL' }                                        // hoy
-  | { kind: 'COMPANIES'; companyIds: readonly string[] };  // cuando UserRole.companyId exista
-```
-
-Cuando llegue el vínculo usuario→empresa cambia *un resolver*, no los cinco casos de uso. El predicado va en `domain/employee-scope.ts` como función pura, porque habla de la colección y no del individuo:
-
-```ts
-export const isCompanyInScope = (scope: EmployeeScope, companyId: string): boolean =>
-  scope.kind === 'ALL' || scope.companyIds.includes(companyId);
-```
+Los datos del empleador (RUC, razón social, domicilio, representante legal) no se perdieron: viven embebidos en las plantillas de contrato (`src/domain/contracts/templates/templates.ts`) y como constante `EMPLOYER` en `prisma/seed.ts`. Cuando US-031 los haga editables, será una tabla singleton de configuración, sin relaciones hacia el resto del modelo.
 
 ### 🟡 D2 · ¿Qué oculta `colaborador:leer_sensible`?
 
@@ -137,7 +157,7 @@ La salida sin ese costo: que el **repositorio** abra el `$transaction` intername
 | --- | --- |
 | Sí, como *anulación registral*: soft delete, solo si no hay contratos, sin tocar `status` ni `terminationDate`, con `colaborador:cesar`. | No: cesar ≠ borrar, y el cese es US-022. |
 
-**Recomiendo A, con esas guardas exactas.** El caso real es concreto y va a pasar: corregir un alta mal tipeada durante la migración del Excel, sin editar la base de datos a mano. Y hay un beneficio que se cae solo del diseño existente: como `ux_employees_doc` es parcial (`WHERE deleted_at IS NULL`), después de anular podés volver a crear el mismo documento. Cuesta 1 punto. Si preferís no exponerlo, sale del alcance y bajan 1 punto.
+**Recomiendo A, con esas guardas exactas.** El caso real es concreto y va a pasar: corregir un alta mal tipeada durante la migración del Excel, sin editar la base de datos a mano. Y hay un beneficio que se cae solo del diseño existente: como `ux_employees_doc` sigue siendo parcial (`WHERE deleted_at IS NULL`), después de anular podés volver a crear el mismo documento. Cuesta 1 punto. Si preferís no exponerlo, sale del alcance y baja 1 punto.
 
 ---
 
@@ -161,33 +181,37 @@ La salida sin ese costo: que el **repositorio** abra el `$transaction` intername
 - Índice único de `employee_code`: no existe.
 - Extensión `pg_trgm`: no existe (solo `btree_gist`).
 
-### 3.3 ✅ El drift, y la prueba histórica de por qué no hay que «arreglarlo»
+### 3.3 ✅ El drift, y por qué no hay que «arreglarlo»
 
 Cuatro objetos SQL viven en la base de datos y **no están declarados en `schema.prisma`**:
 
 ```sql
 -- prisma/migrations/20260709010204_expand_employees/migration.sql
+-- (ux_employees_doc redefinido en 20260813234937_drop_companies)
 
 ck_employees_dni_format          CHECK (document_type <> 'DNI' OR document_number ~ '^\d{8}$')
 ck_employees_termination_range   CHECK (termination_date IS NULL OR termination_date >= hire_date)
 full_name                        VARCHAR(220) GENERATED ALWAYS AS
                                    (first_names || ' ' || last_name_father || ' ' || COALESCE(last_name_mother,''))
                                    STORED
-ux_employees_doc                 UNIQUE (company_id, document_type, document_number) WHERE deleted_at IS NULL
+ux_employees_doc                 UNIQUE (document_type, document_number) WHERE deleted_at IS NULL
 ```
 
-La tentación natural es declarar la unicidad en el schema para «cerrar el drift». **Eso reintroduciría un bug que ya se arregló una vez.** El historial de migraciones lo prueba:
+La tentación natural es declarar la unicidad en el schema con un `@@unique([documentType, documentNumber])` para «cerrar el drift». **No lo hagas: Prisma no sabe expresar índices parciales**, así que produciría un índice *total* — uno que impediría volver a dar de alta a un colaborador cuyo registro fue anulado, porque la fila con `deleted_at` seguiría ocupando el documento.
+
+Ese `@@unique` total **ya existió y ya se eliminó una vez**, por esta misma razón:
 
 ```sql
 20260708181624_add_employees:31     CREATE UNIQUE INDEX "employees_document_type_document_number_key"
-                                      ON "employees"("document_type","document_number");   -- global, generado por @@unique
+                                      ON "employees"("document_type","document_number");   -- total, generado por @@unique
 
 20260709010204_expand_employees:36  DROP INDEX "employees_document_type_document_number_key";
-20260709010204_expand_employees:98  CREATE UNIQUE INDEX "ux_employees_doc" ON "employees"
-                                      (company_id, document_type, document_number) WHERE deleted_at IS NULL;
+20260709010204_expand_employees:98  CREATE UNIQUE INDEX "ux_employees_doc" ...  -- parcial
+
+20260813234937_drop_companies       recreado sin company_id, sigue parcial
 ```
 
-Ese `@@unique` **existió**, generó un índice *global* —que impedía que el mismo DNI existiera en dos razones sociales del grupo— y fue eliminado a mano y reemplazado por el parcial por empresa. Prisma no sabe expresar índices parciales: volver a declararlo produciría otra vez el índice total, y además rompería la posibilidad de recrear un empleado después de un soft delete.
+La forma parcial es la que hay que conservar; la columna `company_id` que llevó entre julio y agosto de 2026 desapareció con el multi-RUC.
 
 **Qué hacer en su lugar.** Documentar los cuatro objetos en un comentario `///` sobre el modelo, y añadir un test e2e que consulte el catálogo de Postgres y afirme que existen. Eso caza en el acto un `db push` destructivo, que es el riesgo real. `prisma migrate diff --exit-code` no sirve aquí: reportaría estas cuatro diferencias para siempre.
 
@@ -209,29 +233,29 @@ SELECT attgenerated FROM pg_attribute WHERE attrelid = 'employees'::regclass AND
 
 ```sql
 CREATE UNIQUE INDEX IF NOT EXISTS ux_employees_code
-  ON employees (company_id, employee_code)
+  ON employees (employee_code)
   WHERE employee_code IS NOT NULL AND deleted_at IS NULL;
 ```
 
-Por empresa, no global — coherente con `ux_employees_doc`. Va en una migración `--create-only` de una sentencia, con el `DROP INDEX` de rollback comentado en el PR. `CONCURRENTLY` no aplica: Prisma envuelve las migraciones en una transacción, y a este volumen el bloqueo es imperceptible.
+Parcial como `ux_employees_doc`, y por eso tampoco declarable en `schema.prisma`. Va en una migración `--create-only` de una sentencia, con el `DROP INDEX` de rollback comentado en el PR. `CONCURRENTLY` no aplica: Prisma envuelve las migraciones en una transacción, y a este volumen el bloqueo es imperceptible.
 
 Y en el repositorio hay que **traducir `P2002` a `DuplicateDocumentError`**. Es la red de seguridad para la carrera entre dos peticiones simultáneas que pasan la comprobación previa: sin esa traducción, el duplicado sale como HTTP 500 en vez de 409.
 
 ### 4.2 Índices de rendimiento: todavía no
 
-El inventario completo sobre `employees` es: la clave primaria, `ux_employees_doc`, y nada más — Postgres no crea índices para las claves foráneas. Hay un detalle que juega a favor: **`ux_employees_doc` tiene `company_id` como primera columna y es parcial sobre `deleted_at IS NULL`**, así que ya puede servir el filtro por empresa del listado.
+El inventario completo sobre `employees` es: la clave primaria, `ux_employees_doc`, y nada más — Postgres no crea índices para las claves foráneas.
 
-La consulta del listado hará seq scan para el resto. Con cientos de filas eso es irrelevante, y añadir índices ahora es optimización prematura. Cuando el volumen lo justifique:
+La consulta del listado hará seq scan. Con cientos de filas eso es irrelevante, y añadir índices ahora es optimización prematura. Cuando el volumen lo justifique:
 
 ```sql
-CREATE INDEX ix_employees_company_created
-  ON employees (company_id, created_at DESC, id DESC) WHERE deleted_at IS NULL;
+CREATE INDEX ix_employees_created
+  ON employees (created_at DESC, id DESC) WHERE deleted_at IS NULL;
 
-CREATE INDEX ix_employees_company_status_created
-  ON employees (company_id, status, created_at DESC, id DESC) WHERE deleted_at IS NULL;
+CREATE INDEX ix_employees_status_created
+  ON employees (status, created_at DESC, id DESC) WHERE deleted_at IS NULL;
 ```
 
-Hacen falta los dos: como `status` es un filtro opcional, el índice que lo lleva en segunda posición no puede sostener el orden cuando el filtro viene ausente.
+Hacen falta los dos: como `status` es un filtro opcional, el índice que lo lleva en primera posición no puede sostener el orden cuando el filtro viene ausente.
 
 ### 4.3 La caja de búsqueda
 
@@ -253,7 +277,7 @@ El detalle que sí importa: **ordenar siempre por `created_at DESC, id DESC`**. 
 ## 5. Especificación (para pegar en el backlog)
 
 **Narrativa:**
-Como **administrador de RRHH**, quiero **crear, consultar, listar con filtros y actualizar la ficha personal de un colaborador dentro de una razón social concreta, con validación del documento de identidad y con cada escritura registrada en la auditoría**, para que **la base de datos —y no el Excel— sea la fuente única de verdad del legajo, y para que ningún usuario vea datos de una empresa que no le corresponde**.
+Como **administrador de RRHH**, quiero **crear, consultar, listar con filtros y actualizar la ficha personal de un colaborador, con validación del documento de identidad y con cada escritura registrada en la auditoría**, para que **la base de datos —y no el Excel— sea la fuente única de verdad del legajo**.
 
 > **El límite de alcance que más se va a malinterpretar.** `Employee` no tiene puesto, sede, división ni salario: esos cuatro campos son de `Contract` (`schema.prisma:239-244`). US-020 es la *ficha personal*. El DTO no expone puesto ni sueldo, ni siquiera derivados por JOIN — eso ya es US-024/US-025 y requiere `contrato:leer`.
 
@@ -262,7 +286,7 @@ Como **administrador de RRHH**, quiero **crear, consultar, listar con filtros y 
 ```gherkin
 Escenario 1: Creación exitosa
   Dado un usuario con permiso "colaborador:crear"
-  Cuando POST /api/employees con { companyId, documentType: "DNI",
+  Cuando POST /api/employees con { documentType: "DNI",
     documentNumber: "40506070", firstNames: "MARIA ELENA",
     lastNameFather: "QUISPE", lastNameMother: "ROJAS", hireDate: "2026-08-17" }
   Entonces responde HTTP 201 con { success: true, data: { id, status: "ACTIVO", ... } }
@@ -271,22 +295,18 @@ Escenario 1: Creación exitosa
     Y hireDate se serializa como "2026-08-17", no como ISO con Z
     Y terminationDate y deletedAt son null
 
-Escenario 2: Documento duplicado en la misma empresa
-  Dado que en la empresa A ya existe un colaborador vivo con DNI "40506070"
+Escenario 2: Documento duplicado
+  Dado que ya existe un colaborador vivo con DNI "40506070"
   Cuando POST /api/employees con ese mismo documentType y documentNumber
   Entonces responde HTTP 409 con
-    "Ya existe un colaborador con DNI 40506070 en esta empresa"
+    "Ya existe un colaborador con DNI 40506070"
     Y no se crea ninguna fila
     Y la violación de ux_employees_doc (P2002) también se traduce a 409,
       nunca a HTTP 500 — defensa ante la carrera entre dos peticiones simultáneas
+    Y si el colaborador con ese DNI está anulado (deleted_at no nulo),
+      la creación SÍ procede: ux_employees_doc es parcial
 
-Escenario 3: El mismo documento sí puede existir en otra razón social
-  Dado que el DNI "40506070" ya existe en la empresa A
-  Cuando POST /api/employees con ese DNI y companyId de la empresa B
-  Entonces responde HTTP 201 y ambos registros coexisten,
-    porque la unicidad es (company_id, document_type, document_number)
-
-Escenario 4: Validación de formato del documento según su tipo
+Escenario 3: Validación de formato del documento según su tipo
   Cuando POST con { documentType: "DNI", documentNumber: "1234567" }
   Entonces HTTP 422 con errors: [{ field: "documentNumber",
     message: "El DNI debe tener exactamente 8 dígitos" }]
@@ -295,15 +315,15 @@ Escenario 4: Validación de formato del documento según su tipo
     Y el número se normaliza antes de validar: trim, sin espacios, mayúsculas
     Y ningún caso llega a estrellarse contra el CHECK ck_employees_dni_format
 
-Escenario 5: Actualización parcial
+Escenario 4: Actualización parcial
   Cuando PATCH /api/employees/<id> con { phone: "987654321", address: "AV. AREQUIPA 123" }
   Entonces HTTP 200 y solo esos dos campos cambian
     Y los otros 13 campos nullable conservan su valor previo
     Y updatedAt avanza
     Y un body vacío {} responde HTTP 422 ("Debe enviar al menos un campo")
 
-Escenario 6: Campos que PATCH no puede tocar
-  Cuando PATCH incluye companyId, fullName, deletedAt o id
+Escenario 5: Campos que PATCH no puede tocar
+  Cuando PATCH incluye fullName, deletedAt o id
   Entonces HTTP 422 indicando el campo rechazado — schema estricto,
     no se ignora en silencio
     Y cuando PATCH intenta status: "CESADO" o terminationDate sin
@@ -312,17 +332,17 @@ Escenario 6: Campos que PATCH no puede tocar
     Y cuando PATCH mueve hireDate más allá de un terminationDate existente
     Entonces HTTP 422 por invariante de dominio, sin llegar al CHECK de Postgres
 
-Escenario 7: Listado paginado con filtros
-  Dado 47 colaboradores en la empresa A (30 ACTIVO, 17 CESADO) y 12 en la empresa B
-  Cuando GET /api/employees?page=2&limit=20&status=ACTIVO&companyId=<A>
+Escenario 6: Listado paginado con filtros
+  Dado 47 colaboradores (30 ACTIVO, 17 CESADO)
+  Cuando GET /api/employees?page=2&limit=20&status=ACTIVO
   Entonces HTTP 200 con 10 elementos y
     pagination = { page: 2, limit: 20, total: 30, totalPages: 2 }
-    Y ninguno de los 12 de la empresa B aparece
     Y ningún registro con deletedAt distinto de null aparece
     Y el orden es created_at DESC, id DESC para que la paginación no repita filas
     Y sin parámetros los defaults son page=1, limit=20; limit>100 responde 422
+    Y un parámetro de query desconocido responde 422 (schema estricto)
 
-Escenario 8: Búsqueda parcial por nombre y por documento
+Escenario 7: Búsqueda parcial por nombre y por documento
   Dado "MARIA ELENA QUISPE ROJAS" (DNI 40506070) y "JUAN PEREZ LOPEZ"
   Cuando GET /api/employees?search=quispe
   Entonces devuelve a MARIA ELENA — parcial, insensible a mayúsculas, sobre full_name
@@ -332,16 +352,7 @@ Escenario 8: Búsqueda parcial por nombre y por documento
     Y se documenta como limitación conocida que "maria" no encuentra "MARÍA"
       y que "rojas quispe" no encuentra: ambas son alcance de US-025
 
-Escenario 9: Alcance — colaborador de otra empresa
-  Dado un colaborador <id-B> de la empresa B, fuera del alcance del actor
-  Cuando GET /api/employees/<id-B>
-  Entonces HTTP 404, no 403: no se revela que el registro existe
-    Y lo mismo aplica a PATCH y DELETE sobre <id-B>
-    Y el filtro de alcance se aplica DENTRO del caso de uso, no solo en el middleware
-    Y en el listado, un companyId fuera de alcance responde 403
-      (el actor ya conoce ese id, no hay enumeración que proteger)
-
-Escenario 10: Campos sensibles ocultos sin "colaborador:leer_sensible"
+Escenario 8: Campos sensibles ocultos sin "colaborador:leer_sensible"
   Dado un usuario con rol HR_ANALYST, que no tiene ese permiso
   Cuando GET /api/employees/<id>
   Entonces HTTP 200 y la respuesta OMITE las claves
@@ -352,7 +363,7 @@ Escenario 10: Campos sensibles ocultos sin "colaborador:leer_sensible"
     Y las mismas claves se omiten en cada elemento del listado
     Y con rol HR_ADMIN ambas claves aparecen
 
-Escenario 11: Toda escritura queda auditada, y de forma atómica
+Escenario 9: Toda escritura queda auditada, y de forma atómica
   Cuando POST /api/employees se completa con éxito
   Entonces existe una fila en audit_logs con action="CREATE",
     entityType="employees", entityId=<id>, actorUserId=<actor>,
@@ -366,7 +377,7 @@ Escenario 11: Toda escritura queda auditada, y de forma atómica
     Y si la escritura falla, no queda ninguna fila de auditoría
     Y las lecturas no generan auditoría en esta historia (US-009b)
 
-Escenario 12: Anulación registral, distinta del cese
+Escenario 10: Anulación registral, distinta del cese
   Dado un colaborador creado por error, SIN ningún contrato asociado
   Cuando DELETE /api/employees/<id> con permiso "colaborador:cesar"
   Entonces HTTP 200, se fija deletedAt = now() y NO se borra la fila
@@ -382,11 +393,11 @@ Escenario 12: Anulación registral, distinta del cese
 ### Definición de Hecho
 
 - [ ] Cinco endpoints operativos bajo `/api/employees`, con `authenticate` y `requirePermission`.
-- [ ] Fix de `req.query` en `validation-error.middleware.ts`, en commit propio.
+- [x] Fix de `req.query` en `validation-error.middleware.ts` (runtime + tipo `query: unknown`).
 - [ ] Migración `ux_employees_code` aplicada, con el rollback comentado en el PR.
 - [ ] Tests unitarios de invariantes de la entidad, del mapper y de la política de campos sensibles.
 - [ ] Test del mapper que afirma que `toCreate` y `toUpdate` no contienen `fullName`.
-- [ ] Tests e2e de los 12 escenarios, con fixtures de **dos** empresas y los roles `HR_ADMIN`, `HR_ANALYST` y `MANAGER`.
+- [ ] Tests e2e de los 10 escenarios, con fixtures de los roles `HR_ADMIN`, `HR_ANALYST` y `MANAGER`.
 - [ ] Test e2e de atomicidad de la auditoría, y test de catálogo que verifica los 4 objetos SQL.
 - [ ] `modules/employees/index.ts` expone el router; `type-check` y `lint` verdes.
 - [ ] `docs/api/employees.md` con la matriz endpoint × permiso y las limitaciones de búsqueda.
@@ -409,7 +420,8 @@ Escenario 12: Anulación registral, distinta del cese
 | Transiciones a `SUSPENDIDO`, `VACACIONES`, `SUBSIDIADO` | US-030 | US-020 fija `ACTIVO` en el alta y no lo vuelve a tocar |
 | Puesto, sede, división, salario | US-031…038 | No son campos de `Employee` |
 | Triggers genéricos, `GET /audit-logs`, auditoría de lecturas | US-009b | US-020 audita sus propias escrituras vía puerto de aplicación |
-| Restringir a qué empresas accede cada usuario | US-008b | Requiere `UserRole.companyId`, que hoy no existe |
+| Restringir a qué **empresas** accede cada usuario | — | **Eliminado del producto** (migración `drop_companies`): una sola razón social, no hay nada que acotar |
+| Restringir a qué **división** accede cada usuario («un jefe solo ve a su división») | US-008b | Sigue vigente: requiere el vínculo `User → Employee → Division`, que hoy no existe |
 | Subida de foto y documentos del legajo | US-017 | US-020 solo guarda `photoUrl` como texto |
 
 ---
@@ -420,9 +432,9 @@ Escenario 12: Anulación registral, distinta del cese
 
 | Endpoint | Permiso | Éxito | Errores |
 | --- | --- | --- | --- |
-| `POST /api/employees` | `colaborador:crear` | 201 | 401 · 403 · 409 duplicado · 422 Zod, invariante, empresa o ubigeo inexistente |
-| `GET /api/employees` | `colaborador:leer` | 200 | 401 · 403 alcance · 422 query inválida |
-| `GET /api/employees/:id` | `colaborador:leer` | 200 | 401 · 404 inexistente o fuera de alcance · 422 id no uuid |
+| `POST /api/employees` | `colaborador:crear` | 201 | 401 · 403 · 409 duplicado · 422 Zod, invariante o ubigeo inexistente |
+| `GET /api/employees` | `colaborador:leer` | 200 | 401 · 403 · 422 query inválida |
+| `GET /api/employees/:id` | `colaborador:leer` | 200 | 401 · 404 inexistente · 422 id no uuid |
 | `PATCH /api/employees/:id` | `colaborador:editar` | 200 | 401 · 403 sin permiso o intento de cese · 404 · 409 · 422 |
 | `DELETE /api/employees/:id` | `colaborador:cesar` | 200 | 401 · 403 · 404 · 409 tiene contratos |
 
@@ -435,25 +447,22 @@ export interface IEmployeeRepository {
   // Devuelve la ENTIDAD, no un boolean: update necesita comparar el id del dueño.
   // Si el documento existe pero es del mismo empleado, no es conflicto.
   findByDocument(
-    companyId: string, documentType: DocumentType, documentNumber: string,
+    documentType: DocumentType, documentNumber: string,
   ): Promise<Employee | null>;
 
-  findByEmployeeCode(companyId: string, employeeCode: string): Promise<Employee | null>;
+  findByEmployeeCode(employeeCode: string): Promise<Employee | null>;
 
   create(employee: Employee, audit: AuditEntry): Promise<void>;   // un solo $transaction
   update(employee: Employee, audit: AuditEntry): Promise<void>;
   softDelete(id: string, audit: AuditEntry): Promise<void>;
 
-  // scope va SEPARADO de filters a propósito: filters viene del cliente y scope
-  // del token. Fusionados, un companyId del cliente podría pisar el alcance.
-  // Con dos parámetros el AND es estructural y la fuga es imposible por construcción.
-  list(filters: EmployeeFilters, scope: EmployeeScope): Promise<Page<Employee>>;
+  list(filters: EmployeeFilters): Promise<Page<Employee>>;
 
-  hasContracts(employeeId: string): Promise<boolean>;   // guarda del escenario 12
+  hasContracts(employeeId: string): Promise<boolean>;   // guarda del escenario 10
 }
 ```
 
-Más dos lectores de otros agregados, `ICompanyReader.existsActive()` y `IUbigeoReader.exists()`. Van como puertos propios y no se delega a la clave foránea porque una FK violada da `P2003` genérico —no sabés si falló la empresa o el ubigeo— y además no comprueba `isActive` ni `deletedAt`. Cuando exista el módulo de organización se sustituye solo el adaptador.
+Más un lector de otro agregado, `IUbigeoReader.exists()`. Va como puerto propio y no se delega a la clave foránea porque una FK violada da `P2003` genérico y además no comprueba `deletedAt`. Cuando exista el módulo de organización se sustituye solo el adaptador.
 
 ### 7.3 Entidad rica, no tipo plano
 
@@ -474,15 +483,13 @@ Las invariantes que **solo el dominio** puede sostener, porque la base no las ex
 ```
 src/modules/employees/
 ├── domain/
-│   ├── types.ts                          [EXISTE] + EmployeeScope, EmployeeUpdatePatch, ActorContext
-│   ├── employee-scope.ts                 función pura isCompanyInScope(scope, companyId)
+│   ├── types.ts                          [EXISTE] + EmployeeUpdatePatch, ActorContext
 │   ├── entities/
 │   │   ├── employee.entity.ts            agregado: invariantes de documento, fechas y estado
 │   │   └── employee.entity.test.ts
-│   ├── errors/employee.error.ts          [EXISTE] + CompanyOutOfScopeError, TerminationNotAllowedError
+│   ├── errors/employee.error.ts          [EXISTE] + TerminationNotAllowedError
 │   └── ports/
 │       ├── employee.repository.port.ts
-│       ├── company-reader.port.ts
 │       └── ubigeo-reader.port.ts
 ├── application/
 │   ├── dtos/employee.dto.ts              EmployeeOutput + toEmployeeOutput(entity, canReadSensitive)
@@ -495,7 +502,6 @@ src/modules/employees/
 │   ├── mappers/employee.mapper.ts
 │   └── repository/
 │       ├── prisma-employee.repository.ts       + traducción de P2002
-│       ├── prisma-company-reader.repository.ts
 │       └── prisma-ubigeo-reader.repository.ts
 ├── presentation/
 │   ├── controllers/employee.controller.ts
@@ -508,13 +514,13 @@ src/modules/employees/
 │       └── shared-fields.schema.ts       dateOnly, documentNumber, ubigeoId
 └── index.ts                              [EXISTE, VACÍO] composition root
 
-tests/helpers/employee.fixtures.ts        2 empresas + 1 ubigeo; NO tocar prisma/seed.ts
+tests/helpers/employee.fixtures.ts        colaboradores + 1 ubigeo; NO tocar prisma/seed.ts
 tests/e2e/employees.e2e.test.ts
 src/services/app.ts                       [EDITAR] +2 líneas
-src/shared/middleware/validation-error.middleware.ts   [EDITAR] fix de req.query
+src/shared/middleware/validation-error.middleware.ts   [HECHO] fix de req.query
 ```
 
-Dos cosas que `auth/` no tiene: `application/dtos/`, porque cinco casos de uso comparten una sola forma de respuesta de 20 campos y duplicarla es peor; y `employee-scope.ts`, porque el predicado habla de la colección, no del individuo. No hay `value-objects/` porque `auth` tampoco los tiene en el código real.
+Lo único que `auth/` no tiene y esto sí es `application/dtos/`, porque cinco casos de uso comparten una sola forma de respuesta de 20 campos y duplicarla es peor. No hay `value-objects/` porque `auth` tampoco los tiene en el código real.
 
 ### 7.5 Detalles del mapper que producen bugs silenciosos
 
@@ -530,36 +536,36 @@ Dos cosas que `auth/` no tiene: `application/dtos/`, porque cinco casos de uso c
 
 Esta sección sí es una secuencia: cada paso depende del anterior. Dos PRs, para respetar el límite de 400 líneas por revisión.
 
-1. **Decidir D1 a D4.** Son cuatro respuestas, no código. D1 determina la firma de los cinco casos de uso.
-2. **Fix de `req.query`** en `validation-error.middleware.ts`, commit propio y aislado.
-3. **US-009a:** puerto de auditoría y propagación del actor. Va primero porque el escenario 11 depende de él, y porque el repositorio necesita su firma para abrir el `$transaction`.
+1. **Decidir D2, D3 y D4.** Son tres respuestas, no código. D1 ya está cerrada por la migración `drop_companies`.
+2. ~~**Fix de `req.query`** en `validation-error.middleware.ts`~~ — **hecho**: `Object.defineProperty` para el runtime y `query: unknown` en `ValidatedRequestData` para el tipo.
+3. **US-009a:** puerto de auditoría y propagación del actor. Va primero porque el escenario 9 depende de él, y porque el repositorio necesita su firma para abrir el `$transaction`.
 4. **Migración `ux_employees_code`**, aditiva y de una sentencia. Anunciala antes: `prisma/` es territorio compartido.
-5. **Dominio:** entidad, invariantes, `employee-scope.ts`, puertos. Con sus tests unitarios, que son el grueso del valor y no necesitan base de datos.
-6. **PR 1 — lectura:** mapper, repositorio, `GET` lista y detalle, proyección de campos sensibles. Escenarios 7 a 10.
-7. **PR 2 — escritura:** `POST`, `PATCH`, `DELETE`, auditoría atómica, traducción de `P2002`. Escenarios 1 a 6, 11 y 12.
+5. **Dominio:** entidad, invariantes, puertos. Con sus tests unitarios, que son el grueso del valor y no necesitan base de datos.
+6. **PR 1 — lectura:** mapper, repositorio, `GET` lista y detalle, proyección de campos sensibles. Escenarios 6 a 8.
+7. **PR 2 — escritura:** `POST`, `PATCH`, `DELETE`, auditoría atómica, traducción de `P2002`. Escenarios 1 a 5, 9 y 10.
 8. **Test de catálogo** que verifica los 4 objetos SQL, y `docs/api/employees.md`.
 
 ---
 
 ## 9. Estimación
 
-| Tarea | Horas |
-| --- | --- |
-| Schemas Zod y tabla de formatos por tipo de documento | 2.5 |
-| Dominio: invariantes, política de campos sensibles, puertos | 3.5 |
-| Repositorio, mapper y `select` condicionado por permiso | 4.0 |
-| Cinco casos de uso con filtro de alcance propio | 3.5 |
-| Controlador, rutas, composition root | 3.0 |
-| Auditoría: puerto, diff de campos, transacción compartida | 2.0 |
-| Migración y traducción de `P2002` | 1.0 |
-| Tests unitarios | 2.5 |
-| Tests e2e: 12 escenarios, fixtures de 2 empresas y 3 roles | 4.0 |
-| Documentación y PRs | 1.5 |
-| **Total** | **27.5** |
+| Tarea | Horas | Antes de `drop_companies` |
+| --- | --- | --- |
+| Schemas Zod y tabla de formatos por tipo de documento | 2.5 | 2.5 |
+| Dominio: invariantes, política de campos sensibles, puertos | 3.0 | 3.5 |
+| Repositorio, mapper y `select` condicionado por permiso | 3.5 | 4.0 |
+| Cinco casos de uso | 2.5 | 3.5 |
+| Controlador, rutas, composition root | 3.0 | 3.0 |
+| Auditoría: puerto, diff de campos, transacción compartida | 2.0 | 2.0 |
+| Migración y traducción de `P2002` | 1.0 | 1.0 |
+| Tests unitarios | 2.0 | 2.5 |
+| Tests e2e: 10 escenarios, fixtures de 3 roles | 3.0 | 4.0 |
+| Documentación y PRs | 1.5 | 1.5 |
+| **Total** | **24.0** | **27.5** |
 
-27,5 h cae en el tramo de **8 puntos** (16–32 h). Los 5 puntos originales corresponden a un CRUD sin alcance multi-RUC, sin máscara de campos sensibles y sin auditoría: llegar a 5 exige entregar la historia sin sus tres mecanismos de seguridad.
+24 h cae en el tramo de **6 puntos**. La eliminación del multi-RUC se llevó unas 3,5 h: el resolver de alcance, el predicado `isCompanyInScope`, el puerto `ICompanyReader` con su adaptador, y las fixtures de la segunda empresa con los dos escenarios que la ejercitaban.
 
-La comparación que lo sostiene: **US-031**, el CRUD de empresas, vale 3 puntos — es el CRUD «desnudo», sin alcance ajeno ni auditoría propia. Y **US-021, US-022 y US-027** valen 3 cada una *porque* US-020 habrá construido antes el alcance, el puerto de auditoría, el helper de paginación y las fixtures. Parte de estos 8 puntos es infraestructura amortizada por seis historias posteriores.
+Los 5 puntos originales del backlog corresponden a un CRUD sin máscara de campos sensibles y sin auditoría: llegar a 5 exige entregar la historia sin dos de sus tres mecanismos de seguridad. **US-021, US-022 y US-027** valen 3 cada una *porque* US-020 habrá construido antes el puerto de auditoría, el helper de paginación y las fixtures. Parte de estos 6 puntos es infraestructura amortizada por seis historias posteriores.
 
 ---
 
@@ -574,7 +580,7 @@ La comparación que lo sostiene: **US-031**, el CRUD de empresas, vale 3 puntos 
 | R5 | US-023 (importación masiva) reutilizará el alta; riesgo de dos caminos de validación divergentes | `CreateEmployee` es el **único** punto de alta. US-023 lo invoca por fila y captura `DuplicateDocumentError` / `InvalidEmployeeDataError` para su reporte. Los schemas Zod se exportan desde el módulo |
 | R6 | `NotFoundError` produce spanglish: *"Colaborador with id 'x' not found"* (`app-error-v2.ts:47`) | Que `EmployeeNotFoundError` construya su propio mensaje en español. Toca un archivo del módulo, no el compartido, y no rompe los tests de `auth` |
 | R7 | `shared/types/employees.interface.ts` es la fila del Excel legacy, no la ficha maestra, y tiene un `ValidationError` homónimo del de `app-error-v2.ts` | `src/modules/employees/**` **nunca** lo importa. El puente Excel↔dominio es US-023 |
-| R8 | `requirePermission` usa `.some()`: la semántica es **OR**, no AND | Nunca pasarle dos códigos esperando exigir ambos. El chequeo de `colaborador:cesar` del escenario 6 va en la capa de aplicación, no en el middleware |
+| R8 | `requirePermission` usa `.some()`: la semántica es **OR**, no AND | Nunca pasarle dos códigos esperando exigir ambos. El chequeo de `colaborador:cesar` del escenario 5 va en la capa de aplicación, no en el middleware |
 
 ---
 
