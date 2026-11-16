@@ -4,6 +4,11 @@ export const ALLOWED_EXCEL_MIMES = [
   'application/excel',
   'application/x-excel',
   'application/x-msexcel',
+  'text/csv',
+  'application/csv',
+  // Algunos clientes (Postman, navegadores en Windows, Blobs sin tipo) envían
+  // el .xlsx como binario genérico; la extensión ya se valida por separado.
+  'application/octet-stream',
 ];
 export const ALLOWED_EXTENSIONS = ['.xlsx', '.xls', '.csv'];
 

@@ -2998,7 +2998,7 @@ export const CONTRACT_ADDENDUM_INCREMENTO_ACTIVIDADES = `
 
         <div class="clause-title">CUARTA.-</div>
         <div class="clause-text">
-            Mediante la presente Adenda, las partes acuerdan modificar la Cláusula Sexta del <span class="bold">CONTRATO</span> referida a la Remuneración de <span class="bold">EL TRABAJADOR</span>, la misma que tendrá el siguiente tenor:
+            Mediante la presente Adenda, las partes acuerdan ratificar la Cláusula Sexta del <span class="bold">CONTRATO</span> referida a la Remuneración de <span class="bold">EL TRABAJADOR</span>, la misma que tendrá el siguiente tenor:
         </div>
 
         <div class="clause-title">SEXTO: REMUNERACIÓN</div>
@@ -3044,7 +3044,7 @@ export const CONTRACT_ADDENDUM_INCREMENTO_ACTIVIDADES = `
 
         <div class="clause-title">QUINTA.-</div>
         <div class="clause-text">
-            Las partes dejan constancia que en la redacción y suscripción de la presente Adenda al <span class="bold">CONTRATO</span> no ha mediado error, lesión o vicio de voluntad alguno capaz de invalidarlo en forma parcial o total. Asimismo, <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> se ratifican las demás estipulaciones del <span class="bold">CONTRATO</span> referido en la cláusula primera, limitándose la presente adenda a la ampliación del plazo de vigencia del mismo y el incremento de remuneración.
+            Las partes dejan constancia que en la redacción y suscripción de la presente Adenda al <span class="bold">CONTRATO</span> no ha mediado error, lesión o vicio de voluntad alguno capaz de invalidarlo en forma parcial o total. Asimismo, <span class="bold">EL TRABAJADOR</span> y <span class="bold">EL EMPLEADOR</span> se ratifican las demás estipulaciones del <span class="bold">CONTRATO</span> referido en la cláusula primera, limitándose la presente adenda a la ampliación del plazo de vigencia del mismo.
         </div>
 
         <div class="clause-title">SEXTA.-</div>
