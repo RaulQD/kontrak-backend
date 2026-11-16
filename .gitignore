@@ -10,6 +10,7 @@ temp/zips/*
 generated_contracts/
 *.xlsx
 *.xls
+*.xlsm
 *.zip
 *.pdf
 /src/generated/prisma
