@@ -16,6 +16,7 @@ import {
 import puppeteer from 'puppeteer';
 import { chunk } from '../../../shared/utils/array.utits';
 import { PDFPreviewBase64 } from '../../../shared/types/contract.interface';
+import { AddendumData } from '../../../shared/types/addendum.interface';
 
 export class ContractService {
   private readonly BATCH_SIZE = 3;
@@ -123,5 +124,68 @@ export class ContractService {
         fileName: result.fileName,
       };
     }
+  }
+  async downloadAddendumsZipStream(
+    response: Response,
+    addendums: AddendumData[],
+  ) {
+    const archive = archiver('zip', { zlib: { level: 9 } }); // Nivel máximo de compresión
+
+    archive.on('error', (err) => {
+      throw err;
+    });
+
+    // Conectamos el stream del ZIP con la respuesta HTTP
+    archive.pipe(response);
+
+    // 2. Iniciamos el navegador de Puppeteer para renderizar los PDFs
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+
+    try {
+      // 3. Dividimos el procesamiento en lotes (batches) para no sobrecargar la memoria
+      const batches = chunk(addendums, this.BATCH_SIZE);
+
+      for (const batch of batches) {
+        // Procesamos cada lote en paralelo
+        await Promise.all(
+          batch.map(async (addendum) => {
+            try {
+              // El tipo ya llega validado por employeeBatchAddendumSchema.
+              const rootFolder = addendum.contractType
+                .toLowerCase()
+                .replace(/\s+/g, '');
+
+              // 4. Generamos el PDF según el tipo de adenda
+              const addendumResult =
+                await this.pdfGeneratorService.generateAddendumPDF(
+                  addendum,
+                  addendum.contractType,
+                  browser,
+                );
+
+              // 5. Agregamos el stream del PDF al archivo ZIP
+              archive.append(addendumResult.stream, {
+                name: `${rootFolder}/${addendumResult.filename}`,
+              });
+            } catch (error) {
+              if (error instanceof Error) {
+                logger.error(
+                  `Error generando adenda para empleado ${addendum.documentNumber}: ${error.message}`,
+                );
+              }
+            }
+          }),
+        );
+      }
+    } finally {
+      // 6. Nos aseguramos de cerrar el navegador sin importar si hubo errores
+      await browser.close();
+    }
+
+    // 7. Finalizamos la creación del archivo ZIP
+    await archive.finalize();
   }
 }

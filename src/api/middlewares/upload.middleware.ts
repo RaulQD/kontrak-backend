@@ -35,7 +35,7 @@ export const excelUpload = multer({
     if (!isValidMimeType) {
       return cb(
         new AppError(
-          `Extensiones de archivo no permitidas: ${fileExtension}.Solo se permiten: ${ALLOWED_EXTENSIONS.join(', ')}`,
+          `Tipo MIME no permitido: ${file.mimetype} (archivo ${fileExtension}). Solo se permiten archivos Excel o CSV`,
           BAD_REQUEST,
         ),
       );

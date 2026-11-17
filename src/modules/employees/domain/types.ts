@@ -17,6 +17,36 @@ export type MaritalStatus =
   | 'CONVIVIENTE'
   | 'VIUDO';
 
+/**
+ * Campos de la ficha que un PATCH puede tocar. Los nombres coinciden con
+ * `EmployeeProps`: si divergen, `withPatch` ignora el campo en silencio.
+ *
+ * Clave ausente = no tocar. `null` = poner NULL (solo en los campos nullable).
+ * Fuera a propósito: `id`, `createdAt`, `deletedAt`, y `status` /
+ * `terminationDate`, que solo cambia el cese (US-022).
+ */
+export interface EmployeeUpdatePatch {
+  employeeCode?: string | null;
+  documentType?: DocumentType;
+  documentNumber?: string;
+  firstNames?: string;
+  lastNameFather?: string;
+  lastNameMother?: string;
+  sex?: Sex | null;
+  birthDate?: Date | null;
+  maritalStatus?: MaritalStatus | null;
+  nationality?: string;
+  email?: string | null;
+  personalEmail?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  ubigeoId?: string | null;
+  hireDate?: Date;
+  hasChildrenUnder18?: boolean;
+  essaludLifeInsurance?: boolean;
+  photoUrl?: string | null;
+}
+
 export interface EmployeeFilters {
   status?: EmployeeStatus;
   /** Coincidencia parcial sobre nombre completo o número de documento. */
