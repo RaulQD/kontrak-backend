@@ -1,6 +1,6 @@
 import { env } from '../../config/env';
 import { prisma } from '../../platform/database/prisma';
-import { authenticateMiddleware } from '../../shared/middleware/authenticate.middleware';
+import { authenticateMiddleware } from './presentation/middlewares/authenticate.middleware';
 import { DeleteSessionUseCase } from './application/delete-session.use-case';
 import { AuthTokenConfig, LoginUseCase } from './application/login.use-case';
 import { LogoutUseCase } from './application/logout.use-case';
@@ -14,7 +14,6 @@ import { AuthController } from './presentation/controllers/auth.controller';
 import { UserSessionsController } from './presentation/controllers/user-sessions.controller';
 import { AuthRouter } from './presentation/routes/auth.routes';
 import { UserSessionsRouter } from './presentation/routes/user-sessions.route';
-
 const useRepo = new PrismaUserRepository(prisma);
 const refreshRepo = new PrismaRefreshTokenRepository(prisma);
 const hasher = new BcryptPasswordHasher();
@@ -57,3 +56,4 @@ export const userSessionsRouter = UserSessionsRouter(
   userSessionsController,
   authenticate,
 );
+export { requirePermission } from './presentation/middlewares/require-permission.middleware';

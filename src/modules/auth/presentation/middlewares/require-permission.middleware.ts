@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { ForbiddenError } from '../utils/app-error-v2';
-import { getAuth } from '../helpers';
-import { permissionLabel, PermissionCode } from '../constants/permissions';
+import { ForbiddenError } from '../../../../shared/utils/app-error-v2';
+import {
+  permissionLabel,
+  PermissionCode,
+} from '../../../../shared/constants/permissions';
+import { getAuth } from './get-auth';
 
 export const requirePermission =
   (...codes: PermissionCode[]): RequestHandler =>

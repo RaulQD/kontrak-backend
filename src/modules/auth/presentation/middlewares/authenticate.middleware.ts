@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { ITokenSigner } from '../../modules/auth/domain/ports/token-signer.port';
-import { catchError } from '../utils/catch-error';
-import { UnauthorizedError } from '../utils/app-error-v2';
+import { ITokenSigner } from '../../domain/ports/token-signer.port';
+import { catchError } from '../../../../shared/utils/catch-error';
+import { UnauthorizedError } from '../../../../shared/utils/app-error-v2';
 
 export const authenticateMiddleware = (signer: ITokenSigner) =>
   catchError(async (req: Request, _res: Response, next: NextFunction) => {
