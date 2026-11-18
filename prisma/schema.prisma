@@ -192,7 +192,7 @@ enum ContractStatus {
   FIRMADO
   VIGENTE
   VENCIDO
-  RESULETO
+  RESUELTO
   RENOVADO
 
   @@map("contract_status")

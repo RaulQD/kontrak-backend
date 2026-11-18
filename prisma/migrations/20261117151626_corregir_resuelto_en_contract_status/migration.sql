@@ -1,0 +1,1 @@
+ALTER TYPE "contract_status" RENAME VALUE 'RESULETO' TO 'RESUELTO';
