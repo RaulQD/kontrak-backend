@@ -1,6 +1,5 @@
 import { Browser } from 'puppeteer';
 import {
-  ContractProcessor,
   ContractProcessorResult,
   ContractResult,
 } from './contract-processor.interface';

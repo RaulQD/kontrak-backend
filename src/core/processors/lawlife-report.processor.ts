@@ -1,7 +1,6 @@
 import { Browser } from 'puppeteer';
 import { EmployeeData } from '../../shared/types/employees.interface';
 import {
-  ContractProcessor,
   ContractProcessorResult,
   ContractResult,
 } from './contract-processor.interface';
