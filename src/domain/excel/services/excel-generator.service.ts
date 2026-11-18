@@ -204,20 +204,19 @@ export class ExcelGeneratorServices {
         name: emp.name,
       });
     }
-    logger.info(`Se agregaron ${employees.length} filas al excel Vida ley`);
+    logger.info(`Se agregaron ${employees.length} filas al CSV de fotochecks`);
+    // writeBuffer y no csv.write(PassThrough): con un PassThrough que nadie lee
+    // aún, la escritura se bloquea por backpressure a partir de ~300 filas.
     const buffer = await workbook.csv.writeBuffer({
       dateFormat: 'DD/MM/YYYY',
       dateUTC: false,
       formatterOptions: {
         delimiter: ';', // Punto y coma para Excel en español/Latam
-        writeBOM: true,
+        writeBOM: true, // Sin BOM, Excel en Windows rompe las tildes y la Ñ
       },
       encoding: 'utf8',
     });
-    const stream = new PassThrough();
-    await workbook.csv.write(stream);
-    stream.end();
-    return stream;
+    return Readable.from(Buffer.from(buffer));
   }
   async generateExcelGroupLife(employee: EmployeeData[]): Promise<Readable> {
     const workbook = new ExcelJS.Workbook();

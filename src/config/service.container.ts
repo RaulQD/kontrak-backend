@@ -1,6 +1,5 @@
 import { EmailNotificationService } from '../core/notifications/services/email-notification.service';
 import { BrevoEmailService } from '../infrastructure/email/services/brevo-email.service';
-import { GraphEmailService } from '../infrastructure/email/services/graph-email.service';
 import { ExcelGeneratorServices } from '../domain/excel/services/excel-generator.service';
 import { PDFGeneratorService } from '../domain/contracts/services/pdf-generator.service';
 

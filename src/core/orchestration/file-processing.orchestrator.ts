@@ -16,7 +16,6 @@ import {
   SctrReportProcessor,
 } from '../processors';
 
-import { GraphEmailService } from '../../infrastructure/email/services/graph-email.service';
 import { BrevoEmailService } from '../../infrastructure/email/services/brevo-email.service';
 import { EmailNotificationService } from '../notifications/services/email-notification.service';
 import { AppError } from '../../shared/utils/app-error';
