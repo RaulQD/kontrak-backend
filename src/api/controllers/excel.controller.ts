@@ -74,7 +74,7 @@ export class ExcelController {
     const response = await this.imageGeneratorService.excelToImage(employees);
     const filename = 'excel.png';
     res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Content-Disposition', 'inline');
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
     res.setHeader('Content-Length', response.length);
     res.end(response);
   });
