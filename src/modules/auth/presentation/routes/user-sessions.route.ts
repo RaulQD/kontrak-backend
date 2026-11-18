@@ -2,7 +2,7 @@ import { RequestHandler, Router } from 'express';
 import { UserSessionsController } from '../controllers/user-sessions.controller';
 import { validationErrorMiddleware } from '../../../../shared/middleware/validation-error.middleware';
 import { revokeSessionsSchema } from '../schemas/revoke.schema';
-import { requirePermission } from '../../../../shared/middleware/require-permission.middleware';
+import { requirePermission } from '../middlewares/require-permission.middleware';
 
 export const UserSessionsRouter = (
   controller: UserSessionsController,
