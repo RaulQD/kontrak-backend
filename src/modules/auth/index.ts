@@ -1,4 +1,3 @@
-import { env } from '../../config/env';
 import { prisma } from '../../platform/database/prisma';
 import { authenticateMiddleware } from './presentation/middlewares/authenticate.middleware';
 import { DeleteSessionUseCase } from './application/delete-session.use-case';
@@ -14,6 +13,7 @@ import { AuthController } from './presentation/controllers/auth.controller';
 import { UserSessionsController } from './presentation/controllers/user-sessions.controller';
 import { AuthRouter } from './presentation/routes/auth.routes';
 import { UserSessionsRouter } from './presentation/routes/user-sessions.route';
+import { env } from '../../platform/config/env';
 const useRepo = new PrismaUserRepository(prisma);
 const refreshRepo = new PrismaRefreshTokenRepository(prisma);
 const hasher = new BcryptPasswordHasher();
