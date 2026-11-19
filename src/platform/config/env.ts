@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { z } from 'zod';
-import { toSeconds } from '../shared/utils/durations';
+import { toSeconds } from '../../shared/utils/durations';
 
 /**
  * Validación de variables de entorno con fail-fast.
