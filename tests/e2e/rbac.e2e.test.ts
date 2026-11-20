@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import bcrypt from 'bcryptjs';
 import type { Express } from 'express';
-import { createApp } from '../../src/services/app';
+import { buildApp } from '../../src/app';
 import { prisma } from '../../src/platform/database/prisma';
 
 const PASSWORD = 'Password123';
@@ -48,7 +48,7 @@ describe('US-008: RBAC con permisos granulares', () => {
   };
 
   beforeAll(async () => {
-    app = await createApp();
+    app = buildApp();
     const employee = await crearUsuarioConRol(EMAIL_EMPLOYEE, 'EMPLOYEE');
     idEmployee = employee.userId;
     rolEmployeeId = employee.roleId;

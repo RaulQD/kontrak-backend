@@ -5,17 +5,6 @@ import addendumRoutes from './addendum.route';
 import { logger } from '../../shared/utils/logger';
 
 const router: Router = Router();
-
-// Health check endpoint
-router.get('/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Server is running',
-    timestamp: new Date().toISOString(),
-    path: req.path,
-  });
-});
-
 // Rutas de contratos
 logger.info('Registrando rutas de contratos...');
 router.use('/contracts', contractRoutes);

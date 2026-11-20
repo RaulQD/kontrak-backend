@@ -3,7 +3,7 @@ import request from 'supertest';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'node:crypto';
 import type { Express } from 'express';
-import { createApp } from '../../src/services/app';
+import { buildApp } from '../../src/app';
 import { prisma } from '../../src/platform/database/prisma';
 
 const EMAIL = 'e2e-auth@test.local';
@@ -17,7 +17,7 @@ describe('US-007: autenticación JWT + refresh token', () => {
   let userId: string;
 
   beforeAll(async () => {
-    app = await createApp();
+    app = buildApp();
     // email no es @unique en Prisma (índice parcial en SQL), upsert no aplica
     const user =
       (await prisma.user.findFirst({

@@ -1,8 +1,8 @@
-import { createApp } from './services/app';
+import { env } from './platform/config/env';
 import { OneDriveScheduler } from './infrastructure/onedrive/scheduler/onedrive.scheduler';
 import { Server } from './server';
 import { logger } from './shared/utils/logger';
-import { env } from './platform/config/env';
+import { buildApp } from './app';
 // Ejecutar aplicación
 (async () => {
   await main();
@@ -11,10 +11,10 @@ import { env } from './platform/config/env';
 async function main(): Promise<void> {
   try {
     logger.info('Creando aplicacion Express...');
-    const app = await createApp();
+    const app = buildApp();
     logger.info('Inicializando servidor...');
     const server = new Server(app);
-    server.listen(Number(env.PORT));
+    server.listen(env.PORT);
     if (process.env.ONEDRIVE_ENABLED === 'true') {
       const oneDriveScheduler = new OneDriveScheduler();
       oneDriveScheduler.start();
