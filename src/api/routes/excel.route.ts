@@ -4,13 +4,14 @@ import { schemaValidatorMiddleware } from '../middlewares/schema-validator.middl
 import { excelUpload } from '../middlewares/upload.middleware';
 import { ExcelController } from '../controllers/excel.controller';
 import { EmployeeBatchSchema } from '../../domain/contracts/validators/employee.validator';
+import { preserveRequestContext } from '../../platform/http/preserve-request-context';
 
 const router: Router = Router();
 const excelController = new ExcelController();
 
 router.post(
   '/upload',
-  excelUpload.single('excel'),
+  preserveRequestContext(excelUpload.single('excel')),
   excelController.readDataFromExcel,
 );
 router.get('/excel-to-image', excelController.excelToImage);

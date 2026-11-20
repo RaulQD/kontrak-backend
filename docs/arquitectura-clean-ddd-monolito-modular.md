@@ -87,6 +87,29 @@ Ambos son transversales, pero se distinguen por **estado / I-O**:
 
 > ⚠️ Lo que **NO** va en `platform`: middlewares de negocio (`authenticate`/`authorize` → van en `auth/presentation/middlewares/`), reglas de negocio, hashing/JWT.
 
+### 4.1 Formato de las respuestas de error
+
+Todas las respuestas de error salen de `platform/http/middlewares/error-handler.middleware.ts` (o de `not-found.middleware.ts` para rutas inexistentes) con el mismo formato:
+
+```json
+{ "success": false, "message": "...", "code": "NOT_FOUND", "errors": [], "data": {} }
+```
+
+`code`, `errors` y `data` solo aparecen cuando aplican.
+
+| Origen del error | Estado | Cuerpo |
+|---|---|---|
+| `ZodError` | 400 | `message` + `errors` por campo |
+| `AppError` (`shared/utils/app-error-v2`) | su `statusCode` | `message` + `code` (+ `data` / `errors`) |
+| `AppError` legacy (`shared/utils/app-error`) — se elimina con TASK-13 | su `statusCode` | `message` (+ `data`) |
+| Errores HTTP de librerías con `status` 4xx (body-parser, CORS) | ese `status` | `message` |
+| Ruta inexistente | 404 | `code: ROUTE_NOT_FOUND` |
+| Cualquier otro error | 500 | `message: Internal Server Error`; el detalle va solo al log |
+
+Cada respuesta lleva la cabecera `X-Request-Id`, y ese mismo valor aparece en los logs de error (`requestId`). Para rastrear un error que reporta un usuario, se busca ese id en el log.
+
+**Decisión (TASK-07, noviembre 2026): no se adopta RFC 7807** (`application/problem+json`). El backlog lo pedía en US-006, pero el frontend ya consume `{ success, message, code }`, y cambiar el contrato obligaría a tocar cada pantalla que muestra errores. Si la API se abre a terceros, la migración a RFC 7807 será una historia propia.
+
 ---
 
 ## 5. Estructura de carpetas (raíz)

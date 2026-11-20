@@ -1,11 +1,15 @@
 import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
+import path from 'node:path';
+
+const ROOT = path.resolve(__dirname, '../../..');
 
 const runEnv = (overrides: Record<string, string>) =>
   spawnSync(
     process.execPath,
     ['--import', 'tsx', 'src/platform/config/env.ts'],
     {
+      cwd: ROOT,
       env: { ...process.env, ...overrides },
       encoding: 'utf8',
     },

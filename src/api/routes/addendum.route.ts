@@ -4,13 +4,14 @@ import { excelUpload } from '../middlewares/upload.middleware';
 import { AddendumController } from '../controllers/addendum.controller';
 import { schemaValidatorMiddleware } from '../middlewares/schema-validator.middleware';
 import { employeeBatchAddendumSchema } from '../../domain/contracts/validators/addendum.validator';
+import { preserveRequestContext } from '../../platform/http/preserve-request-context';
 
 const router: Router = Router();
 const addendumController = new AddendumController();
 
 router.post(
   '/upload',
-  excelUpload.single('excel'),
+  preserveRequestContext(excelUpload.single('excel')),
   addendumController.processExcelToAddendumData,
 );
 router.post(
