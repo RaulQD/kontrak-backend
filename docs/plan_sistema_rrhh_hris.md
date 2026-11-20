@@ -1443,7 +1443,7 @@ Puntos clave del diagrama:
 
 ## 4. Módulos del HRIS: responsabilidades y endpoints
 
-Convención: prefijo `/api/v1`, autenticación JWT en todo salvo `/auth/login`, paginación `?page&limit`, errores RFC 7807.
+Convención: prefijo `/api/v1`, autenticación JWT en todo salvo `/auth/login`, paginación `?page&limit`, errores con formato `{ success, message, code }` (no RFC 7807; ver `arquitectura-clean-ddd-monolito-modular.md` §4.1).
 
 ### 4.1 `auth` — Usuarios, roles y permisos
 Responsabilidad: identidad, sesiones, RBAC, recuperación de contraseña, vinculación usuario↔empleado.
