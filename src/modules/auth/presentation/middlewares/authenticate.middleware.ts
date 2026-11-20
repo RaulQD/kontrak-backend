@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { ITokenSigner } from '../../domain/ports/token-signer.port';
 import { catchError } from '../../../../shared/utils/catch-error';
 import { UnauthorizedError } from '../../../../shared/utils/app-error-v2';
+import { VerifyAccessUseCase } from '../../application/verify-access.use-case';
 
-export const authenticateMiddleware = (signer: ITokenSigner) =>
+export const authenticateMiddleware = (verifyAccess: VerifyAccessUseCase) =>
   catchError(async (req: Request, _res: Response, next: NextFunction) => {
     const header = req.headers.authorization;
     if (!header || !header.startsWith('Bearer ')) {
@@ -13,7 +13,7 @@ export const authenticateMiddleware = (signer: ITokenSigner) =>
     if (token === '') {
       throw new UnauthorizedError('Token de acceso requerido');
     }
-    const payload = signer.verifyAccess(token);
+    const payload = await verifyAccess.execute(token);
     req.auth = {
       userId: payload.sub,
       email: payload.email,

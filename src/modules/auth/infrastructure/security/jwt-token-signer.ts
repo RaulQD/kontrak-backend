@@ -1,6 +1,6 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { ITokenSigner } from '../../domain/ports/token-signer.port';
-import { AccessPayload } from '../../domain/types';
+import { AccessPayload, VerifiedAccessPayload } from '../../domain/types';
 import {
   AccessTokenExpiredError,
   InvalidAccessTokenError,
@@ -14,9 +14,9 @@ export class JwtTokenSigner implements ITokenSigner {
       expiresIn: expiresInSeconds,
     } as SignOptions);
   }
-  verifyAccess(token: string): AccessPayload {
+  verifyAccess(token: string): VerifiedAccessPayload {
     try {
-      return jwt.verify(token, this.secret) as AccessPayload;
+      return jwt.verify(token, this.secret) as VerifiedAccessPayload;
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         throw new AccessTokenExpiredError();

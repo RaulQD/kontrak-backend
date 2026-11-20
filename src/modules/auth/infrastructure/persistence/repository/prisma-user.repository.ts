@@ -1,10 +1,24 @@
 import { PrismaClient } from '../../../../../generated/prisma/client';
 import { User } from '../../../domain/entities/user.entity';
 import { IUserRepository } from '../../../domain/ports/user.repository.port';
+import { UserAccessStatus } from '../../../domain/types';
 import { UserMapper } from '../mappers/user.mapper';
 
 export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly prisma: PrismaClient) {}
+  async findAccessStatus(id: string): Promise<UserAccessStatus | null> {
+    const result = await this.prisma.user.findFirst({
+      where: { id, deletedAt: null },
+      select: { isActive: true, tokensRevokedAt: true },
+    });
+    return result;
+  }
+  async markTokensRevoked(id: string, at: Date): Promise<void> {
+    await this.prisma.user.update({
+      where: { id },
+      data: { tokensRevokedAt: at },
+    });
+  }
 
   async findPermissionsByUserId(userId: string): Promise<string[]> {
     const rows = await this.prisma.permission.findMany({
