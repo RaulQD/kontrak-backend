@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { catchError } from '../../../../shared/utils/catch-error';
 import { UnauthorizedError } from '../../../../shared/utils/app-error-v2';
 import { VerifyAccessUseCase } from '../../application/verify-access.use-case';
+import { setRequestActor } from '../../../../platform/http/request-context';
 
 export const authenticateMiddleware = (verifyAccess: VerifyAccessUseCase) =>
   catchError(async (req: Request, _res: Response, next: NextFunction) => {
@@ -14,6 +15,7 @@ export const authenticateMiddleware = (verifyAccess: VerifyAccessUseCase) =>
       throw new UnauthorizedError('Token de acceso requerido');
     }
     const payload = await verifyAccess.execute(token);
+    setRequestActor(payload.sub);
     req.auth = {
       userId: payload.sub,
       email: payload.email,
