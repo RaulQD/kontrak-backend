@@ -14,11 +14,13 @@ import { UserSessionsController } from './presentation/controllers/user-sessions
 import { AuthRouter } from './presentation/routes/auth.routes';
 import { UserSessionsRouter } from './presentation/routes/user-sessions.route';
 import { env } from '../../platform/config/env';
+import { VerifyAccessUseCase } from './application/verify-access.use-case';
 const useRepo = new PrismaUserRepository(prisma);
 const refreshRepo = new PrismaRefreshTokenRepository(prisma);
 const hasher = new BcryptPasswordHasher();
 const signer = new JwtTokenSigner(env.JWT_ACCESS_SECRET);
-export const authenticate = authenticateMiddleware(signer);
+const verifyAccess = new VerifyAccessUseCase(signer, useRepo);
+export const authenticate = authenticateMiddleware(verifyAccess);
 const refreshGen = new CryptoRefreshTokenGenerator();
 
 const tokenConfig: AuthTokenConfig = {

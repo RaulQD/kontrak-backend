@@ -9,6 +9,11 @@ export class InvalidCredentialsError extends UnauthorizedError {
     super('Credenciales inválidas'); // mismo mensaje para email inexistente y password mala (no enumerar usuarios)
   }
 }
+export class AccessRevokedError extends UnauthorizedError {
+  constructor() {
+    super('La sesión fue cerrada. Inicia sesión nuevamente');
+  }
+}
 
 export class AccountLockedError extends TooManyRequestsError {
   constructor(public readonly lockedUntil: Date) {

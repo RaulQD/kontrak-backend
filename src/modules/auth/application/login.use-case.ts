@@ -42,6 +42,8 @@ export class LoginUseCase {
     const email = input.email.trim().toLowerCase();
     const user = await this.userRepo.findByEmail(email);
     if (!user) {
+      // Mismo costo que una contraseña incorrecta: el tiempo no revela si el email existe.
+      await this.hasher.simulateVerify();
       throw new InvalidCredentialsError();
     }
 
