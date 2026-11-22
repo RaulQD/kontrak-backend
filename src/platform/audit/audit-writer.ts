@@ -1,5 +1,5 @@
 import type { Prisma } from '../../generated/prisma/client';
-import { AuditEntry } from './audit-entry';
+import { AuditEntry } from '../../shared/audit/audit-entry';
 
 export async function writeAudit(
   tx: Prisma.TransactionClient,
@@ -14,6 +14,7 @@ export async function writeAudit(
       ...(entry.oldValues != null ? { oldValues: entry.oldValues } : {}),
       ...(entry.newValues != null ? { newValues: entry.newValues } : {}),
       ipAddress: entry.ipAddress,
+      correlationId: entry.correlationId,
     },
   });
 }
