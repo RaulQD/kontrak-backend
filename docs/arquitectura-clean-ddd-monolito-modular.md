@@ -110,6 +110,97 @@ Cada respuesta lleva la cabecera `X-Request-Id`, y ese mismo valor aparece en lo
 
 **Decisión (TASK-07, noviembre 2026): no se adopta RFC 7807** (`application/problem+json`). El backlog lo pedía en US-006, pero el frontend ya consume `{ success, message, code }`, y cambiar el contrato obligaría a tocar cada pantalla que muestra errores. Si la API se abre a terceros, la migración a RFC 7807 será una historia propia.
 
+### 4.2 Cómo audita un módulo (US-009a)
+
+Cada escritura de negocio (crear, modificar, anular) deja una fila en `audit_logs` con quién la hizo, desde qué IP, en qué petición y qué campos cambiaron. La fila se inserta **en la misma transacción** que la escritura: si una falla, se revierten las dos (decisión D3 de `docs/scrum/04-us-020-maestro-empleados.md`).
+
+**Dónde vive cada pieza**
+
+| Pieza | Archivo | Por qué ahí |
+|---|---|---|
+| `AuditEntry`, `AuditAction`, `AuditContextProvider` | `shared/audit/audit-entry.ts` | Son tipos puros, y los usan los puertos del **dominio** (`create(employee, audit: AuditEntry)`). El dominio solo puede importar de sí mismo y de `shared`. |
+| `diffAuditValues(antes, despues)` | `shared/audit/diff-audit-values.ts` | Es una función pura, sin I/O. |
+| `writeAudit(tx, entry)` | `platform/audit/audit-writer.ts` | Usa Prisma. |
+| `currentAuditContext` | `platform/audit/audit-context.ts` | Lee el contexto de la petición (AsyncLocalStorage). |
+| Contexto de la petición | `platform/http/request-context.ts` | `requestIdMiddleware` lo abre con `requestId` e `ipAddress`, y `authenticate` le agrega el actor con `setRequestActor(payload.sub)`, después de verificar el token. |
+
+**Nombres:** `action` es `CREATE`, `UPDATE` o `DELETE` (`DELETE` es la anulación registral, un soft delete). `entityType` es el nombre de la tabla (`'employees'`) y `correlationId` es el `X-Request-Id` de la petición: con ese valor se cruzan los logs con las filas de auditoría.
+
+**Los cinco pasos**
+
+1. **El puerto del repositorio recibe la entrada de auditoría** junto con la entidad, en una sola llamada:
+
+   ```ts
+   // modules/employees/domain/ports/employee.repository.port.ts
+   create(employee: Employee, audit: AuditEntry): Promise<void>;
+   update(employee: Employee, audit: AuditEntry): Promise<void>;
+   softDelete(id: string, audit: AuditEntry): Promise<void>;
+   ```
+
+   El dominio ve un `AuditEntry`, que es un objeto plano, y nunca un `Prisma.TransactionClient`.
+
+2. **El caso de uso arma la entrada.** Obtiene el actor, la IP y el `correlationId` de un `AuditContextProvider` inyectado, sin recibir `req`, y calcula el diff:
+
+   ```ts
+   // modules/employees/application/update-employee.use-case.ts (ilustrativo)
+   constructor(
+     private readonly employees: IEmployeeRepository,
+     private readonly auditContext: AuditContextProvider,
+   ) {}
+
+   async execute(id: string, cambios: UpdateEmployeeInput): Promise<void> {
+     const employee = await this.employees.findById(id);
+     if (!employee) throw new NotFoundError('Empleado', id);
+
+     const antes = employee.toSnapshot();
+     employee.actualizar(cambios);
+     const diff = diffAuditValues(antes, employee.toSnapshot());
+     if (!diff) return; // nada cambió: ni escritura ni auditoría
+
+     await this.employees.update(employee, {
+       ...this.auditContext(),
+       action: AuditAction.UPDATE,
+       entityType: 'employees',
+       entityId: employee.id,
+       ...diff, // solo los campos que cambiaron
+     });
+   }
+   ```
+
+   En un `CREATE` no hay estado anterior: `oldValues: null` y `newValues` es la foto completa. En un `DELETE` basta con `action` y `entityId`.
+
+3. **El repositorio Prisma abre la transacción** y escribe las dos cosas dentro:
+
+   ```ts
+   // modules/employees/infrastructure/persistence/prisma-employee.repository.ts
+   async update(employee: Employee, audit: AuditEntry): Promise<void> {
+     await this.prisma.$transaction(async (tx) => {
+       await tx.employee.update({ where: { id: employee.id }, data: EmployeeMapper.toPersistence(employee) });
+       await writeAudit(tx, audit);
+     });
+   }
+   ```
+
+   `writeAudit` siempre recibe el `tx` de la transacción, nunca el cliente global.
+
+4. **El `index.ts` del módulo inyecta el proveedor real:**
+
+   ```ts
+   // modules/employees/index.ts (composition root)
+   const updateEmployee = new UpdateEmployeeUseCase(employeeRepo, currentAuditContext);
+   ```
+
+   En los tests unitarios se pasa una función falsa: `() => ({ actorUserId: 'user-1', ipAddress: null, correlationId: 'req-1' })`.
+
+5. **Reglas:**
+   - **Nunca se audita fuera de la transacción.** Una fila de auditoría sin escritura, o una escritura sin auditoría, es justo lo que D3 prohíbe.
+   - **Toda escritura auditada necesita un actor.** Si no lo hay, porque es una ruta sin `authenticate`, un script o un seed, `currentAuditContext` lanza un error y la petición responde 500. Es preferible a una fila de auditoría anónima. Una ruta pública que deba auditar se diseña aparte; no se relaja esta regla.
+   - **Las lecturas no se auditan** en esta etapa: eso es US-009b.
+   - **La IP real detrás de un proxy** requiere `app.set('trust proxy', <número de saltos>)` en el despliegue. Sin eso, `req.ip` es la IP del proxy. Nunca se usa `true`, porque confiaría en cualquier `X-Forwarded-For` y un cliente podría falsificar la IP auditada.
+   - **El `X-Request-Id` lo genera siempre el servidor.** `correlation_id` es una columna `uuid`: si algún día se acepta el del cliente, hay que validarlo como UUID, o toda escritura auditada de esa petición fallará.
+
+Los tests de referencia son `tests/e2e/audit-atomicity.e2e.test.ts` (atomicidad en ambos sentidos), `src/platform/http/request-context.test.ts`, `src/platform/audit/audit-context.test.ts` y `src/modules/auth/presentation/middlewares/authenticate.middleware.test.ts`.
+
 ---
 
 ## 5. Estructura de carpetas (raíz)
