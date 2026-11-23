@@ -1,5 +1,5 @@
-import { User } from '../entities/user.entity';
-import { UserAccessStatus } from '../types';
+import { User } from '../../domain/entities/user.entity';
+import { UserAccessStatus } from '../../domain/types';
 
 export interface IUserRepository {
   findByEmail(email: string): Promise<User | null>;

@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { IRefreshTokenGenerator } from '../../domain/ports/token-generator.port';
+import { IRefreshTokenGenerator } from '../../application/ports/token-generator.port';
 
 export class CryptoRefreshTokenGenerator implements IRefreshTokenGenerator {
   generate(): string {

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { catchError } from '../../../../shared/utils/catch-error';
 import { UnauthorizedError } from '../../../../shared/utils/app-error-v2';
-import { VerifyAccessUseCase } from '../../application/verify-access.use-case';
 import { setRequestActor } from '../../../../platform/http/request-context';
+import { VerifyAccessUseCase } from '../../application/use-case/verify-access.use-case';
 
 export const authenticateMiddleware = (verifyAccess: VerifyAccessUseCase) =>
   catchError(async (req: Request, _res: Response, next: NextFunction) => {

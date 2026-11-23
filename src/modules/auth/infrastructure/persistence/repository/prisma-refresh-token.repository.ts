@@ -1,6 +1,6 @@
 import type { PrismaClient } from '../../../../../generated/prisma/client';
 import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
-import { IRefreshTokenRepository } from '../../../domain/ports/refresh-token-repository.port';
+import { IRefreshTokenRepository } from '../../../application/ports/refresh-token-repository.port';
 
 export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
   constructor(private readonly prisma: PrismaClient) {}

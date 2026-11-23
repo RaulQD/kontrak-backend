@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LoginUseCase } from './login.use-case';
-import { User } from '../domain/entities/user.entity';
-import { InvalidCredentialsError } from '../domain/errors/auth.error';
-import { IPasswordHasher } from '../domain/ports/password-hasher.port';
-import { IRefreshTokenRepository } from '../domain/ports/refresh-token-repository.port';
-import { IRefreshTokenGenerator } from '../domain/ports/token-generator.port';
-import { ITokenSigner } from '../domain/ports/token-signer.port';
-import { IUserRepository } from '../domain/ports/user.repository.port';
+import { User } from '../../domain/entities/user.entity';
+import { IUserRepository } from '../ports/user.repository.port';
+import { IRefreshTokenRepository } from '../ports/refresh-token-repository.port';
+import { IPasswordHasher } from '../ports/password-hasher.port';
+import { ITokenSigner } from '../ports/token-signer.port';
+import { IRefreshTokenGenerator } from '../ports/token-generator.port';
+import { InvalidCredentialsError } from '../../domain/errors/auth.error';
 
 const INPUT = { email: 'admin@kontrak.com', password: 'Incorrecta123!' };
 

@@ -4,6 +4,7 @@ import { prisma } from './platform/database/prisma';
 import { corsConfig } from './config/cors.config';
 import legacyRouter from './api/routes';
 import { authRouter, userSessionsRouter } from './modules/auth';
+import { employeesRouter } from './modules/employees';
 
 export const buildApp = (): Express =>
   createApp({
@@ -13,5 +14,6 @@ export const buildApp = (): Express =>
       { path: '/api', router: legacyRouter },
       { path: '/api/auth', router: authRouter },
       { path: '/api/users', router: userSessionsRouter },
+      { path: '/api/employees', router: employeesRouter },
     ],
   });

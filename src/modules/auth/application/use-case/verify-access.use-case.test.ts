@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { VerifyAccessUseCase } from './verify-access.use-case';
-import { ITokenSigner } from '../domain/ports/token-signer.port';
-import { IUserRepository } from '../domain/ports/user.repository.port';
-import { UserAccessStatus, VerifiedAccessPayload } from '../domain/types';
+import { IUserRepository } from '../ports/user.repository.port';
+import { UserAccessStatus, VerifiedAccessPayload } from '../../domain/types';
+import { ITokenSigner } from '../ports/token-signer.port';
 import {
   AccessRevokedError,
   AccessTokenExpiredError,
-} from '../domain/errors/auth.error';
+} from '../../domain/errors/auth.error';
 
 // iat del token: 2026-11-19T10:00:00Z, en segundos como lo emite jsonwebtoken.
 const IAT = Date.UTC(2026, 10, 19, 10, 0, 0) / 1000;

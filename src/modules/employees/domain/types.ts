@@ -61,3 +61,8 @@ export interface Page<T> {
   page: number;
   limit: number;
 }
+/** Quién ejecuta el caso de uso. Lo arma el controlador desde req.auth. */
+export interface ActorContext {
+  userId: string;
+  permissions: readonly string[];
+}
