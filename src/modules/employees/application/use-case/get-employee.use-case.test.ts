@@ -21,7 +21,7 @@ const makeView = (over: Partial<EmployeeView> = {}): EmployeeView => ({
   birthDate: null,
   maritalStatus: null,
   nationality: 'PERUANA',
-  email: null,
+  email: 'maria.quispe@empresa.pe',
   personalEmail: null,
   phone: null,
   address: null,

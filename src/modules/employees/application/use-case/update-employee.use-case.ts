@@ -62,6 +62,9 @@ export class UpdateEmployeeUseCase {
     const patch = toEmployeeUpdatePatch(input);
     const next = current.withPatch(patch);
 
+    // Se escribe el correo como lo normalizó la entidad, no como llegó.
+    if (patch.email !== undefined) patch.email = next.email;
+
     // 4. Reglas que necesitan la base de datos, solo si el dato cambió.
     if (
       next.ubigeoId !== null &&

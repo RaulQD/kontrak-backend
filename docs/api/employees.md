@@ -77,7 +77,8 @@ Es la misma en el detalle, en cada elemento del listado y en las respuestas de `
 | `birthDate` | `YYYY-MM-DD` \| null | |
 | `maritalStatus` | `SOLTERO` \| `CASADO` \| `DIVORCIADO` \| `CONVIVIENTE` \| `VIUDO` \| null | |
 | `nationality` | string \| null | `PERUANA` por defecto en el alta |
-| `email`, `personalEmail` | string \| null | En minúsculas |
+| `email` | string | Correo corporativo. Siempre tiene valor, en minúsculas |
+| `personalEmail` | string \| null | En minúsculas |
 | `phone`, `address`, `photoUrl` | string \| null | |
 | `ubigeoId` | string \| null | Código INEI de 6 dígitos del distrito |
 | `hireDate` | `YYYY-MM-DD` | |
@@ -138,11 +139,12 @@ Un parámetro desconocido responde 422. Ordena por `createdAt` descendente y, a 
 | `firstNames` | ✓ | Hasta 100 caracteres |
 | `lastNameFather`, `lastNameMother` | ✓ | Hasta 60 caracteres cada uno |
 | `hireDate` | ✓ | `YYYY-MM-DD` |
+| `email` | ✓ | Correo corporativo válido, hasta 150 caracteres. Se quitan los espacios de los extremos y se guarda en minúsculas |
 | `employeeCode` | | Hasta 20 caracteres |
 | `sex`, `maritalStatus` | | Valores de la tabla de la ficha |
 | `birthDate` | | `YYYY-MM-DD` |
 | `nationality` | | Hasta 40 caracteres. Si no se envía, `PERUANA` |
-| `email`, `personalEmail` | | Correo válido, hasta 150 caracteres. Se guarda en minúsculas |
+| `personalEmail` | | Correo válido, hasta 150 caracteres. Se guarda en minúsculas |
 | `phone` | | Hasta 20 caracteres |
 | `address` | | Hasta 300 caracteres |
 | `ubigeoId` | | 6 dígitos y debe existir en el catálogo |
@@ -163,7 +165,8 @@ Content-Type: application/json
   "firstNames": "MARIA ELENA",
   "lastNameFather": "QUISPE",
   "lastNameMother": "ROJAS",
-  "hireDate": "2026-08-17"
+  "hireDate": "2026-08-17",
+  "email": "maria.quispe@empresa.pe"
 }
 ```
 
@@ -172,6 +175,7 @@ Responde 201 con la ficha creada, igual que el detalle: `status: "ACTIVO"`, `nat
 | Error | Respuesta |
 | --- | --- |
 | Formato del documento, campos obligatorios, longitudes, fechas, claves no permitidas | 422 con `errors` |
+| Correo ausente, vacío, solo con espacios o en `null` | 422 con `errors`: `El correo corporativo es obligatorio` |
 | Ubigeo que no está en el catálogo | 422 `El ubigeo 999999 no existe` |
 | Documento ya registrado | 409 `Ya existe un colaborador con DNI 40506070` |
 | Código ya registrado | 409 `Ya existe un colaborador con el código EMP-001` |
@@ -184,8 +188,9 @@ Dos altas simultáneas con el mismo documento no generan 500: una responde 201 y
 Acepta los mismos campos que el alta, todos opcionales.
 
 - **Campo ausente:** no se toca.
-- **`null`:** borra el valor. Solo en `employeeCode`, `sex`, `birthDate`, `maritalStatus`, `email`, `personalEmail`, `phone`, `address`, `ubigeoId` y `photoUrl`. El documento, los nombres, `nationality`, `hireDate` y los campos sensibles se pueden cambiar, pero no borrar.
+- **`null`:** borra el valor. Solo en `employeeCode`, `sex`, `birthDate`, `maritalStatus`, `personalEmail`, `phone`, `address`, `ubigeoId` y `photoUrl`. El documento, los nombres, `email`, `nationality`, `hireDate` y los campos sensibles se pueden cambiar, pero no borrar.
 - **Texto vacío (`""`):** 422 `No puede estar vacío: envía null para borrarlo`.
+- **Correo corporativo.** Se cambia, pero no se borra: `null` o `""` en `email` responden 422 `El correo corporativo es obligatorio`.
 - **Cuerpo vacío:** 422 `Debe enviar al menos un campo`.
 
 ```http
@@ -234,6 +239,6 @@ Los valores sensibles también quedan en `audit_logs`, porque ahí se registra q
 
 ## Pendiente en otras historias
 
-- **US-020c:** correo corporativo obligatorio y único.
+- **US-020c:** correo corporativo único.
 - **US-004d:** catálogo completo de ubigeos. Hasta entonces solo existen los cargados a mano (`tests/manual/dev-data.ts` crea el `150101`).
 - **US-022:** cese del colaborador.

@@ -26,7 +26,7 @@ export interface EmployeeOutput {
   birthDate: string | null; // YYYY-MM-DD
   maritalStatus: MaritalStatus | null;
   nationality: string | null;
-  email: string | null;
+  email: string;
   personalEmail: string | null;
   phone: string | null;
   address: string | null;

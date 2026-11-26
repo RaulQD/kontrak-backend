@@ -2,7 +2,7 @@
   "info": {
     "name": "Kontrak API (local)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Pruebas de la API de Kontrak en local.\n\nAntes de empezar:\n1. Postgres corriendo (el tuyo local, o docker compose up -d db)\n2. pnpm prisma migrate deploy && pnpm seed\n3. pnpm tsx tests/manual/dev-data.ts  (usuarios por rol, colaboradores de prueba y el ubigeo 150101)\n4. pnpm dev\n5. En la pestaña Variables de esta colección, pon tu BOOTSTRAP_ADMIN_PASSWORD en el\n   valor ACTUAL (Current value) de `password`. Así no se exporta ni se sincroniza.\n\nEjecuta primero la carpeta 1. Auth: cada login guarda su token en una variable.\nCon Run collection se ejecuta todo en orden y ves cada test en verde o rojo."
+    "description": "Pruebas de la API de Kontrak en local.\n\nAntes de empezar:\n1. Postgres corriendo (el tuyo local, o docker compose up -d db)\n2. pnpm prisma migrate deploy && pnpm seed\n   (US-020c: si la migración del correo falla porque hay colaboradores sin correo,\n   borra antes los que creó Postman: DELETE FROM employees WHERE last_name_mother = 'POSTMAN';\n   y vuelve a correr el paso 3 para que los de prueba tengan correo)\n3. pnpm tsx tests/manual/dev-data.ts  (usuarios por rol, colaboradores de prueba y el ubigeo 150101)\n4. pnpm dev\n5. En la pestaña Variables de esta colección, pon tu BOOTSTRAP_ADMIN_PASSWORD en el\n   valor ACTUAL (Current value) de `password`. Así no se exporta ni se sincroniza.\n\nEjecuta primero la carpeta 1. Auth: cada login guarda su token en una variable.\nCon Run collection se ejecuta todo en orden y ves cada test en verde o rojo."
   },
   "auth": {
     "type": "noauth"
@@ -52,6 +52,21 @@
     {
       "key": "altaDni3",
       "value": ""
+    },
+    {
+      "key": "altaDni4",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "altaDni5",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "altaDni6",
+      "value": "",
+      "type": "string"
     },
     {
       "key": "altaDniSpaced",
@@ -1041,7 +1056,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"ana.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1068,6 +1083,9 @@
                   "  pm.collectionVariables.set('altaDni', rnd(10000000, 89999999));",
                   "  pm.collectionVariables.set('altaDni2', rnd(10000000, 89999999));",
                   "  pm.collectionVariables.set('altaDni3', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('altaDni4', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('altaDni5', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('altaDni6', rnd(10000000, 89999999));",
                   "  pm.collectionVariables.set('altaCe', '0' + rnd(10000000, 99999999));",
                   "  pm.collectionVariables.set('altaCode', 'PM-' + rnd(100000, 999999));",
                   "}"
@@ -1102,6 +1120,9 @@
                   "    pm.collectionVariables.set('createdEmployeeId', data.id);",
                   "    pm.collectionVariables.set('createdEmployeeUpdatedAt', data.updatedAt);",
                   "  }",
+                  "  pm.test('guarda el correo corporativo', () => {",
+                  "    pm.expect(pm.response.json().data.email).to.eql('ana.' + pm.collectionVariables.get('altaDni') + '@postman.test');",
+                  "  });",
                   "}"
                 ]
               }
@@ -1168,7 +1189,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{altaDni2}} \",\n  \"firstNames\": \"ROSA\",\n  \"lastNameFather\": \"HUAMAN\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-01\",\n  \"employeeCode\": \"{{altaCode}}\",\n  \"sex\": \"FEMENINO\",\n  \"birthDate\": \"1990-05-20\",\n  \"maritalStatus\": \"CASADO\",\n  \"nationality\": \"PERUANA\",\n  \"email\": \"Rosa.Huaman@Empresa.PE\",\n  \"personalEmail\": \"rosa.personal@gmail.com\",\n  \"phone\": \"987654321\",\n  \"address\": \"AV. AREQUIPA 123\",\n  \"ubigeoId\": \"150101\",\n  \"hasChildrenUnder18\": true,\n  \"essaludLifeInsurance\": true,\n  \"photoUrl\": \"https://example.com/fotos/rosa.jpg\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{altaDni2}} \",\n  \"firstNames\": \"ROSA\",\n  \"lastNameFather\": \"HUAMAN\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-01\",\n  \"email\": \"Rosa.{{altaDni2}}@Postman.TEST\",\n  \"employeeCode\": \"{{altaCode}}\",\n  \"sex\": \"FEMENINO\",\n  \"birthDate\": \"1990-05-20\",\n  \"maritalStatus\": \"CASADO\",\n  \"nationality\": \"PERUANA\",\n  \"personalEmail\": \"rosa.personal@gmail.com\",\n  \"phone\": \"987654321\",\n  \"address\": \"AV. AREQUIPA 123\",\n  \"ubigeoId\": \"150101\",\n  \"hasChildrenUnder18\": true,\n  \"essaludLifeInsurance\": true,\n  \"photoUrl\": \"https://example.com/fotos/rosa.jpg\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1190,7 +1211,7 @@
                   "  pm.test('responde 201', () => pm.response.to.have.status(201));",
                   "  const data = pm.response.json().data;",
                   "  pm.test('el documento llega sin espacios', () => pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('altaDni2')));",
-                  "  pm.test('el correo se guarda en minúsculas', () => pm.expect(data.email).to.eql('rosa.huaman@empresa.pe'));",
+                  "  pm.test('el correo se guarda en minúsculas', () => pm.expect(data.email).to.eql('rosa.' + pm.collectionVariables.get('altaDni2') + '@postman.test'));",
                   "  pm.test('guarda los opcionales', () => {",
                   "    pm.expect(data.employeeCode).to.eql(pm.collectionVariables.get('altaCode'));",
                   "    pm.expect(data.birthDate).to.eql('1990-05-20');",
@@ -1231,7 +1252,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"{{altaCe}}\",\n  \"firstNames\": \"CARLOS\",\n  \"lastNameFather\": \"GOMEZ\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"{{altaCe}}\",\n  \"firstNames\": \"CARLOS\",\n  \"lastNameFather\": \"GOMEZ\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"carlos.{{altaCe}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1277,7 +1298,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"documento.repetido.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1327,7 +1348,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDniSpaced}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDniSpaced}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"documento.espacios.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1390,7 +1411,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni3}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{altaCode}}\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni3}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"codigo.repetido.{{altaDni}}@postman.test\",\n  \"employeeCode\": \"{{altaCode}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1440,7 +1461,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"1234567\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"1234567\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1491,7 +1512,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"4050607A\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"4050607A\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1542,7 +1563,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"12345678\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"12345678\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1593,7 +1614,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"RUC\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"RUC\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1622,7 +1643,7 @@
           ]
         },
         {
-          "name": "422 · cuerpo vacío: lista los 6 obligatorios",
+          "name": "422 · cuerpo vacío: lista los 7 obligatorios",
           "request": {
             "method": "POST",
             "header": [
@@ -1662,7 +1683,11 @@
                   "  pm.test('responde 422', () => pm.response.to.have.status(422));",
                   "  pm.test('un error por cada campo obligatorio', () => {",
                   "    const fields = pm.response.json().errors.map((e) => e.field);",
-                  "    pm.expect(fields).to.include.members(['documentType', 'documentNumber', 'firstNames', 'lastNameFather', 'lastNameMother', 'hireDate']);",
+                  "    pm.expect(fields).to.include.members(['documentType', 'documentNumber', 'firstNames', 'lastNameFather', 'lastNameMother', 'hireDate', 'email']);",
+                  "  });",
+                  "  pm.test('el correo con su propio mensaje', () => {",
+                  "    const error = pm.response.json().errors.find((e) => e.field === 'email');",
+                  "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
                   "  });",
                   "}"
                 ]
@@ -1693,7 +1718,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"id\": \"00000000-0000-4000-8000-000000000000\",\n  \"status\": \"CESADO\",\n  \"terminationDate\": \"2026-09-01\",\n  \"fullName\": \"OTRO NOMBRE\",\n  \"createdAt\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedAt\": \"2026-01-01T00:00:00.000Z\",\n  \"deletedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"id\": \"00000000-0000-4000-8000-000000000000\",\n  \"status\": \"CESADO\",\n  \"terminationDate\": \"2026-09-01\",\n  \"fullName\": \"OTRO NOMBRE\",\n  \"createdAt\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedAt\": \"2026-01-01T00:00:00.000Z\",\n  \"deletedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1745,7 +1770,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-02-31\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-02-31\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1796,7 +1821,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17T00:00:00.000Z\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17T00:00:00.000Z\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1851,7 +1876,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"ubigeoId\": \"15010\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"ubigeoId\": \"15010\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1902,7 +1927,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"ubigeoId\": \"999999\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"ubigeoId\": \"999999\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1981,6 +2006,159 @@
           ]
         },
         {
+          "name": "422 · alta sin correo corporativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo email', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'email');",
+                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · correo corporativo con solo espacios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"   \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo email', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'email');",
+                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · correo corporativo en null",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo email', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'email');",
+                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "422 · texto opcional vacío",
           "request": {
             "method": "POST",
@@ -2003,7 +2181,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"phone\": \"\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"phone\": \"\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2054,7 +2232,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2106,7 +2284,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2152,7 +2330,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2198,7 +2376,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2237,7 +2415,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2289,7 +2467,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editDni}}\",\n  \"firstNames\": \"LUIS ALBERTO\",\n  \"lastNameFather\": \"RAMOS\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{editCode}}\",\n  \"phone\": \"900000001\",\n  \"address\": \"JR. CUSCO 100\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editDni}}\",\n  \"firstNames\": \"LUIS ALBERTO\",\n  \"lastNameFather\": \"RAMOS\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"luis.{{editDni}}@postman.test\",\n  \"employeeCode\": \"{{editCode}}\",\n  \"phone\": \"900000001\",\n  \"address\": \"JR. CUSCO 100\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2360,7 +2538,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editOtherDni}}\",\n  \"firstNames\": \"OTRO\",\n  \"lastNameFather\": \"COLABORADOR\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{editOtherCode}}\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editOtherDni}}\",\n  \"firstNames\": \"OTRO\",\n  \"lastNameFather\": \"COLABORADOR\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"otro.{{editOtherDni}}@postman.test\",\n  \"employeeCode\": \"{{editOtherCode}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2663,7 +2841,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{editDni2}} \",\n  \"email\": \"Luis.Ramos@Empresa.PE\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{editDni2}} \",\n  \"email\": \"Luis.{{editDni2}}@Postman.TEST\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2681,7 +2859,7 @@
                   "  pm.test('responde 200', () => pm.response.to.have.status(200));",
                   "  const data = pm.response.json().data;",
                   "  pm.test('documento nuevo sin espacios', () => pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('editDni2')));",
-                  "  pm.test('correo en minúsculas', () => pm.expect(data.email).to.eql('luis.ramos@empresa.pe'));",
+                  "  pm.test('correo en minúsculas', () => pm.expect(data.email).to.eql('luis.' + pm.collectionVariables.get('editDni2') + '@postman.test'));",
                   "  if (pm.response.code === 200) pm.collectionVariables.set('editUpdatedAt', pm.response.json().data.updatedAt);",
                   "}"
                 ]
@@ -3341,6 +3519,108 @@
           ]
         },
         {
+          "name": "422 · null en el correo corporativo: se cambia, no se borra",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo email', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'email');",
+                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · correo corporativo vacío",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo email', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'email');",
+                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "422 · texto vacío",
           "request": {
             "method": "PATCH",
@@ -3751,7 +4031,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"rosa.anulada.{{annulDni}}@postman.test\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4225,7 +4505,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"rosa.anulada.{{annulDni}}@postman.test\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

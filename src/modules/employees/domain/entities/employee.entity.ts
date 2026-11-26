@@ -18,8 +18,10 @@ export const DOCUMENT_PATTERNS: Record<DocumentType, RegExp> = {
   PTP: /^\d{9}$/,
 };
 const UBIGEO_PATTERN = /^\d{6}$/;
-/** Longitudes de schema.prisma. Sin esto, POstgres responde 22001 -> 500 opaco */
+/** El correo corporativo se guarda y se compara sin espacios y en minúsculas. */
+const normalizeEmail = (email: string): string => email.trim().toLowerCase();
 
+/** Longitudes de schema.prisma. Sin esto, POstgres responde 22001 -> 500 opaco */
 const MAX = {
   employeeCode: 20,
   documentNumber: 15,
@@ -46,7 +48,7 @@ export interface EmployeeProps {
   birthDate: Date | null;
   maritalStatus: MaritalStatus | null;
   nationality: string;
-  email: string | null;
+  email: string;
   personalEmail: string | null;
   phone: string | null;
   address: string | null;
@@ -78,7 +80,7 @@ export class Employee {
   readonly birthDate: Date | null;
   readonly maritalStatus: MaritalStatus | null;
   readonly nationality: string;
-  readonly email: string | null;
+  readonly email: string;
   readonly personalEmail: string | null;
   readonly phone: string | null;
   readonly address: string | null;
@@ -120,6 +122,7 @@ export class Employee {
   static create(props: NewEmployeeProps, id: string, now: Date): Employee {
     const employee = new Employee({
       ...props,
+      email: normalizeEmail(props.email),
       id,
       status: 'ACTIVO',
       terminationDate: null,
@@ -140,6 +143,9 @@ export class Employee {
     const changes = Object.fromEntries(
       Object.entries(patch).filter(([, value]) => value !== undefined),
     ) as EmployeeUpdatePatch;
+    if (changes.email !== undefined) {
+      changes.email = normalizeEmail(changes.email);
+    }
     const candidate = new Employee({ ...this, ...changes });
     candidate.validate();
     return candidate;
@@ -164,6 +170,7 @@ export class Employee {
   }
   private validate(): void {
     this.assertDocument();
+    this.assertEmail();
     this.assertLengths();
     this.assertUbigeo();
     this.assertNationality();
@@ -178,7 +185,14 @@ export class Employee {
       );
     }
   }
-
+  private assertEmail(): void {
+    // El formato lo valida el schema; el dominio garantiza que exista.
+    if (this.email === '') {
+      throw new InvalidEmployeeDataError(
+        'El correo corporativo es obligatorio',
+      );
+    }
+  }
   private assertLengths(): void {
     const checks: Array<[keyof typeof MAX, string | null]> = [
       ['employeeCode', this.employeeCode],

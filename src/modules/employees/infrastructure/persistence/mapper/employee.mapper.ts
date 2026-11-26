@@ -2,6 +2,10 @@ import { Prisma } from '../../../../../generated/prisma/client';
 import type { EmployeeView } from '../../../application/port/employee.repository.port';
 import type { EmployeeFullRow, EmployeeRow } from '../employee.select';
 import { Employee } from '../../../domain/entities/employee.entity';
+import type { EmployeeUpdatePatch } from '../../../domain/types';
+
+/** Lo que el PATCH escribe, con los nombres de schema.prisma. */
+export type EmployeeUpdateData = Prisma.EmployeeUncheckedUpdateInput;
 
 /**
  * Columnas que la app escribe. Sin `fullName` (columna generada: Postgres
@@ -37,7 +41,7 @@ export const EmployeeMapper = {
       birthDate: row.birthDate,
       maritalStatus: row.maritalStatus,
       nationality: row.nationality,
-      email: row.email,
+      email: row.corporateEmail,
       personalEmail: row.personalEmail,
       phone: row.phone,
       address: row.address,
@@ -70,7 +74,7 @@ export const EmployeeMapper = {
       birthDate: row.birthDate,
       maritalStatus: row.maritalStatus,
       nationality: row.nationality ?? 'PERUANA',
-      email: row.email,
+      email: row.corporateEmail,
       personalEmail: row.personalEmail,
       phone: row.phone,
       address: row.address,
@@ -99,7 +103,7 @@ export const EmployeeMapper = {
       birthDate: employee.birthDate,
       maritalStatus: employee.maritalStatus,
       nationality: employee.nationality,
-      email: employee.email,
+      corporateEmail: employee.email,
       personalEmail: employee.personalEmail,
       phone: employee.phone,
       address: employee.address,
@@ -112,6 +116,20 @@ export const EmployeeMapper = {
       photoUrl: employee.photoUrl,
       createdAt: employee.createdAt,
       deletedAt: employee.deletedAt,
+    };
+  },
+
+  /**
+   * Patch del dominio → data de Prisma. El dominio dice `email`; la columna es
+   * corporate_email (US-020c). Como `patch` no es un objeto literal, tsc no
+   * avisa si lleva una clave que Prisma no conoce: Prisma la rechaza en
+   * ejecución ("Unknown argument `email`") y el PATCH respondería 500.
+   */
+  toUpdateData(patch: EmployeeUpdatePatch): EmployeeUpdateData {
+    const { email, ...rest } = patch;
+    return {
+      ...rest,
+      ...(email !== undefined && { corporateEmail: email }),
     };
   },
 };

@@ -70,6 +70,7 @@ export const crearEmpleadosFixture = async (): Promise<EmployeeFixture> => {
       lastNameFather: 'E2E',
       lastNameMother: 'FIXTURE',
       hireDate: new Date('2025-01-15'),
+      corporateEmail: `prueba.${n}@e2e-fixture.test`,
       status: activo ? 'ACTIVO' : 'CESADO',
       terminationDate: activo ? null : new Date('2026-06-30'),
       createdAt: createdAt(n),
@@ -107,6 +108,7 @@ export const crearEmpleadosFixture = async (): Promise<EmployeeFixture> => {
     lastNameFather: 'E2E',
     lastNameMother: 'FIXTURE',
     hireDate: new Date('2025-01-15'),
+    corporateEmail: 'anulado@e2e-fixture.test',
     status: 'ACTIVO',
     // El más reciente: si el filtro de deletedAt fallara, saldría primero.
     createdAt: new Date(Date.UTC(2026, 0, 2)),

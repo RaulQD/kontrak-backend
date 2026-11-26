@@ -88,6 +88,7 @@ const employee = (
   lastNameMother: 'KONTRAK',
   hireDate: new Date('2025-01-15'),
   status: 'ACTIVO',
+  corporateEmail: `dev-emp-${String(n).padStart(3, '0')}@kontrak.local`,
   ...data,
 });
 
