@@ -7,12 +7,96 @@ import {
   IEmployeeRepository,
   ReadOptions,
 } from '../../../application/port/employee.repository.port';
-import { EmployeeFilters, Page } from '../../../domain/types';
+import {
+  DocumentType,
+  EmployeeFilters,
+  EmployeeUpdatePatch,
+  Page,
+} from '../../../domain/types';
 import { EmployeeMapper } from '../mapper/employee.mapper';
 import { EmployeeRow, FULL_SELECT, PUBLIC_SELECT } from '../employee.select';
+import { AuditEntry } from '../../../../../shared/audit/audit-entry';
+import { Employee } from '../../../domain/entities/employee.entity';
+import { writeAudit } from '../../../../../platform/audit/audit-writer';
+import { isRecordNotFound, uniqueViolationFields } from '../prisma-error';
+import {
+  DuplicateDocumentError,
+  DuplicateEmployeeCodeError,
+  EmployeeNotFoundError,
+} from '../../../domain/errors/employee.error';
 
 export class PrismaEmployeeRepository implements IEmployeeRepository {
   constructor(private readonly prisma: PrismaClient) {}
+
+  async findById(id: string): Promise<Employee | null> {
+    return this.findOne({ id });
+  }
+  async findByDocument(
+    type: DocumentType,
+    documentNumber: string,
+  ): Promise<Employee | null> {
+    return this.findOne({ documentType: type, documentNumber });
+  }
+  async findByEmployeeCode(code: string): Promise<Employee | null> {
+    return this.findOne({ employeeCode: code });
+  }
+  async create(employe: Employee, audit: AuditEntry): Promise<void> {
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.employee.create({
+          data: EmployeeMapper.toPersistence(employe),
+        });
+        await writeAudit(tx, audit);
+      });
+    } catch (error) {
+      throw this.translate(error, employe);
+    }
+  }
+  async update(
+    employee: Employee,
+    patch: EmployeeUpdatePatch,
+    audit: AuditEntry,
+  ): Promise<void> {
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.employee.update({
+          where: { id: employee.id, deletedAt: null },
+          data: patch,
+        });
+        await writeAudit(tx, audit);
+      });
+    } catch (error) {
+      throw this.translate(error, employee);
+    }
+  }
+  async softDelete(
+    id: string,
+    deletedAt: Date,
+    audit: AuditEntry,
+  ): Promise<void> {
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        // Solo deletedAt: anular no es cesar, status y terminationDate no se tocan (D4)
+        await tx.employee.update({
+          where: { id, deletedAt: null },
+          data: { deletedAt },
+        });
+        await writeAudit(tx, audit);
+      });
+    } catch (error) {
+      if (isRecordNotFound(error)) throw new EmployeeNotFoundError(id);
+      throw error;
+    }
+  }
+  async hasContracts(employeeId: string): Promise<boolean> {
+    // Cuenta también los contratos anulados: siguen siendo un rastro legal
+    // que referencia al colaborador. findFirst se detiene en el primero.
+    const contract = await this.prisma.contract.findFirst({
+      where: { employeeId },
+      select: { id: true },
+    });
+    return contract !== null;
+  }
 
   async findViewById(
     id: string,
@@ -28,13 +112,25 @@ export class PrismaEmployeeRepository implements IEmployeeRepository {
     filters: EmployeeFilters,
     { includeSensitive }: ReadOptions,
   ): Promise<Page<EmployeeView>> {
+    const escapeLike = (value: string): string =>
+      value.replace(/[\\%_]/g, '\\$&');
     const where: Prisma.EmployeeWhereInput = {
       deletedAt: null,
       ...(filters.status && { status: filters.status }),
       ...(filters.search && {
         OR: [
-          { fullName: { contains: filters.search, mode: 'insensitive' } },
-          { documentNumber: { contains: filters.search, mode: 'insensitive' } },
+          {
+            fullName: {
+              contains: escapeLike(filters.search),
+              mode: 'insensitive',
+            },
+          },
+          {
+            documentNumber: {
+              contains: escapeLike(filters.search),
+              mode: 'insensitive',
+            },
+          },
         ],
       }),
     };
@@ -60,5 +156,28 @@ export class PrismaEmployeeRepository implements IEmployeeRepository {
       page: filters.page,
       limit: filters.limit,
     };
+  }
+  private async findOne(
+    where: Prisma.EmployeeWhereInput,
+  ): Promise<Employee | null> {
+    const row = await this.prisma.employee.findFirst({
+      where: { ...where, deletedAt: null },
+      select: FULL_SELECT,
+    });
+    return row ? EmployeeMapper.toEntity(row) : null;
+  }
+  private translate(error: unknown, employee: Employee): unknown {
+    const fields = uniqueViolationFields(error);
+    if (fields?.includes('employee_code') && employee.employeeCode !== null) {
+      return new DuplicateEmployeeCodeError(employee.employeeCode);
+    }
+    if (fields) {
+      return new DuplicateDocumentError(
+        employee.documentType,
+        employee.documentNumber,
+      );
+    }
+    if (isRecordNotFound(error)) return new EmployeeNotFoundError(employee.id);
+    return error;
   }
 }

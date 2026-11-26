@@ -2,6 +2,7 @@ import { NOT_FOUND } from '../../../../shared/constants/http';
 import {
   AppError,
   ConflictError,
+  ForbiddenError,
   ValidationError,
 } from '../../../../shared/utils/app-error-v2';
 
@@ -41,7 +42,18 @@ export class InvalidEmployeeDataError extends ValidationError {
   }
 }
 
-export class TerminationNotAllowedError extends ValidationError {
+export class TerminationNotAllowedError extends ForbiddenError {
+  constructor(message: string) {
+    super(message);
+  }
+}
+export class SensitiveFieldsForbiddenError extends ForbiddenError {
+  constructor(fields: readonly string[]) {
+    super(`No tiene permiso para registrar ${fields.join(', ')}`);
+  }
+}
+
+export class EmployeeHasContractsError extends ConflictError {
   constructor(message: string) {
     super(message);
   }

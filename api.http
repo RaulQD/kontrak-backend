@@ -1,0 +1,221 @@
+# Pruebas manuales de la API de Kontrak
+#
+# Requiere la extensión "REST Client" de VS Code (humao.rest-client).
+# Antes de empezar:
+#   1. Postgres corriendo (el tuyo local, o docker compose up -d db)
+#   2. pnpm prisma migrate deploy && pnpm seed
+#   3. pnpm tsx tests/manual/dev-data.ts   (usuarios por rol + colaboradores)
+#   4. pnpm dev
+#
+# Haz clic en "Send Request" sobre cada petición, de arriba hacia abajo:
+# cada petición toma el token del login de su rol (loginHrAdmin, loginManager...),
+# así que haz los logins primero.
+# La contraseña se lee de BOOTSTRAP_ADMIN_PASSWORD en tu .env; no la escribas aquí.
+
+@baseUrl = http://localhost:3000/api
+@password = {{$dotenv BOOTSTRAP_ADMIN_PASSWORD}}
+
+# Id de usuario para revocar sesiones: cópialo de la salida de dev-data.ts
+@hrAnalystUserId = PEGA-AQUI-EL-ID-DE-hr-analyst
+
+
+######################################################################
+# Salud
+######################################################################
+
+### 200 { status: "ok", database: "up" }
+GET {{baseUrl}}/health
+
+
+######################################################################
+# Auth: /api/auth
+######################################################################
+
+### Login HR_ADMIN: tiene colaborador:leer_sensible y usuario:gestionar
+# @name loginHrAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "hr-admin@kontrak.local",
+  "password": "{{password}}"
+}
+
+### Login HR_ANALYST: colaborador:leer, sin leer_sensible
+# @name loginHrAnalyst
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "hr-analyst@kontrak.local",
+  "password": "{{password}}"
+}
+
+### Login MANAGER: colaborador:leer, sin leer_sensible
+# @name loginManager
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "manager@kontrak.local",
+  "password": "{{password}}"
+}
+
+### Login EMPLOYEE: sin colaborador:leer
+# @name loginEmployee
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "employee@kontrak.local",
+  "password": "{{password}}"
+}
+
+### 401: credenciales inválidas
+# Email inexistente a propósito: así no suma intentos fallidos a ningún usuario.
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "no-existe@kontrak.local",
+  "password": "no-es-la-clave"
+}
+
+### 422: body inválido
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "no-es-un-email",
+  "password": "123"
+}
+
+### 200: renueva la sesión con la cookie refresh_token del último login
+# REST Client guarda las cookies entre peticiones.
+POST {{baseUrl}}/auth/refresh
+
+### 200: cierra la sesión y borra la cookie
+POST {{baseUrl}}/auth/logout
+
+### 401: después del logout ya no hay cookie que renovar
+POST {{baseUrl}}/auth/refresh
+
+
+######################################################################
+# Colaboradores: GET /api/employees  (US-020a)
+######################################################################
+
+### HR_ADMIN: cada elemento TRAE hasChildrenUnder18 y essaludLifeInsurance
+# @name listHrAdmin
+GET {{baseUrl}}/employees
+Authorization: Bearer {{loginHrAdmin.response.body.$.data.accessToken}}
+
+### HR_ANALYST: mismas filas, SIN las dos claves sensibles
+GET {{baseUrl}}/employees
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### MANAGER: SIN las dos claves sensibles
+GET {{baseUrl}}/employees
+Authorization: Bearer {{loginManager.response.body.$.data.accessToken}}
+
+### Paginación y filtro por estado
+GET {{baseUrl}}/employees?page=1&limit=2&status=ACTIVO
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### Búsqueda por nombre (sin distinguir mayúsculas)
+GET {{baseUrl}}/employees?search=quispe
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### Búsqueda por número de documento
+GET {{baseUrl}}/employees?search=9905
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### Sin resultados: 200 con lista vacía, nunca 404
+GET {{baseUrl}}/employees?search=zzz
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### Los comodines de LIKE se buscan como texto: total 0
+GET {{baseUrl}}/employees?search=%25%25
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### 422: limit mayor que 100
+GET {{baseUrl}}/employees?limit=101
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### 422: parámetro desconocido
+GET {{baseUrl}}/employees?orden=nombre
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### 422: búsqueda de menos de 2 caracteres
+GET {{baseUrl}}/employees?search=a
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### 401: sin token
+GET {{baseUrl}}/employees
+
+### 403: EMPLOYEE no tiene colaborador:leer
+GET {{baseUrl}}/employees
+Authorization: Bearer {{loginEmployee.response.body.$.data.accessToken}}
+
+
+######################################################################
+# Colaboradores: GET /api/employees/:id  (US-020a)
+######################################################################
+
+### HR_ADMIN: con las claves sensibles
+GET {{baseUrl}}/employees/{{listHrAdmin.response.body.$.data[0].id}}
+Authorization: Bearer {{loginHrAdmin.response.body.$.data.accessToken}}
+
+### HR_ANALYST: sin las claves sensibles
+GET {{baseUrl}}/employees/{{listHrAdmin.response.body.$.data[0].id}}
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### 404: el id no existe (o el colaborador está anulado)
+GET {{baseUrl}}/employees/00000000-0000-4000-8000-000000000000
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+### 422: el id no es un UUID
+GET {{baseUrl}}/employees/no-es-un-uuid
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+
+######################################################################
+# Sesiones de usuario: DELETE /api/users/:id/sessions
+######################################################################
+
+### 403: MANAGER no tiene usuario:gestionar
+DELETE {{baseUrl}}/users/{{hrAnalystUserId}}/sessions
+Authorization: Bearer {{loginManager.response.body.$.data.accessToken}}
+
+### 200: HR_ADMIN revoca todas las sesiones de HR_ANALYST
+# Después, el token de HR_ANALYST deja de servir: vuelve a hacer su login.
+DELETE {{baseUrl}}/users/{{hrAnalystUserId}}/sessions
+Authorization: Bearer {{loginHrAdmin.response.body.$.data.accessToken}}
+
+### 401: el access token revocado ya no sirve
+GET {{baseUrl}}/employees
+Authorization: Bearer {{loginHrAnalyst.response.body.$.data.accessToken}}
+
+
+######################################################################
+# Legacy: /api/contracts, /api/excel, /api/addendum
+# Ojo: estas rutas NO piden token. Necesitan un Excel real.
+######################################################################
+
+### Sube un Excel de empleados y devuelve los datos leídos
+POST {{baseUrl}}/excel/upload
+Content-Type: multipart/form-data; boundary=KontrakBoundary
+
+--KontrakBoundary
+Content-Disposition: form-data; name="excel"; filename="empleados.xlsx"
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+< ./ruta/a/tu-archivo.xlsx
+--KontrakBoundary--
+
+# Las rutas siguientes reciben en el body el arreglo data.employees
+# que devuelve /excel/upload:
+#   POST /contracts/download-zip     POST /contracts/preview
+#   POST /excel/download-lawlife     POST /excel/download-sctr
+#   POST /excel/download-photocheck  GET  /excel/excel-to-image
+#   POST /addendum/upload (multipart, campo "excel")   POST /addendum/process

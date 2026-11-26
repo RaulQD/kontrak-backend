@@ -45,3 +45,7 @@ type SensitiveRow = Prisma.EmployeeGetPayload<{
 
 /** Fila leída: lo público siempre; lo sensible solo si se seleccionó. */
 export type EmployeeRow = PublicRow & Partial<SensitiveRow>;
+
+export type EmployeeFullRow = Prisma.EmployeeGetPayload<{
+  select: typeof FULL_SELECT;
+}>;

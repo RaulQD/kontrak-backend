@@ -11,7 +11,7 @@ import {
 /** Formato por tipo de documento. Solo DNI tiene respaldo de CHECK en la BD
  *  (ckemployeesdniformat); los otros tres los sostiene únicamente el dominio.
  *  R2: confirmar CE / PASAPORTE / PTP con el contador contra la tabla de SUNAT. */
-const DOCUMENTPATTERNS: Record<DocumentType, RegExp> = {
+export const DOCUMENT_PATTERNS: Record<DocumentType, RegExp> = {
   DNI: /^\d{8}$/,
   CE: /^[0-9A-Z]{9,12}$/,
   PASAPORTE: /^[0-9A-Z]{6,12}$/,
@@ -171,7 +171,7 @@ export class Employee {
     this.assertDateRange();
   }
   private assertDocument(): void {
-    const pattern = DOCUMENTPATTERNS[this.documentType];
+    const pattern = DOCUMENT_PATTERNS[this.documentType];
     if (!pattern.test(this.documentNumber)) {
       throw new InvalidEmployeeDataError(
         `El número de documento no tiene el formato válido para ${this.documentType}`,

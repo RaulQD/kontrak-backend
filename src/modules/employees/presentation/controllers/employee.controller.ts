@@ -6,11 +6,18 @@ import { ListEmployeesUseCase } from '../../application/use-case/list-employee.u
 import { EmployeeFilters } from '../../domain/types';
 import { ListEmployeesQuery } from '../schemas/employee.schema';
 import { getAuth } from '../../../auth';
+import { CreateEmployeeUseCase } from '../../application/use-case/create-employee.use-case';
+import { CreateEmployeeInput } from '../../application/dto/create-employee.dto';
+import { UpdateEmployeeUseCase } from '../../application/use-case/update-employee.use-case';
+import { DeleteEmployeeUseCase } from '../../application/use-case/delete-employee.use-case';
 
 export class EmployeeController {
   constructor(
     private readonly getEmployee: GetEmployeeUseCase,
     private readonly listEmployees: ListEmployeesUseCase,
+    private readonly createEmployee: CreateEmployeeUseCase,
+    private readonly updateEmployee: UpdateEmployeeUseCase,
+    private readonly softDeleteEmployee: DeleteEmployeeUseCase,
   ) {}
 
   public getById = catchError(async (req: Request, res: Response) => {
@@ -42,5 +49,36 @@ export class EmployeeController {
       total: result.total,
       totalPages: Math.ceil(result.total / result.limit),
     });
+  });
+  public create = catchError(async (req: Request, res: Response) => {
+    const { userId, permissions } = getAuth(req);
+    const result = await this.createEmployee.execute(
+      req.body as CreateEmployeeInput,
+      { userId, permissions },
+    );
+    return ApiResponse.created(
+      res,
+      result,
+      'Se registro correctamente el empleado',
+    );
+  });
+
+  public update = catchError(async (req: Request, res: Response) => {
+    const { userId, permissions } = getAuth(req);
+    const result = await this.updateEmployee.execute(
+      String(req.params.id),
+      req.body,
+      { userId, permissions },
+    );
+    return ApiResponse.success(
+      res,
+      result,
+      'Se actualizo correctamente el empleado.',
+    );
+  });
+
+  public softDelete = catchError(async (req: Request, res: Response) => {
+    await this.softDeleteEmployee.execute(String(req.params.id));
+    return ApiResponse.ok(res, 'Colaborador anulado');
   });
 }
