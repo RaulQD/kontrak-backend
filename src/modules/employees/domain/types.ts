@@ -36,7 +36,7 @@ export interface EmployeeUpdatePatch {
   birthDate?: Date | null;
   maritalStatus?: MaritalStatus | null;
   nationality?: string;
-  email?: string | null;
+  email?: string;
   personalEmail?: string | null;
   phone?: string | null;
   address?: string | null;

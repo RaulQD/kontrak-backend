@@ -51,7 +51,7 @@ const PROPS: NewEmployeeProps = {
   birthDate: null,
   maritalStatus: null,
   nationality: 'PERUANA',
-  email: null,
+  email: 'maria.quispe@empresa.pe',
   personalEmail: null,
   phone: '900000001',
   address: 'JR. CUSCO 100',
@@ -305,6 +305,18 @@ describe('UpdateEmployeeUseCase', () => {
       expect(repository.findByEmployeeCode).not.toHaveBeenCalled();
       expect(repository.update.mock.calls[0]?.[1]).toEqual({
         employeeCode: null,
+      });
+    });
+  });
+
+  describe('correo (US-020c)', () => {
+    it('escribe el correo normalizado por la entidad, no el que llegó', async () => {
+      const { useCase, repository } = makeUseCase();
+
+      await useCase.execute(ID, { email: ' Nuevo@Empresa.PE' }, ADMIN);
+
+      expect(repository.update.mock.calls[0]?.[1]).toEqual({
+        email: 'nuevo@empresa.pe',
       });
     });
   });

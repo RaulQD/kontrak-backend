@@ -61,7 +61,7 @@ export class PrismaEmployeeRepository implements IEmployeeRepository {
       await this.prisma.$transaction(async (tx) => {
         await tx.employee.update({
           where: { id: employee.id, deletedAt: null },
-          data: patch,
+          data: EmployeeMapper.toUpdateData(patch),
         });
         await writeAudit(tx, audit);
       });

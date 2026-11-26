@@ -19,7 +19,7 @@ const makeProps = (over: Partial<NewEmployeeProps> = {}): NewEmployeeProps => ({
   birthDate: null,
   maritalStatus: null,
   nationality: 'PERUANA',
-  email: null,
+  email: 'maria.quispe@empresa.pe',
   personalEmail: null,
   phone: '999111222',
   address: 'AV. AREQUIPA 123',
@@ -60,6 +60,28 @@ describe('Employee', () => {
       expect(() => makeEmployee({ ubigeoId: '15010' })).toThrow(
         InvalidEmployeeDataError,
       );
+    });
+  });
+
+  describe('correo corporativo (US-020c)', () => {
+    it('se guarda sin espacios y en minúsculas', () => {
+      expect(makeEmployee({ email: '  Maria.Quispe@Empresa.PE ' }).email).toBe(
+        'maria.quispe@empresa.pe',
+      );
+    });
+
+    it('es obligatorio: uno vacío o de solo espacios se rechaza', () => {
+      expect(() => makeEmployee({ email: '   ' })).toThrow(
+        'El correo corporativo es obligatorio',
+      );
+    });
+
+    it('withPatch también lo normaliza', () => {
+      const editado = makeEmployee().withPatch({
+        email: ' Otro.Correo@Empresa.PE',
+      });
+
+      expect(editado.email).toBe('otro.correo@empresa.pe');
     });
   });
 

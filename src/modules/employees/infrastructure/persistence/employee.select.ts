@@ -13,7 +13,7 @@ export const PUBLIC_SELECT = {
   birthDate: true,
   maritalStatus: true,
   nationality: true,
-  email: true,
+  corporateEmail: true,
   personalEmail: true,
   phone: true,
   address: true,

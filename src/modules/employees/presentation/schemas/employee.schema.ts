@@ -55,6 +55,18 @@ const requiredText = (max: number) =>
     .min(1, 'Es obligatorio')
     .max(max, `Máximo ${max} caracteres`);
 
+/**
+ * Correo corporativo (US-020c): obligatorio, sin espacios y en minúsculas.
+ * El `min(1)` va antes del `pipe` para que un correo vacío diga "obligatorio"
+ * y no "no es válido".
+ */
+const corporateEmail = z
+  .string({ error: 'El correo corporativo es obligatorio' })
+  .trim()
+  .toLowerCase()
+  .min(1, 'El correo corporativo es obligatorio')
+  .pipe(z.email('El correo no es válido').max(150, 'Máximo 150 caracteres'));
+
 const optionalEmail = z
   .string()
   .trim()
@@ -88,7 +100,7 @@ export const createEmployeeSchema = z.object({
         .enum(['SOLTERO', 'CASADO', 'DIVORCIADO', 'CONVIVIENTE', 'VIUDO'])
         .optional(),
       nationality: optionalText(40),
-      email: optionalEmail,
+      email: corporateEmail,
       personalEmail: optionalEmail,
       phone: optionalText(20),
       address: optionalText(300),
@@ -154,7 +166,7 @@ export const updateEmployeeSchema = z.object({
         .enum(['SOLTERO', 'CASADO', 'DIVORCIADO', 'CONVIVIENTE', 'VIUDO'])
         .nullable()
         .optional(),
-      email: nullableEmail,
+      email: corporateEmail.optional(),
       personalEmail: nullableEmail,
       phone: nullableText(20),
       address: nullableText(300),

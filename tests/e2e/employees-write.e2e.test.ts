@@ -40,6 +40,7 @@ const UBIGEO = {
 let secuencia = 0;
 const nuevoDni = () => String(61000000 + ++secuencia);
 const nuevoCodigo = () => `E2E-W-${String(secuencia).padStart(3, '0')}`;
+const nuevoCorreo = () => `ana.${secuencia}@e2e-escritura.test`;
 
 const cuerpo = (cambios: Record<string, unknown> = {}) => ({
   documentType: 'DNI',
@@ -48,6 +49,7 @@ const cuerpo = (cambios: Record<string, unknown> = {}) => ({
   lastNameFather: MARCA,
   lastNameMother: 'TORRES',
   hireDate: '2026-08-17',
+  email: nuevoCorreo(),
   ...cambios,
 });
 
@@ -93,7 +95,6 @@ describe('US-020b: alta, edición y anulación de la ficha del empleado', () => 
     await prisma.contract.deleteMany({ where });
     await prisma.employee.deleteMany({ where: { lastNameFather: MARCA } });
   };
-
   beforeAll(async () => {
     app = buildApp();
     await borrarFilasDeEsteArchivo();
@@ -222,7 +223,7 @@ describe('US-020b: alta, edición y anulación de la ficha del empleado', () => 
         birthDate: null,
         maritalStatus: null,
         nationality: 'PERUANA',
-        email: null,
+        email: 'repetido.p2002@e2e-escritura.test',
         personalEmail: null,
         phone: null,
         address: null,
@@ -408,6 +409,7 @@ describe('US-020b: alta, edición y anulación de la ficha del empleado', () => 
           firstNames: 'CESADA',
           lastNameFather: MARCA,
           lastNameMother: 'FECHAS',
+          corporateEmail: 'cesada.fechas@e2e-escritura.test',
           hireDate: new Date('2025-01-15'),
           status: 'CESADO',
           terminationDate: new Date('2026-06-30'),
@@ -550,7 +552,7 @@ describe('US-020b: alta, edición y anulación de la ficha del empleado', () => 
           birthDate: null,
           maritalStatus: null,
           nationality: 'PERUANA',
-          email: null,
+          email: 'sin.auditoria@e2e-escritura.test',
           personalEmail: null,
           phone: null,
           address: null,

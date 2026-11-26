@@ -147,7 +147,7 @@ model Employee {
   birthDate            DateTime?      @map("birth_date") @db.Date
   maritalStatus        MaritalStatus? @map("marital_status")
   nationality          String?        @default("PERUANA") @map("nationality") @db.VarChar(40) // Nacionalidad del trabajador (por defecto: PERUANA)
-  email                String?        @db.VarChar(150)
+  corporateEmail       String         @map("corporate_email") @db.VarChar(150)
   personalEmail        String?        @map("personal_email") @db.VarChar(150)
   phone                String?        @db.VarChar(20)
   address              String?        @db.VarChar(300)

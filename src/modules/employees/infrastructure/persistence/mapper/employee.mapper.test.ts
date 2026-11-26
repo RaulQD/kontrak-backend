@@ -18,7 +18,7 @@ const makeRow = (over: Partial<EmployeeRow> = {}): EmployeeRow => ({
   birthDate: new Date('1990-05-10'),
   maritalStatus: 'SOLTERO',
   nationality: 'PERUANA',
-  email: 'maria.quispe@apparka.pe',
+  corporateEmail: 'maria.quispe@apparka.pe',
   personalEmail: null,
   phone: '999111222',
   address: 'AV. AREQUIPA 123',
@@ -36,8 +36,13 @@ const makeRow = (over: Partial<EmployeeRow> = {}): EmployeeRow => ({
 describe('EmployeeMapper.toView', () => {
   it('copia cada campo público tal cual, incluida una nacionalidad null', () => {
     const row = makeRow({ nationality: null });
+    const { corporateEmail, ...resto } = row;
 
-    expect(EmployeeMapper.toView(row)).toEqual(row);
+    // La columna es corporate_email; la vista la expone como `email` (US-020c).
+    expect(EmployeeMapper.toView(row)).toEqual({
+      ...resto,
+      email: corporateEmail,
+    });
   });
 
   it('si la fila no trae las columnas sensibles, la vista no tiene esas claves', () => {
@@ -100,7 +105,7 @@ const COLUMNAS_ESCRITAS = [
   'birthDate',
   'maritalStatus',
   'nationality',
-  'email',
+  'corporateEmail',
   'personalEmail',
   'phone',
   'address',
@@ -138,8 +143,10 @@ describe('EmployeeMapper.toPersistence', () => {
   });
 
   it('copia los valores de la entidad, incluidos los null y lo que fija el alta', () => {
+    const { email, ...resto } = PROPS;
     expect(data).toEqual({
-      ...PROPS,
+      ...resto,
+      corporateEmail: email,
       id: ID,
       status: 'ACTIVO',
       terminationDate: null,
@@ -178,5 +185,18 @@ describe('EmployeeMapper.toEntity', () => {
 
     const { updatedAt: _updatedAt, ...columnas } = row;
     expect(data).toEqual(columnas);
+  });
+});
+describe('EmployeeMapper.toUpdateData', () => {
+  it('escribe el correo en corporateEmail, no en email (US-020c)', () => {
+    expect(
+      EmployeeMapper.toUpdateData({ email: 'ana@empresa.pe', phone: null }),
+    ).toEqual({ corporateEmail: 'ana@empresa.pe', phone: null });
+  });
+
+  it('sin email en el patch no agrega corporateEmail', () => {
+    expect(EmployeeMapper.toUpdateData({ phone: '999888777' })).toEqual({
+      phone: '999888777',
+    });
   });
 });
