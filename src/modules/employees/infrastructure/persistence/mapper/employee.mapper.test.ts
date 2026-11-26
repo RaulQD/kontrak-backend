@@ -1,6 +1,10 @@
-import { describe, expect, it } from 'vitest';
-import type { EmployeeRow } from '../employee.select';
-import { EmployeeMapper } from './employee.mapper';
+import { describe, expect, expectTypeOf, it } from 'vitest';
+import {
+  Employee,
+  NewEmployeeProps,
+} from '../../../domain/entities/employee.entity';
+import type { EmployeeFullRow, EmployeeRow } from '../employee.select';
+import { EmployeeMapper, EmployeeWriteData } from './employee.mapper';
 
 const makeRow = (over: Partial<EmployeeRow> = {}): EmployeeRow => ({
   id: '7d0b6c0e-0a0e-4f9b-9a57-2f4b6d1c3e10',
@@ -54,5 +58,125 @@ describe('EmployeeMapper.toView', () => {
 
   it('no agrega fullName: la vista no arrastra el string | null de la columna', () => {
     expect(EmployeeMapper.toView(makeRow())).not.toHaveProperty('fullName');
+  });
+});
+
+// ── Escritura ───────────────────────────────────────────────────────────────
+
+const PROPS: NewEmployeeProps = {
+  employeeCode: 'E-0001',
+  documentType: 'DNI',
+  documentNumber: '40506070',
+  firstNames: 'MARIA ELENA',
+  lastNameFather: 'QUISPE',
+  lastNameMother: 'ROJAS',
+  sex: 'FEMENINO',
+  birthDate: new Date('1990-05-10T00:00:00.000Z'),
+  maritalStatus: 'SOLTERO',
+  nationality: 'PERUANA',
+  email: 'maria.quispe@apparka.pe',
+  personalEmail: null,
+  phone: '999111222',
+  address: 'AV. AREQUIPA 123',
+  ubigeoId: '150101',
+  hireDate: new Date('2026-08-17T00:00:00.000Z'),
+  hasChildrenUnder18: true,
+  essaludLifeInsurance: false,
+  photoUrl: null,
+};
+const ID = '7d0b6c0e-0a0e-4f9b-9a57-2f4b6d1c3e10';
+const CREATED_AT = new Date('2026-08-17T15:00:00.000Z');
+
+/** Las 24 columnas que escribe la app: todas menos full_name y updated_at. */
+const COLUMNAS_ESCRITAS = [
+  'id',
+  'employeeCode',
+  'documentType',
+  'documentNumber',
+  'firstNames',
+  'lastNameFather',
+  'lastNameMother',
+  'sex',
+  'birthDate',
+  'maritalStatus',
+  'nationality',
+  'email',
+  'personalEmail',
+  'phone',
+  'address',
+  'ubigeoId',
+  'hireDate',
+  'terminationDate',
+  'status',
+  'hasChildrenUnder18',
+  'essaludLifeInsurance',
+  'photoUrl',
+  'createdAt',
+  'deletedAt',
+];
+
+describe('EmployeeMapper.toPersistence', () => {
+  const data = EmployeeMapper.toPersistence(
+    Employee.create(PROPS, ID, CREATED_AT),
+  );
+
+  it('no contiene fullName: es una columna generada y Postgres rechazaría el INSERT', () => {
+    expect(data).not.toHaveProperty('fullName');
+  });
+
+  it('no contiene updatedAt: lo pone Prisma', () => {
+    expect(data).not.toHaveProperty('updatedAt');
+  });
+
+  it('el tipo tampoco los admite, así que agregarlos no compila', () => {
+    expectTypeOf<EmployeeWriteData>().not.toHaveProperty('fullName');
+    expectTypeOf<EmployeeWriteData>().not.toHaveProperty('updatedAt');
+  });
+
+  it('escribe exactamente las columnas de la ficha, ni una más', () => {
+    expect(Object.keys(data).sort()).toEqual([...COLUMNAS_ESCRITAS].sort());
+  });
+
+  it('copia los valores de la entidad, incluidos los null y lo que fija el alta', () => {
+    expect(data).toEqual({
+      ...PROPS,
+      id: ID,
+      status: 'ACTIVO',
+      terminationDate: null,
+      createdAt: CREATED_AT,
+      deletedAt: null,
+    });
+  });
+});
+
+describe('EmployeeMapper.toEntity', () => {
+  const fullRow = (over: Partial<EmployeeFullRow> = {}): EmployeeFullRow => ({
+    ...makeRow(),
+    hasChildrenUnder18: true,
+    essaludLifeInsurance: false,
+    ...over,
+  });
+
+  it('una nacionalidad null se lee como PERUANA', () => {
+    expect(
+      EmployeeMapper.toEntity(fullRow({ nationality: null })).nationality,
+    ).toBe('PERUANA');
+  });
+
+  it('no valida: un dato legacy que hoy no pasaría no bloquea la lectura', () => {
+    const employee = EmployeeMapper.toEntity(
+      fullRow({ documentNumber: '1234567' }),
+    );
+
+    expect(employee.documentNumber).toBe('1234567');
+  });
+
+  it('ida y vuelta: toPersistence(toEntity(fila)) conserva cada columna escrita', () => {
+    const row = fullRow();
+
+    const data = EmployeeMapper.toPersistence(EmployeeMapper.toEntity(row));
+
+    const { updatedAt: _updatedAt, ...columnas } = row;
+    expect(data).toEqual(columnas);
   });
 });
