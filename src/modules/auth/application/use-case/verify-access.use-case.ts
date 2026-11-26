@@ -1,7 +1,7 @@
-import { AccessRevokedError } from '../domain/errors/auth.error';
-import { ITokenSigner } from '../domain/ports/token-signer.port';
-import { IUserRepository } from '../domain/ports/user.repository.port';
-import { VerifiedAccessPayload } from '../domain/types';
+import { AccessRevokedError } from '../../domain/errors/auth.error';
+import { VerifiedAccessPayload } from '../../domain/types';
+import { ITokenSigner } from '../ports/token-signer.port';
+import { IUserRepository } from '../ports/user.repository.port';
 
 export class VerifyAccessUseCase {
   constructor(

@@ -1,4 +1,5 @@
 import { InvalidEmployeeDataError } from '../errors/employee.error';
+import { buildFullName } from '../full-name';
 import {
   DocumentType,
   EmployeeStatus,
@@ -157,6 +158,9 @@ export class Employee {
   }
   isDeleted(): boolean {
     return this.deletedAt !== null;
+  }
+  fullName(): string {
+    return buildFullName(this);
   }
   private validate(): void {
     this.assertDocument();

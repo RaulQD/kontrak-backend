@@ -1,5 +1,5 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { ITokenSigner } from '../../domain/ports/token-signer.port';
+import { ITokenSigner } from '../../application/ports/token-signer.port';
 import { AccessPayload, VerifiedAccessPayload } from '../../domain/types';
 import {
   AccessTokenExpiredError,

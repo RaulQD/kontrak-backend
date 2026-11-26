@@ -1,5 +1,5 @@
-import { IRefreshTokenRepository } from '../domain/ports/refresh-token-repository.port';
-import { IRefreshTokenGenerator } from '../domain/ports/token-generator.port';
+import { IRefreshTokenRepository } from '../ports/refresh-token-repository.port';
+import { IRefreshTokenGenerator } from '../ports/token-generator.port';
 
 export class LogoutUseCase {
   constructor(

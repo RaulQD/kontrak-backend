@@ -1,6 +1,6 @@
 import { PrismaClient } from '../../../../../generated/prisma/client';
+import { IUserRepository } from '../../../application/ports/user.repository.port';
 import { User } from '../../../domain/entities/user.entity';
-import { IUserRepository } from '../../../domain/ports/user.repository.port';
 import { UserAccessStatus } from '../../../domain/types';
 import { UserMapper } from '../mappers/user.mapper';
 

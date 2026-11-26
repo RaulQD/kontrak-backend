@@ -1,4 +1,4 @@
-import { AccessPayload, VerifiedAccessPayload } from '../types';
+import { AccessPayload, VerifiedAccessPayload } from '../../domain/types';
 
 export interface ITokenSigner {
   signAccess(payload: AccessPayload, expiresInSeconds: number): string;

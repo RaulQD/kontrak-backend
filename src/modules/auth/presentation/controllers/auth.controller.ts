@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { catchError } from '../../../../shared/utils/catch-error';
-import { LoginUseCase } from '../../application/login.use-case';
+import { LoginUseCase } from '../../application/use-case/login.use-case';
 import { ApiResponse } from '../../../../shared/utils/api-response';
-import { RefreshSessionUseCase } from '../../application/refresh-session.use-case';
+import { RefreshSessionUseCase } from '../../application/use-case/refresh-session.use-case';
 import { InvalidRefreshTokenError } from '../../domain/errors/auth.error';
-import { LogoutUseCase } from '../../application/logout.use-case';
+import { LogoutUseCase } from '../../application/use-case/logout.use-case';
 
 export class AuthController {
   constructor(

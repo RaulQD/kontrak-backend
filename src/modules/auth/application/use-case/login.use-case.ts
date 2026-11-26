@@ -1,13 +1,13 @@
-import { IPasswordHasher } from '../domain/ports/password-hasher.port';
-import { IRefreshTokenRepository } from '../domain/ports/refresh-token-repository.port';
-import { ITokenSigner } from '../domain/ports/token-signer.port';
-import { IUserRepository } from '../domain/ports/user.repository.port';
+import { RefreshToken } from '../../domain/entities/refresh-token.entity';
 import {
   AccountLockedError,
   InvalidCredentialsError,
-} from '../domain/errors/auth.error';
-import { IRefreshTokenGenerator } from '../domain/ports/token-generator.port';
-import { RefreshToken } from '../domain/entities/refresh-token.entity';
+} from '../../domain/errors/auth.error';
+import { IPasswordHasher } from '../ports/password-hasher.port';
+import { IRefreshTokenRepository } from '../ports/refresh-token-repository.port';
+import { IRefreshTokenGenerator } from '../ports/token-generator.port';
+import { ITokenSigner } from '../ports/token-signer.port';
+import { IUserRepository } from '../ports/user.repository.port';
 
 export interface LoginInput {
   email: string;

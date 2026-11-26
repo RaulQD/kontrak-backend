@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ApiResponse } from '../../../../shared/utils/api-response';
 import { catchError } from '../../../../shared/utils/catch-error';
-import { DeleteSessionUseCase } from '../../application/delete-session.use-case';
+import { DeleteSessionUseCase } from '../../application/use-case/delete-session.use-case';
 
 export class UserSessionsController {
   constructor(private readonly deleteSessionUseCase: DeleteSessionUseCase) {}

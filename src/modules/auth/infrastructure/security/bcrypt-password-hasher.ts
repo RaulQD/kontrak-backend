@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { IPasswordHasher } from '../../domain/ports/password-hasher.port';
+import { IPasswordHasher } from '../../application/ports/password-hasher.port';
 
 export const SALT_ROUNDS = 12;
 

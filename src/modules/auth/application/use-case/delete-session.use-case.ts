@@ -1,6 +1,6 @@
-import { NotFoundError } from '../../../shared/utils/app-error-v2';
-import { IRefreshTokenRepository } from '../domain/ports/refresh-token-repository.port';
-import { IUserRepository } from '../domain/ports/user.repository.port';
+import { NotFoundError } from '../../../../shared/utils/app-error-v2';
+import { IRefreshTokenRepository } from '../ports/refresh-token-repository.port';
+import { IUserRepository } from '../ports/user.repository.port';
 
 export class DeleteSessionUseCase {
   constructor(

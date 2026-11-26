@@ -136,6 +136,12 @@ describe('Employee', () => {
       expect(deleted.terminationDate).toBeNull();
     });
   });
+
+  describe('fullName', () => {
+    it('arma el nombre completo con la fórmula de la columna full_name', () => {
+      expect(makeEmployee().fullName()).toBe('MARIA ELENA QUISPE ROJAS');
+    });
+  });
 });
 
 describe('EmployeeNotFoundError', () => {

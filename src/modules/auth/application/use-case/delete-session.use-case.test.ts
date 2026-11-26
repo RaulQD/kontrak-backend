@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DeleteSessionUseCase } from './delete-session.use-case';
-import { User } from '../domain/entities/user.entity';
-import { IRefreshTokenRepository } from '../domain/ports/refresh-token-repository.port';
-import { IUserRepository } from '../domain/ports/user.repository.port';
-import { NotFoundError } from '../../../shared/utils/app-error-v2';
+import { DeleteSessionUseCase } from '../use-case/delete-session.use-case';
+import { User } from '../../domain/entities/user.entity';
+import { NotFoundError } from '../../../../shared/utils/app-error-v2';
+import { IUserRepository } from '../ports/user.repository.port';
+import { IRefreshTokenRepository } from '../ports/refresh-token-repository.port';
 
 const AHORA = new Date('2026-11-19T10:00:00.000Z');
 

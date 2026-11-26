@@ -1,10 +1,10 @@
-import { InvalidRefreshTokenError } from '../domain/errors/auth.error';
-import { IRefreshTokenRepository } from '../domain/ports/refresh-token-repository.port';
-import { IRefreshTokenGenerator } from '../domain/ports/token-generator.port';
-import { ITokenSigner } from '../domain/ports/token-signer.port';
-import { IUserRepository } from '../domain/ports/user.repository.port';
+import { RefreshToken } from '../../domain/entities/refresh-token.entity';
+import { InvalidRefreshTokenError } from '../../domain/errors/auth.error';
+import { IRefreshTokenRepository } from '../ports/refresh-token-repository.port';
+import { IRefreshTokenGenerator } from '../ports/token-generator.port';
+import { ITokenSigner } from '../ports/token-signer.port';
+import { IUserRepository } from '../ports/user.repository.port';
 import { AuthTokenConfig } from './login.use-case';
-import { RefreshToken } from '../domain/entities/refresh-token.entity';
 
 export interface RefreshInput {
   refreshToken: string; // el valor plano que viene en la cookie
