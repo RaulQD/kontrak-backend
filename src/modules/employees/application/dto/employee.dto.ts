@@ -1,11 +1,11 @@
+import { EmployeeView } from '../../application/port/employee.repository.port';
+import { buildFullName } from '../../domain/full-name';
 import {
   DocumentType,
   EmployeeStatus,
   MaritalStatus,
-} from '../../../../generated/prisma/browser';
-import { EmployeeView } from '../../application/port/employee.repository.port';
-import { buildFullName } from '../../domain/full-name';
-import { Sex } from '../../domain/types';
+  Sex,
+} from '../../domain/types';
 
 /**
  * Contrato público de la ficha. Lo usan el detalle, cada elemento del

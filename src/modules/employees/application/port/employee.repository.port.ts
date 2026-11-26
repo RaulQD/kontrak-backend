@@ -1,6 +1,12 @@
-import { EmployeeProps } from '../../domain/entities/employee.entity';
+import { AuditEntry } from '../../../../shared/audit/audit-entry';
+import { Employee, EmployeeProps } from '../../domain/entities/employee.entity';
 import { SensitiveField } from '../../domain/sensitive-fields';
-import { EmployeeFilters, Page } from '../../domain/types';
+import {
+  DocumentType,
+  EmployeeFilters,
+  EmployeeUpdatePatch,
+  Page,
+} from '../../domain/types';
 
 export type EmployeeView = Omit<EmployeeProps, SensitiveField | 'nationality'> &
   Partial<Pick<EmployeeProps, SensitiveField>> & {
@@ -13,6 +19,7 @@ export type EmployeeView = Omit<EmployeeProps, SensitiveField | 'nationality'> &
 export interface ReadOptions {
   includeSensitive: boolean;
 }
+export type EmployeeField = keyof EmployeeProps;
 
 export interface IEmployeeRepository {
   findViewById(id: string, opts: ReadOptions): Promise<EmployeeView | null>;
@@ -20,5 +27,18 @@ export interface IEmployeeRepository {
     filters: EmployeeFilters,
     opts: ReadOptions,
   ): Promise<Page<EmployeeView>>;
-  // US-020b agregará findById(id): Promise<Employee | null>, siempre completo
+  findById(id: string): Promise<Employee | null>;
+  findByDocument(type: DocumentType, number: string): Promise<Employee | null>;
+  findByEmployeeCode(code: string): Promise<Employee | null>;
+  create(employe: Employee, audit: AuditEntry): Promise<void>;
+  update(
+    employee: Employee,
+    patch: EmployeeUpdatePatch,
+    audit: AuditEntry,
+  ): Promise<void>;
+  softDelete(id: string, deletedAt: Date, audit: AuditEntry): Promise<void>;
+  hasContracts(employeeId: string): Promise<boolean>;
+}
+export interface IUbigeoReader {
+  exists(id: string): Promise<boolean>;
 }

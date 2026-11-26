@@ -38,7 +38,10 @@ const makeView = (over: Partial<EmployeeView> = {}): EmployeeView => ({
 
 const makeRepository = (view: EmployeeView | null) => {
   const findViewById = vi.fn().mockResolvedValue(view);
-  const repository: IEmployeeRepository = { findViewById, list: vi.fn() };
+  const repository = {
+    findViewById,
+    list: vi.fn(),
+  } as unknown as IEmployeeRepository;
   return { repository, findViewById };
 };
 

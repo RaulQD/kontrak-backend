@@ -1,0 +1,4381 @@
+{
+  "info": {
+    "name": "Kontrak API (local)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Pruebas de la API de Kontrak en local.\n\nAntes de empezar:\n1. Postgres corriendo (el tuyo local, o docker compose up -d db)\n2. pnpm prisma migrate deploy && pnpm seed\n3. pnpm tsx tests/manual/dev-data.ts  (usuarios por rol, colaboradores de prueba y el ubigeo 150101)\n4. pnpm dev\n5. En la pestaña Variables de esta colección, pon tu BOOTSTRAP_ADMIN_PASSWORD en el\n   valor ACTUAL (Current value) de `password`. Así no se exporta ni se sincroniza.\n\nEjecuta primero la carpeta 1. Auth: cada login guarda su token en una variable.\nCon Run collection se ejecuta todo en orden y ves cada test en verde o rojo."
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "password",
+      "value": "",
+      "description": "Tu BOOTSTRAP_ADMIN_PASSWORD. Ponlo solo en Current value."
+    },
+    {
+      "key": "hrAdminToken",
+      "value": ""
+    },
+    {
+      "key": "hrAnalystToken",
+      "value": ""
+    },
+    {
+      "key": "managerToken",
+      "value": ""
+    },
+    {
+      "key": "employeeToken",
+      "value": ""
+    },
+    {
+      "key": "employeeId",
+      "value": ""
+    },
+    {
+      "key": "hrAnalystUserId",
+      "value": ""
+    },
+    {
+      "key": "altaDni",
+      "value": ""
+    },
+    {
+      "key": "altaDni2",
+      "value": ""
+    },
+    {
+      "key": "altaDni3",
+      "value": ""
+    },
+    {
+      "key": "altaDniSpaced",
+      "value": ""
+    },
+    {
+      "key": "altaCe",
+      "value": ""
+    },
+    {
+      "key": "altaCode",
+      "value": ""
+    },
+    {
+      "key": "createdEmployeeId",
+      "value": ""
+    },
+    {
+      "key": "createdEmployeeUpdatedAt",
+      "value": ""
+    },
+    {
+      "key": "editDni",
+      "value": ""
+    },
+    {
+      "key": "editDni2",
+      "value": ""
+    },
+    {
+      "key": "editDniSpaced",
+      "value": ""
+    },
+    {
+      "key": "editOtherDni",
+      "value": ""
+    },
+    {
+      "key": "editCode",
+      "value": ""
+    },
+    {
+      "key": "editOtherCode",
+      "value": ""
+    },
+    {
+      "key": "editEmployeeId",
+      "value": ""
+    },
+    {
+      "key": "editUpdatedAt",
+      "value": ""
+    },
+    {
+      "key": "annulDni",
+      "value": ""
+    },
+    {
+      "key": "annulCode",
+      "value": ""
+    },
+    {
+      "key": "annulEmployeeId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Salud",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('la base responde', () => pm.expect(pm.response.json().database).to.eql('up'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Login HR_ADMIN (con leer_sensible)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr-admin@kontrak.local\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con accessToken', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().data.accessToken).to.be.a('string');",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const token = pm.response.json().data.accessToken;",
+                  "  pm.collectionVariables.set('hrAdminToken', token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login HR_ANALYST (sin leer_sensible)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr-analyst@kontrak.local\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con accessToken', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().data.accessToken).to.be.a('string');",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const token = pm.response.json().data.accessToken;",
+                  "  pm.collectionVariables.set('hrAnalystToken', token);",
+                  "  // Guarda el id del usuario (campo sub del JWT) para la carpeta de sesiones.",
+                  "  const atob = require('atob');",
+                  "  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
+                  "  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);",
+                  "  pm.collectionVariables.set('hrAnalystUserId', JSON.parse(atob(padded)).sub);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login MANAGER (sin leer_sensible)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@kontrak.local\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con accessToken', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().data.accessToken).to.be.a('string');",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const token = pm.response.json().data.accessToken;",
+                  "  pm.collectionVariables.set('managerToken', token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login EMPLOYEE (sin colaborador:leer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"employee@kontrak.local\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200 con accessToken', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().data.accessToken).to.be.a('string');",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const token = pm.response.json().data.accessToken;",
+                  "  pm.collectionVariables.set('employeeToken', token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 · credenciales inválidas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"no-existe@kontrak.local\",\n  \"password\": \"no-es-la-clave\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Usa un email inexistente para no sumar intentos fallidos a ningún usuario real."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · body inválido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"no-es-un-email\",\n  \"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh (usa la cookie del último login)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/refresh",
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Postman guarda la cookie refresh_token del login y la envía aquí sola."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout (borra la cookie)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/logout",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 · refresh después del logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/auth/refresh",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Colaboradores · listado",
+      "item": [
+        {
+          "name": "HR_ADMIN ve los campos sensibles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('cada colaborador TRAE los campos sensibles', () => {",
+                  "  const items = pm.response.json().data;",
+                  "  pm.expect(items.length).to.be.above(0);",
+                  "  items.forEach((e) => {",
+                  "    pm.expect(e).to.have.property('hasChildrenUnder18');",
+                  "    pm.expect(e).to.have.property('essaludLifeInsurance');",
+                  "  });",
+                  "});",
+                  "const first = pm.response.json().data[0];",
+                  "if (first) pm.collectionVariables.set('employeeId', first.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "HR_ANALYST NO ve los campos sensibles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('ningún colaborador trae los campos sensibles', () => {",
+                  "  const items = pm.response.json().data;",
+                  "  pm.expect(items.length).to.be.above(0);",
+                  "  items.forEach((e) => {",
+                  "    pm.expect(e).to.not.have.property('hasChildrenUnder18');",
+                  "    pm.expect(e).to.not.have.property('essaludLifeInsurance');",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "MANAGER NO ve los campos sensibles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('ningún colaborador trae los campos sensibles', () => {",
+                  "  const items = pm.response.json().data;",
+                  "  pm.expect(items.length).to.be.above(0);",
+                  "  items.forEach((e) => {",
+                  "    pm.expect(e).to.not.have.property('hasChildrenUnder18');",
+                  "    pm.expect(e).to.not.have.property('essaludLifeInsurance');",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paginación + filtro por estado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees?page=1&limit=2&status=ACTIVO",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('máximo 2 por página, todos ACTIVO', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data.length).to.be.at.most(2);",
+                  "  pm.expect(body.pagination.limit).to.eql(2);",
+                  "  body.data.forEach((e) => pm.expect(e.status).to.eql('ACTIVO'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Búsqueda por nombre",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees?search=quispe",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('total = 1', () => pm.expect(pm.response.json().pagination.total).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Búsqueda por documento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees?search=9905",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('total = 1', () => pm.expect(pm.response.json().pagination.total).to.eql(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sin resultados: 200 con lista vacía",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees?search=zzz",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('total = 0', () => pm.expect(pm.response.json().pagination.total).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Comodines de LIKE como texto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees?search=%25%25",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Falla hasta que escapes los comodines en el repositorio (escapeLike)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('total = 0', () => pm.expect(pm.response.json().pagination.total).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · limit mayor que 100",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees?limit=101",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · parámetro desconocido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees?orden=nombre",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · búsqueda de 1 carácter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees?search=a",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 · sin token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · EMPLOYEE sin colaborador:leer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employeeToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Colaboradores · detalle",
+      "item": [
+        {
+          "name": "HR_ADMIN ve los campos sensibles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{employeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('trae los campos sensibles', () => {",
+                  "  const e = pm.response.json().data;",
+                  "  pm.expect(e).to.have.property('hasChildrenUnder18');",
+                  "  pm.expect(e).to.have.property('essaludLifeInsurance');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "HR_ANALYST NO ve los campos sensibles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{employeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "pm.test('no trae los campos sensibles', () => {",
+                  "  const e = pm.response.json().data;",
+                  "  pm.expect(e).to.not.have.property('hasChildrenUnder18');",
+                  "  pm.expect(e).to.not.have.property('essaludLifeInsurance');",
+                  "});",
+                  "pm.test('fechas sin hora (YYYY-MM-DD)', () =>",
+                  "  pm.expect(pm.response.json().data.hireDate).to.match(/^\\d{4}-\\d{2}-\\d{2}$/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "404 · id que no existe",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees/00000000-0000-4000-8000-000000000000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · id que no es UUID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees/no-es-un-uuid",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 422', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Colaboradores · alta (US-020b)",
+      "description": "POST /api/employees (US-020b). Ejecuta antes la carpeta 1. Auth.\n\nEl primer request genera un DNI, un CE y un código nuevos en cada corrida, así que puedes ejecutar la carpeta las veces que quieras. Los duplicados reutilizan esos valores.\n\nNo se pueden probar desde Postman (van en los e2e): la carrera entre dos altas simultáneas, la fila de audit_logs, la reutilización del documento de un anulado (no es repetible) y el 403 de D6 (ningún rol del seed tiene colaborador:crear sin colaborador:leer_sensible).\n\nTodo lo que crea esta carpeta lleva el apellido materno POSTMAN. Para borrarlo de tu BD de desarrollo:\nDELETE FROM employees WHERE last_name_mother = 'POSTMAN';",
+      "item": [
+        {
+          "name": "201 · alta con solo los campos obligatorios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Escenario 1 de 04 §5. Es el caso que falla si el caso de uso consulta el ubigeo o el código cuando vienen en null."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  // Valores únicos por corrida: así la colección se puede ejecutar muchas veces.",
+                  "  // Sin '9905': la carpeta 2 busca ese texto y espera un solo resultado.",
+                  "  const rnd = (min, max) => {",
+                  "    let value;",
+                  "    do value = String(Math.floor(min + Math.random() * (max - min)));",
+                  "    while (value.includes('9905'));",
+                  "    return value;",
+                  "  };",
+                  "  pm.collectionVariables.set('altaDni', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('altaDni2', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('altaDni3', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('altaCe', '0' + rnd(10000000, 99999999));",
+                  "  pm.collectionVariables.set('altaCode', 'PM-' + rnd(100000, 999999));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test('status ACTIVO y nationality PERUANA por defecto', () => {",
+                  "    pm.expect(data.status).to.eql('ACTIVO');",
+                  "    pm.expect(data.nationality).to.eql('PERUANA');",
+                  "  });",
+                  "  pm.test('hireDate llega como fecha sin hora', () => pm.expect(data.hireDate).to.eql('2026-08-17'));",
+                  "  pm.test('fullName calculado', () => pm.expect(data.fullName).to.eql('ANA LUCIA TORRES POSTMAN'));",
+                  "  pm.test('terminationDate, deletedAt y employeeCode en null', () => {",
+                  "    pm.expect(data.terminationDate).to.be.null;",
+                  "    pm.expect(data.deletedAt).to.be.null;",
+                  "    pm.expect(data.employeeCode).to.be.null;",
+                  "  });",
+                  "  pm.test('HR_ADMIN ve los campos sensibles, en false por defecto', () => {",
+                  "    pm.expect(data.hasChildrenUnder18).to.eql(false);",
+                  "    pm.expect(data.essaludLifeInsurance).to.eql(false);",
+                  "  });",
+                  "  pm.test('id es un UUID', () => pm.expect(data.id).to.match(/^[0-9a-f-]{36}$/));",
+                  "  if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('createdEmployeeId', data.id);",
+                  "    pm.collectionVariables.set('createdEmployeeUpdatedAt', data.updatedAt);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · el GET devuelve la misma ficha que respondió el POST",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{createdEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test('mismo id y mismo updatedAt que el POST', () => {",
+                  "    pm.expect(data.id).to.eql(pm.collectionVariables.get('createdEmployeeId'));",
+                  "    pm.expect(data.updatedAt).to.eql(pm.collectionVariables.get('createdEmployeeUpdatedAt'));",
+                  "  });",
+                  "  pm.test('el documento quedó guardado', () => pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('altaDni')));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "201 · alta completa: normaliza documento y correo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{altaDni2}} \",\n  \"firstNames\": \"ROSA\",\n  \"lastNameFather\": \"HUAMAN\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-01\",\n  \"employeeCode\": \"{{altaCode}}\",\n  \"sex\": \"FEMENINO\",\n  \"birthDate\": \"1990-05-20\",\n  \"maritalStatus\": \"CASADO\",\n  \"nationality\": \"PERUANA\",\n  \"email\": \"Rosa.Huaman@Empresa.PE\",\n  \"personalEmail\": \"rosa.personal@gmail.com\",\n  \"phone\": \"987654321\",\n  \"address\": \"AV. AREQUIPA 123\",\n  \"ubigeoId\": \"150101\",\n  \"hasChildrenUnder18\": true,\n  \"essaludLifeInsurance\": true,\n  \"photoUrl\": \"https://example.com/fotos/rosa.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Requiere que exista el ubigeo 150101 (lo crea tests/manual/dev-data.ts mientras US-004d no cargue el catálogo)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  if (pm.response.code === 422 && /ubigeo/.test(pm.response.text())) {",
+                  "    pm.test('falta el ubigeo 150101: corre pnpm tsx tests/manual/dev-data.ts', () => pm.expect.fail(pm.response.text()));",
+                  "  }",
+                  "  pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test('el documento llega sin espacios', () => pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('altaDni2')));",
+                  "  pm.test('el correo se guarda en minúsculas', () => pm.expect(data.email).to.eql('rosa.huaman@empresa.pe'));",
+                  "  pm.test('guarda los opcionales', () => {",
+                  "    pm.expect(data.employeeCode).to.eql(pm.collectionVariables.get('altaCode'));",
+                  "    pm.expect(data.birthDate).to.eql('1990-05-20');",
+                  "    pm.expect(data.ubigeoId).to.eql('150101');",
+                  "    pm.expect(data.maritalStatus).to.eql('CASADO');",
+                  "  });",
+                  "  pm.test('guarda los campos sensibles en true', () => {",
+                  "    pm.expect(data.hasChildrenUnder18).to.eql(true);",
+                  "    pm.expect(data.essaludLifeInsurance).to.eql(true);",
+                  "  });",
+                  "  pm.test('status sigue siendo ACTIVO', () => pm.expect(data.status).to.eql('ACTIVO'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "201 · CE válido de 9 caracteres",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"{{altaCe}}\",\n  \"firstNames\": \"CARLOS\",\n  \"lastNameFather\": \"GOMEZ\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "  pm.test('documentType CE', () => pm.expect(pm.response.json().data.documentType).to.eql('CE'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 · documento ya registrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 409', () => pm.response.to.have.status(409));",
+                  "  pm.test('mensaje de duplicado', () => {",
+                  "    pm.expect(pm.response.json().message).to.eql('Ya existe un colaborador con DNI ' + pm.collectionVariables.get('altaDni'));",
+                  "    pm.expect(pm.response.json().code).to.eql('CONFLICT');",
+                  "  });",
+                  "  pm.test('no devuelve datos de colaborador', () => pm.expect(pm.response.json().data).to.be.undefined);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 · mismo documento escrito con espacios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDniSpaced}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El número se normaliza antes de buscar duplicados: \"4050 6070\" es el mismo DNI que \"40506070\"."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  const dni = pm.collectionVariables.get('altaDni');",
+                  "  pm.collectionVariables.set('altaDniSpaced', dni.slice(0, 4) + ' ' + dni.slice(4));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 409', () => pm.response.to.have.status(409));",
+                  "  pm.test('mensaje de duplicado', () => {",
+                  "    pm.expect(pm.response.json().message).to.eql('Ya existe un colaborador con DNI ' + pm.collectionVariables.get('altaDni'));",
+                  "    pm.expect(pm.response.json().code).to.eql('CONFLICT');",
+                  "  });",
+                  "  pm.test('no devuelve datos de colaborador', () => pm.expect(pm.response.json().data).to.be.undefined);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 · código de empleado ya registrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni3}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{altaCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 409', () => pm.response.to.have.status(409));",
+                  "  pm.test('mensaje de duplicado', () => {",
+                  "    pm.expect(pm.response.json().message).to.eql('Ya existe un colaborador con el código ' + pm.collectionVariables.get('altaCode'));",
+                  "    pm.expect(pm.response.json().code).to.eql('CONFLICT');",
+                  "  });",
+                  "  pm.test('no devuelve datos de colaborador', () => pm.expect(pm.response.json().data).to.be.undefined);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · DNI de 7 dígitos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"1234567\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo documentNumber', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'documentNumber');",
+                  "    pm.expect(error, 'no hay error para documentNumber: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('El DNI debe tener exactamente 8 dígitos');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · DNI con letras",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"4050607A\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo documentNumber', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'documentNumber');",
+                  "    pm.expect(error, 'no hay error para documentNumber: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('El DNI debe tener exactamente 8 dígitos');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · CE de 8 caracteres",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"12345678\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo documentNumber', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'documentNumber');",
+                  "    pm.expect(error, 'no hay error para documentNumber: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('El CE debe tener entre 9 y 12 caracteres alfanuméricos');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · tipo de documento no permitido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"RUC\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo documentType', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'documentType');",
+                  "    pm.expect(error, 'no hay error para documentType: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('Use DNI, CE, PASAPORTE o PTP');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · cuerpo vacío: lista los 6 obligatorios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('un error por cada campo obligatorio', () => {",
+                  "    const fields = pm.response.json().errors.map((e) => e.field);",
+                  "    pm.expect(fields).to.include.members(['documentType', 'documentNumber', 'firstNames', 'lastNameFather', 'lastNameMother', 'hireDate']);",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · campos que el cliente no puede enviar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"id\": \"00000000-0000-4000-8000-000000000000\",\n  \"status\": \"CESADO\",\n  \"terminationDate\": \"2026-09-01\",\n  \"fullName\": \"OTRO NOMBRE\",\n  \"createdAt\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedAt\": \"2026-01-01T00:00:00.000Z\",\n  \"deletedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "z.strictObject: no se ignoran en silencio. El status lo fija Employee.create y el cese es US-022."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('nombra cada campo rechazado', () => {",
+                  "    const message = pm.response.json().errors.map((e) => e.message).join(' ');",
+                  "    ['id', 'status', 'terminationDate', 'fullName', 'createdAt', 'updatedAt', 'deletedAt'].forEach((key) => {",
+                  "      pm.expect(message).to.include('\"' + key + '\"');",
+                  "    });",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · fecha que no existe (31 de febrero)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-02-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo hireDate', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'hireDate');",
+                  "    pm.expect(error, 'no hay error para hireDate: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('La fecha no existe en el calendario');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · fecha con hora (ISO con Z)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo hireDate', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'hireDate');",
+                  "    pm.expect(error, 'no hay error para hireDate: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('La fecha debe tener el formato YYYY-MM-DD');",
+                  "  });",
+                  "  pm.test('un solo error para hireDate', () => {",
+                  "    const n = pm.response.json().errors.filter((e) => e.field === 'hireDate').length;",
+                  "    pm.expect(n).to.eql(1);",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · ubigeo de 5 dígitos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"ubigeoId\": \"15010\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo ubigeoId', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'ubigeoId');",
+                  "    pm.expect(error, 'no hay error para ubigeoId: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('El ubigeo debe tener 6 dígitos');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · ubigeo que no existe en el catálogo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"ubigeoId\": \"999999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pasa Zod (6 dígitos) y lo rechaza el caso de uso con IUbigeoReader, antes de llegar a la FK."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('mensaje del ubigeo', () => {",
+                  "    pm.expect(pm.response.json().message).to.eql('El ubigeo 999999 no existe');",
+                  "    pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · correo mal formado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no-es-un-correo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo email', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'email');",
+                  "    pm.expect(error, 'no hay error para email: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('El correo no es válido');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · texto opcional vacío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"phone\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo phone', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'phone');",
+                  "    pm.expect(error, 'no hay error para phone: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('No puede estar vacío: omite el campo si no tiene valor');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · apellido de más de 60 caracteres",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "La columna es VARCHAR(60). Si el schema permite más, el error lo da la entidad, sin el campo en errors."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo lastNameFather', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'lastNameFather');",
+                  "    pm.expect(error, 'no hay error para lastNameFather: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    pm.expect(error.message).to.eql('Máximo 60 caracteres');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · HR_ANALYST no tiene colaborador:crear",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('mensaje de permiso', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · MANAGER no tiene colaborador:crear",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('mensaje de permiso', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · EMPLOYEE no tiene colaborador:crear",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employeeToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('mensaje de permiso', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 · sin token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 401', () => pm.response.to.have.status(401));",
+                  "  pm.test('code UNAUTHORIZED', () => pm.expect(pm.response.json().code).to.eql('UNAUTHORIZED'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Colaboradores · edición (US-020b)",
+      "description": "PATCH /api/employees/:id (US-020b). Ejecuta antes la carpeta 1. Auth.\n\nLos dos primeros requests crean los colaboradores que usa la carpeta, con DNI y códigos nuevos en cada corrida, así que no depende de la carpeta 4 y se puede ejecutar muchas veces.\n\nNo se puede probar desde Postman (va en los e2e): la fila de audit_logs con solo los campos que cambiaron.\n\nLo que crea esta carpeta también lleva el apellido materno POSTMAN:\nDELETE FROM employees WHERE last_name_mother = 'POSTMAN';",
+      "item": [
+        {
+          "name": "Preparación · crea el colaborador a editar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editDni}}\",\n  \"firstNames\": \"LUIS ALBERTO\",\n  \"lastNameFather\": \"RAMOS\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{editCode}}\",\n  \"phone\": \"900000001\",\n  \"address\": \"JR. CUSCO 100\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  // Valores únicos por corrida. Sin '9905': la carpeta 2 busca ese texto.",
+                  "  const rnd = (min, max) => {",
+                  "    let value;",
+                  "    do value = String(Math.floor(min + Math.random() * (max - min)));",
+                  "    while (value.includes('9905'));",
+                  "    return value;",
+                  "  };",
+                  "  pm.collectionVariables.set('editDni', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('editDni2', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('editOtherDni', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('editCode', 'PE-' + rnd(100000, 999999));",
+                  "  pm.collectionVariables.set('editOtherCode', 'PE-' + rnd(100000, 999999));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "  if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('editEmployeeId', pm.response.json().data.id);",
+                  "    pm.collectionVariables.set('editUpdatedAt', pm.response.json().data.updatedAt);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Preparación · crea otro colaborador (para los duplicados)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editOtherDni}}\",\n  \"firstNames\": \"OTRO\",\n  \"lastNameFather\": \"COLABORADOR\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{editOtherCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · edición parcial: cambia solo phone y address",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"987654321\",\n  \"address\": \"AV. AREQUIPA 123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Escenario 4 de 04 §5."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test('cambian los dos campos enviados', () => {",
+                  "    pm.expect(data.phone).to.eql('987654321');",
+                  "    pm.expect(data.address).to.eql('AV. AREQUIPA 123');",
+                  "  });",
+                  "  pm.test('los demás conservan su valor', () => {",
+                  "    pm.expect(data.firstNames).to.eql('LUIS ALBERTO');",
+                  "    pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('editDni'));",
+                  "    pm.expect(data.employeeCode).to.eql(pm.collectionVariables.get('editCode'));",
+                  "    pm.expect(data.hireDate).to.eql('2026-08-17');",
+                  "    pm.expect(data.status).to.eql('ACTIVO');",
+                  "  });",
+                  "  pm.test('updatedAt avanza', () => {",
+                  "    const before = new Date(pm.collectionVariables.get('editUpdatedAt'));",
+                  "    pm.expect(new Date(data.updatedAt).getTime()).to.be.above(before.getTime());",
+                  "  });",
+                  "  if (pm.response.code === 200) pm.collectionVariables.set('editUpdatedAt', pm.response.json().data.updatedAt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · el GET muestra los cambios guardados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  pm.test('quedó guardado', () => {",
+                  "    const data = pm.response.json().data;",
+                  "    pm.expect(data.phone).to.eql('987654321');",
+                  "    pm.expect(data.address).to.eql('AV. AREQUIPA 123');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · null borra un campo opcional",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test('address queda en null', () => pm.expect(data.address).to.be.null);",
+                  "  pm.test('phone no se toca', () => pm.expect(data.phone).to.eql('987654321'));",
+                  "  if (pm.response.code === 200) pm.collectionVariables.set('editUpdatedAt', pm.response.json().data.updatedAt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · enviar el mismo valor no escribe nada",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"987654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Sin cambios no hay UPDATE ni fila en audit_logs, así que updatedAt queda igual."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  pm.test('no escribió: updatedAt no cambió', () => {",
+                  "    pm.expect(pm.response.json().data.updatedAt).to.eql(pm.collectionVariables.get('editUpdatedAt'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · el propio documento con espacios no es duplicado",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentNumber\": \"{{editDniSpaced}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  const dni = pm.collectionVariables.get('editDni');",
+                  "  pm.collectionVariables.set('editDniSpaced', dni.slice(0, 4) + ' ' + dni.slice(4));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  pm.test('sigue siendo el mismo documento', () => pm.expect(pm.response.json().data.documentNumber).to.eql(pm.collectionVariables.get('editDni')));",
+                  "  pm.test('no escribió: updatedAt no cambió', () => {",
+                  "    pm.expect(pm.response.json().data.updatedAt).to.eql(pm.collectionVariables.get('editUpdatedAt'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · cambia el documento y normaliza el correo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{editDni2}} \",\n  \"email\": \"Luis.Ramos@Empresa.PE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test('documento nuevo sin espacios', () => pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('editDni2')));",
+                  "  pm.test('correo en minúsculas', () => pm.expect(data.email).to.eql('luis.ramos@empresa.pe'));",
+                  "  if (pm.response.code === 200) pm.collectionVariables.set('editUpdatedAt', pm.response.json().data.updatedAt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · HR_ANALYST puede editar (tiene colaborador:editar)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"912345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  const data = pm.response.json().data;",
+                  "  pm.test('cambió el teléfono', () => pm.expect(data.phone).to.eql('912345678'));",
+                  "  pm.test('sin leer_sensible la respuesta no trae los campos sensibles', () => {",
+                  "    pm.expect(data).to.not.have.property('hasChildrenUnder18');",
+                  "    pm.expect(data).to.not.have.property('essaludLifeInsurance');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · HR_ANALYST no puede editar campos sensibles (D6)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hasChildrenUnder18\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('code y mensaje', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('FORBIDDEN');",
+                  "    pm.expect(pm.response.json().message).to.eql('No tiene permiso para registrar hasChildrenUnder18');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · HR_ADMIN sí edita los campos sensibles",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hasChildrenUnder18\": true,\n  \"essaludLifeInsurance\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  pm.test('quedan en true', () => {",
+                  "    pm.expect(pm.response.json().data.hasChildrenUnder18).to.eql(true);",
+                  "    pm.expect(pm.response.json().data.essaludLifeInsurance).to.eql(true);",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · asigna un ubigeo del catálogo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ubigeoId\": \"150101\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Requiere el ubigeo 150101 (lo crea tests/manual/dev-data.ts)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  if (pm.response.code === 422 && /ubigeo/.test(pm.response.text())) {",
+                  "    pm.test('falta el ubigeo 150101: corre pnpm tsx tests/manual/dev-data.ts', () => pm.expect.fail(pm.response.text()));",
+                  "  }",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  pm.test('ubigeoId guardado', () => pm.expect(pm.response.json().data.ubigeoId).to.eql('150101'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 · documento de otro colaborador",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentNumber\": \"{{editOtherDni}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 409', () => pm.response.to.have.status(409));",
+                  "  pm.test('code y mensaje', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('CONFLICT');",
+                  "    pm.expect(pm.response.json().message).to.eql('Ya existe un colaborador con DNI ' + pm.collectionVariables.get('editOtherDni'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 · código de empleado de otro colaborador",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeCode\": \"{{editOtherCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 409', () => pm.response.to.have.status(409));",
+                  "  pm.test('code y mensaje', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('CONFLICT');",
+                  "    pm.expect(pm.response.json().message).to.eql('Ya existe un colaborador con el código ' + pm.collectionVariables.get('editOtherCode'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · intento de cese con status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CESADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "D5: el cese es US-022. Responde 403 aunque el usuario tenga colaborador:cesar."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('code y mensaje', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('FORBIDDEN');",
+                  "    pm.expect(pm.response.json().message).to.eql('El cese se registra con su propio proceso (US-022)');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · intento de cese con terminationDate",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terminationDate\": \"2026-09-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('code y mensaje', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('FORBIDDEN');",
+                  "    pm.expect(pm.response.json().message).to.eql('El cese se registra con su propio proceso (US-022)');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · cuerpo vacío",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo body', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'body');",
+                  "    pm.expect(error, 'no hay error para body: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('Debe enviar al menos un campo');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · campos que el PATCH no puede tocar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"00000000-0000-4000-8000-000000000000\",\n  \"fullName\": \"OTRO NOMBRE\",\n  \"createdAt\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedAt\": \"2026-01-01T00:00:00.000Z\",\n  \"deletedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Escenario 5 de 04 §5: schema estricto, no se ignoran en silencio."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('nombra cada campo rechazado', () => {",
+                  "    const message = pm.response.json().errors.map((e) => e.message).join(' ');",
+                  "    ['id', 'fullName', 'createdAt', 'updatedAt', 'deletedAt'].forEach((key) => {",
+                  "      pm.expect(message).to.include('\"' + key + '\"');",
+                  "    });",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · DNI de 7 dígitos con su tipo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"1234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo documentNumber', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'documentNumber');",
+                  "    pm.expect(error, 'no hay error para documentNumber: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('El DNI debe tener exactamente 8 dígitos');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · solo el número, inválido para el tipo guardado",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentNumber\": \"1234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "El schema no conoce el tipo guardado: lo rechaza la entidad en withPatch, sin errors[].field."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('code y mensaje', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR');",
+                  "    pm.expect(pm.response.json().message).to.eql('El número de documento no tiene el formato válido para DNI');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · null en un campo que no se puede borrar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstNames\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo firstNames', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'firstNames');",
+                  "    pm.expect(error, 'no hay error para firstNames: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('El campo es obligatorio');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · texto vacío",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo phone', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'phone');",
+                  "    pm.expect(error, 'no hay error para phone: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('No puede estar vacío: envía null para borrarlo');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · fecha que no existe",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hireDate\": \"2026-02-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo hireDate', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'hireDate');",
+                  "    pm.expect(error, 'no hay error para hireDate: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('La fecha no existe en el calendario');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · ubigeo que no existe en el catálogo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ubigeoId\": \"999999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('code y mensaje', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('VALIDATION_ERROR');",
+                  "    pm.expect(pm.response.json().message).to.eql('El ubigeo 999999 no existe');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · el id de la URL no es un UUID",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/no-es-un-uuid",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"987654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo id', () => {",
+                  "    const errors = pm.response.json().errors || [];",
+                  "    const error = errors.find((e) => e.field === 'id');",
+                  "    pm.expect(error, 'no hay error para id: ' + pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('Invalid UUID');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "404 · colaborador inexistente",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/00000000-0000-4000-8000-000000000000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"987654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 404', () => pm.response.to.have.status(404));",
+                  "  pm.test('code y mensaje', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('NOT_FOUND');",
+                  "    pm.expect(pm.response.json().message).to.eql('No se encontró un colaborador con el id 00000000-0000-4000-8000-000000000000');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · MANAGER no tiene colaborador:editar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"987654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('code FORBIDDEN', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · EMPLOYEE no tiene colaborador:editar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employeeToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"987654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('code FORBIDDEN', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 · sin token",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"987654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 401', () => pm.response.to.have.status(401));",
+                  "  pm.test('code UNAUTHORIZED', () => pm.expect(pm.response.json().code).to.eql('UNAUTHORIZED'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Colaboradores · anulación (US-020b)",
+      "description": "DELETE /api/employees/:id (US-020b): anulación registral (D4). Ejecuta antes la carpeta 1. Auth.\n\nEl primer request crea el colaborador que se anula, con DNI y código nuevos en cada corrida.\n\nNo se puede probar desde Postman (va en los e2e): el 409 de un colaborador con contratos (hoy no hay API para crear contratos), que status y terminationDate no cambian, y la fila DELETE en audit_logs.\n\nLimpieza: DELETE FROM employees WHERE last_name_mother = 'POSTMAN';",
+      "item": [
+        {
+          "name": "Preparación · crea el colaborador a anular",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  // Valores únicos por corrida. Sin '9905': la carpeta 2 busca ese texto.",
+                  "  const rnd = (min, max) => {",
+                  "    let value;",
+                  "    do value = String(Math.floor(min + Math.random() * (max - min)));",
+                  "    while (value.includes('9905'));",
+                  "    return value;",
+                  "  };",
+                  "  pm.collectionVariables.set('annulDni', rnd(10000000, 89999999));",
+                  "  pm.collectionVariables.set('annulCode', 'PA-' + rnd(100000, 999999));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "  if (pm.response.code === 201) pm.collectionVariables.set('annulEmployeeId', pm.response.json().data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · HR_ANALYST no tiene colaborador:cesar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{annulEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "D4: anular requiere colaborador:cesar. HR_ANALYST puede editar, pero no anular."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('code FORBIDDEN', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · MANAGER no tiene colaborador:cesar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{annulEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('code FORBIDDEN', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 · EMPLOYEE no tiene colaborador:cesar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{annulEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{employeeToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 403', () => pm.response.to.have.status(403));",
+                  "  pm.test('code FORBIDDEN', () => pm.expect(pm.response.json().code).to.eql('FORBIDDEN'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 · sin token",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{annulEmployeeId}}",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 401', () => pm.response.to.have.status(401));",
+                  "  pm.test('code UNAUTHORIZED', () => pm.expect(pm.response.json().code).to.eql('UNAUTHORIZED'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · después de los 403 el colaborador sigue vigente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{annulEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  pm.test('deletedAt sigue en null', () => pm.expect(pm.response.json().data.deletedAt).to.be.null);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "422 · el id de la URL no es un UUID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/employees/no-es-un-uuid",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 422', () => pm.response.to.have.status(422));",
+                  "  pm.test('el error indica el campo id', () => {",
+                  "    const error = (pm.response.json().errors || []).find((e) => e.field === 'id');",
+                  "    pm.expect(error, pm.response.text()).to.exist;",
+                  "    pm.expect(error.message).to.eql('Invalid UUID');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "404 · colaborador inexistente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/employees/00000000-0000-4000-8000-000000000000",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 404', () => pm.response.to.have.status(404));",
+                  "  pm.test('mensaje de no encontrado', () => pm.expect(pm.response.json().message).to.eql('No se encontró un colaborador con el id 00000000-0000-4000-8000-000000000000'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · HR_ADMIN anula el colaborador",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{annulEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Solo fija deletedAt. status y terminationDate no cambian (D4): lo cubren los e2e, porque después el GET ya no lo muestra."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  pm.test('confirma la anulación', () => {",
+                  "    pm.expect(pm.response.json().success).to.eql(true);",
+                  "    pm.expect(pm.response.json().message).to.eql('Colaborador anulado');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "404 · el detalle ya no lo encuentra",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{annulEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 404', () => pm.response.to.have.status(404));",
+                  "  pm.test('mensaje de no encontrado', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('NOT_FOUND');",
+                  "    pm.expect(pm.response.json().message).to.eql('No se encontró un colaborador con el id ' + pm.collectionVariables.get('annulEmployeeId'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · el listado ya no lo incluye",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees?search={{annulDni}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  pm.test('ningún resultado con ese documento', () => pm.expect(pm.response.json().pagination.total).to.eql(0));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "404 · anular de nuevo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/employees/{{annulEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 404', () => pm.response.to.have.status(404));",
+                  "  pm.test('mensaje de no encontrado', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('NOT_FOUND');",
+                  "    pm.expect(pm.response.json().message).to.eql('No se encontró un colaborador con el id ' + pm.collectionVariables.get('annulEmployeeId'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "404 · ya no se puede editar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{annulEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"987654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 404', () => pm.response.to.have.status(404));",
+                  "  pm.test('mensaje de no encontrado', () => {",
+                  "    pm.expect(pm.response.json().code).to.eql('NOT_FOUND');",
+                  "    pm.expect(pm.response.json().message).to.eql('No se encontró un colaborador con el id ' + pm.collectionVariables.get('annulEmployeeId'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "201 · el documento y el código del anulado se pueden volver a usar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "ux_employees_doc y ux_employees_code son parciales (WHERE deleted_at IS NULL): anular libera el documento y el código."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "  pm.test('mismo documento y mismo código', () => {",
+                  "    const data = pm.response.json().data;",
+                  "    pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('annulDni'));",
+                  "    pm.expect(data.employeeCode).to.eql(pm.collectionVariables.get('annulCode'));",
+                  "    pm.expect(data.id).to.not.eql(pm.collectionVariables.get('annulEmployeeId'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Sesiones de usuario",
+      "item": [
+        {
+          "name": "403 · MANAGER no tiene usuario:gestionar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{hrAnalystUserId}}/sessions",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{managerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "HR_ADMIN revoca las sesiones de HR_ANALYST",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/users/{{hrAnalystUserId}}/sessions",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Después de esto, el token de HR_ANALYST deja de servir: vuelve a hacer su login."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 · el token revocado ya no sirve",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAnalystToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('responde 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Legacy (sin autenticación)",
+      "description": "Estas rutas no piden token. Necesitan un Excel real.",
+      "item": [
+        {
+          "name": "Subir Excel de empleados",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/excel/upload",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "excel",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "description": "En Body > form-data, elige tu archivo en el campo `excel`. El arreglo data.employees de la respuesta es el body de /contracts/download-zip, /contracts/preview, /excel/download-lawlife, /excel/download-sctr y /excel/download-photocheck."
+          }
+        }
+      ]
+    }
+  ]
+}

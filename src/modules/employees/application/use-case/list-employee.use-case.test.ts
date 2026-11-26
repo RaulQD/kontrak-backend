@@ -40,7 +40,10 @@ const FILTERS: EmployeeFilters = { page: 2, limit: 20, status: 'ACTIVO' };
 
 const makeRepository = (page: Page<EmployeeView>) => {
   const list = vi.fn().mockResolvedValue(page);
-  const repository: IEmployeeRepository = { findViewById: vi.fn(), list };
+  const repository = {
+    findViewById: vi.fn(),
+    list,
+  } as unknown as IEmployeeRepository;
   return { repository, list };
 };
 
