@@ -13,7 +13,7 @@ export interface CreateEmployeeInput {
   lastNameFather: string;
   lastNameMother: string;
   hireDate: Date;
-  email: string;
+  corporateEmail: string;
   employeeCode?: string | undefined;
   sex?: Sex | undefined;
   birthDate?: Date | undefined;
@@ -43,7 +43,7 @@ export const toNewEmployeeProps = (
   birthDate: input.birthDate ?? null,
   maritalStatus: input.maritalStatus ?? null,
   nationality: input.nationality ?? DEFAULT_NATIONALITY,
-  email: input.email,
+  corporateEmail: input.corporateEmail,
   personalEmail: input.personalEmail ?? null,
   phone: input.phone ?? null,
   address: input.address ?? null,

@@ -172,8 +172,7 @@ export const addendumSchema = z
 export const employeeBatchAddendumSchema = z.object({
   body: z
     .array(addendumSchema)
-    .min(1, 'La lista de empleados no puede estar vacía.')
-    .max(80, 'Máximo 80 empleados por lote'),
+    .min(1, 'La lista de empleados no puede estar vacía.'),
 });
 
 export type EmployeeFromAddendum = z.infer<typeof addendumSchema>;

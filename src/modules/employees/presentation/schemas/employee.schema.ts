@@ -100,7 +100,7 @@ export const createEmployeeSchema = z.object({
         .enum(['SOLTERO', 'CASADO', 'DIVORCIADO', 'CONVIVIENTE', 'VIUDO'])
         .optional(),
       nationality: optionalText(40),
-      email: corporateEmail,
+      corporateEmail: corporateEmail,
       personalEmail: optionalEmail,
       phone: optionalText(20),
       address: optionalText(300),
@@ -166,7 +166,7 @@ export const updateEmployeeSchema = z.object({
         .enum(['SOLTERO', 'CASADO', 'DIVORCIADO', 'CONVIVIENTE', 'VIUDO'])
         .nullable()
         .optional(),
-      email: corporateEmail.optional(),
+      corporateEmail: corporateEmail.optional(),
       personalEmail: nullableEmail,
       phone: nullableText(20),
       address: nullableText(300),

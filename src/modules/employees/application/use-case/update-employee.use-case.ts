@@ -1,6 +1,7 @@
 import { diffAuditValues } from '../../../../shared/audit/diff-audit-values';
 import {
   DuplicateDocumentError,
+  DuplicateEmailError,
   DuplicateEmployeeCodeError,
   EmployeeNotFoundError,
   SensitiveFieldsForbiddenError,
@@ -63,7 +64,8 @@ export class UpdateEmployeeUseCase {
     const next = current.withPatch(patch);
 
     // Se escribe el correo como lo normalizó la entidad, no como llegó.
-    if (patch.email !== undefined) patch.email = next.email;
+    if (patch.corporateEmail !== undefined)
+      patch.corporateEmail = next.corporateEmail;
 
     // 4. Reglas que necesitan la base de datos, solo si el dato cambió.
     if (
@@ -73,6 +75,8 @@ export class UpdateEmployeeUseCase {
     ) {
       throw new UbigeoNotFoundError(next.ubigeoId);
     }
+
+    //VALIDAR TIPO DE DOCUMENTO Y NRO DE DOCUENTO
     const changed =
       next.documentType !== current.documentType ||
       next.documentNumber !== current.documentNumber;
@@ -88,6 +92,7 @@ export class UpdateEmployeeUseCase {
         );
       }
     }
+    //VALIDAR CODIGO DE EMPELADO
     if (
       next.employeeCode !== null &&
       next.employeeCode !== current.employeeCode
@@ -99,6 +104,16 @@ export class UpdateEmployeeUseCase {
         throw new DuplicateEmployeeCodeError(next.employeeCode);
       }
     }
+    //VALIDAR CORREO CORPORATIVO
+    if (next.corporateEmail !== current.corporateEmail) {
+      const owner = await this.employeeRepository.findByCorporateEmail(
+        next.corporateEmail,
+      );
+      if (owner && owner.id !== current.id) {
+        throw new DuplicateEmailError(next.corporateEmail);
+      }
+    }
+
     const diff = diffAuditValues({ ...current }, { ...next });
     if (diff) {
       await this.employeeRepository.update(

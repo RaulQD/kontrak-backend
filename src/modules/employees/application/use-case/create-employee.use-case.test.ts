@@ -6,6 +6,7 @@ import type {
 import { Employee } from '../../domain/entities/employee.entity';
 import {
   DuplicateDocumentError,
+  DuplicateEmailError,
   DuplicateEmployeeCodeError,
   InvalidEmployeeDataError,
   SensitiveFieldsForbiddenError,
@@ -36,7 +37,7 @@ const INPUT: CreateEmployeeInput = {
   documentType: 'DNI',
   documentNumber: '40506070',
   firstNames: 'MARIA ELENA',
-  email: 'Maria.Quispe@Empresa.PE ',
+  corporateEmail: 'Maria.Quispe@Empresa.PE ',
   lastNameFather: 'QUISPE',
   lastNameMother: 'ROJAS',
   hireDate: new Date('2026-08-17T00:00:00.000Z'),
@@ -44,7 +45,11 @@ const INPUT: CreateEmployeeInput = {
 
 /** Repositorio falso en memoria: create guarda, findViewById lee lo guardado. */
 const makeRepository = (
-  existing: { byDocument?: Employee; byCode?: Employee } = {},
+  existing: {
+    byDocument?: Employee;
+    byCode?: Employee;
+    byCorporateEmail?: Employee;
+  } = {},
 ) => {
   let saved: Employee | null = null;
   const toView = (e: Employee): EmployeeView => ({
@@ -57,6 +62,9 @@ const makeRepository = (
     findById: vi.fn(),
     findByDocument: vi.fn().mockResolvedValue(existing.byDocument ?? null),
     findByEmployeeCode: vi.fn().mockResolvedValue(existing.byCode ?? null),
+    findByCorporateEmail: vi
+      .fn()
+      .mockResolvedValue(existing.byCorporateEmail ?? null),
     create: vi.fn(async (e: Employee, _audit: AuditEntry) => {
       saved = e;
     }),
@@ -88,7 +96,7 @@ describe('CreateEmployeeUseCase', () => {
       status: 'ACTIVO',
       nationality: 'PERUANA',
       hireDate: '2026-08-17',
-      email: 'maria.quispe@empresa.pe', // normalizado por la entidad
+      corporateEmail: 'maria.quispe@empresa.pe', // normalizado por la entidad
       terminationDate: null,
       hasChildrenUnder18: false,
       essaludLifeInsurance: false,
@@ -170,6 +178,26 @@ describe('CreateEmployeeUseCase', () => {
     ).rejects.toBeInstanceOf(DuplicateEmployeeCodeError);
   });
 
+  it('correo de otro colaborador: 409 y no escribe (US-020c)', async () => {
+    const otro = Employee.create(await toProps(), 'otro-id', NOW);
+    const repository = makeRepository({ byCorporateEmail: otro });
+
+    await expect(
+      makeUseCase(repository).execute(INPUT, ADMIN),
+    ).rejects.toBeInstanceOf(DuplicateEmailError);
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('busca el correo ya normalizado', async () => {
+    const repository = makeRepository();
+
+    await makeUseCase(repository).execute(INPUT, ADMIN);
+
+    expect(repository.findByCorporateEmail).toHaveBeenCalledWith(
+      'maria.quispe@empresa.pe',
+    );
+  });
+
   it('sin employeeCode no consulta por código', async () => {
     const repository = makeRepository();
 
@@ -202,7 +230,7 @@ const toProps = async () => ({
   birthDate: null,
   maritalStatus: null,
   nationality: 'PERUANA',
-  email: 'maria.quispe@empresa.pe',
+  corporateEmail: 'maria.quispe@empresa.pe',
   personalEmail: null,
   phone: null,
   address: null,

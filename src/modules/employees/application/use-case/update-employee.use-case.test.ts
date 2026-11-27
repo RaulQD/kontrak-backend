@@ -9,6 +9,7 @@ import {
 } from '../../domain/entities/employee.entity';
 import {
   DuplicateDocumentError,
+  DuplicateEmailError,
   DuplicateEmployeeCodeError,
   EmployeeNotFoundError,
   InvalidEmployeeDataError,
@@ -51,7 +52,7 @@ const PROPS: NewEmployeeProps = {
   birthDate: null,
   maritalStatus: null,
   nationality: 'PERUANA',
-  email: 'maria.quispe@empresa.pe',
+  corporateEmail: 'maria.quispe@empresa.pe',
   personalEmail: null,
   phone: '900000001',
   address: 'JR. CUSCO 100',
@@ -71,7 +72,12 @@ const otro = (cambios: Partial<NewEmployeeProps>) =>
  * lectura (sin las claves sensibles si no hay permiso).
  */
 const makeRepository = (
-  opts: { missing?: boolean; byDocument?: Employee; byCode?: Employee } = {},
+  opts: {
+    missing?: boolean;
+    byDocument?: Employee;
+    byCode?: Employee;
+    byCorporateEmail?: Employee;
+  } = {},
 ) => {
   let saved = Employee.create(PROPS, ID, NOW);
   const toView = (e: Employee, { includeSensitive }: ReadOptions) => {
@@ -89,6 +95,9 @@ const makeRepository = (
     findById: vi.fn().mockResolvedValue(opts.missing ? null : saved),
     findByDocument: vi.fn().mockResolvedValue(opts.byDocument ?? null),
     findByEmployeeCode: vi.fn().mockResolvedValue(opts.byCode ?? null),
+    findByCorporateEmail: vi
+      .fn()
+      .mockResolvedValue(opts.byCorporateEmail ?? null),
     create: vi.fn(),
     update: vi.fn(
       async (
@@ -310,13 +319,46 @@ describe('UpdateEmployeeUseCase', () => {
   });
 
   describe('correo (US-020c)', () => {
-    it('escribe el correo normalizado por la entidad, no el que llegó', async () => {
+    it('el mismo en otras mayúsculas no consulta duplicados ni escribe', async () => {
       const { useCase, repository } = makeUseCase();
 
-      await useCase.execute(ID, { email: ' Nuevo@Empresa.PE' }, ADMIN);
+      await useCase.execute(
+        ID,
+        { corporateEmail: 'MARIA.QUISPE@EMPRESA.PE' },
+        ADMIN,
+      );
 
+      expect(repository.findByCorporateEmail).not.toHaveBeenCalled();
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
+    it('el de otro colaborador: 409 y no escribe', async () => {
+      const repository = makeRepository({
+        byCorporateEmail: otro({ corporateEmail: 'otra.persona@empresa.pe' }),
+      });
+      const { useCase } = makeUseCase(repository);
+
+      await expect(
+        useCase.execute(
+          ID,
+          { corporateEmail: 'Otra.Persona@Empresa.PE' },
+          ADMIN,
+        ),
+      ).rejects.toBeInstanceOf(DuplicateEmailError);
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
+    it('uno libre: lo busca normalizado y lo escribe normalizado', async () => {
+      const { useCase, repository } = makeUseCase();
+
+      await useCase.execute(ID, { corporateEmail: ' Nuevo@Empresa.PE' }, ADMIN);
+
+      expect(repository.findByCorporateEmail).toHaveBeenCalledWith(
+        'nuevo@empresa.pe',
+      );
+      // El patch que llega al repositorio, no solo la entidad.
       expect(repository.update.mock.calls[0]?.[1]).toEqual({
-        email: 'nuevo@empresa.pe',
+        corporateEmail: 'nuevo@empresa.pe',
       });
     });
   });

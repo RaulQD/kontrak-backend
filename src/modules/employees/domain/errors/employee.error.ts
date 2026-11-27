@@ -58,3 +58,9 @@ export class EmployeeHasContractsError extends ConflictError {
     super(message);
   }
 }
+
+export class DuplicateEmailError extends ConflictError {
+  constructor(email: string) {
+    super(`Ya existe un colaborador con el correo ${email}`);
+  }
+}

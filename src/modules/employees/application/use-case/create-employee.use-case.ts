@@ -7,6 +7,7 @@ import { diffAuditValues } from '../../../../shared/audit/diff-audit-values';
 import { Employee } from '../../domain/entities/employee.entity';
 import {
   DuplicateDocumentError,
+  DuplicateEmailError,
   DuplicateEmployeeCodeError,
   EmployeeNotFoundError,
   SensitiveFieldsForbiddenError,
@@ -70,6 +71,13 @@ export class CreateEmployeeUseCase {
       (await this.employeeRepository.findByEmployeeCode(employee.employeeCode))
     ) {
       throw new DuplicateEmployeeCodeError(employee.employeeCode);
+    }
+    const corporateEmailExists =
+      await this.employeeRepository.findByCorporateEmail(
+        employee.corporateEmail,
+      );
+    if (corporateEmailExists) {
+      throw new DuplicateEmailError(employee.corporateEmail);
     }
     await this.employeeRepository.create(employee, this.auditEntry(employee));
 

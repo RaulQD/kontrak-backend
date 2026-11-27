@@ -367,33 +367,33 @@ Total: 86 puntos. Etapa 0: 12. Etapa 1: 35. Etapa 2: 39.
 **Descripción.** Como analista de RR. HH., quiero que cada colaborador tenga un correo corporativo propio, obligatorio desde el alta y que no se repita, para que las boletas y documentos que envíe el sistema lleguen siempre a la persona correcta.
 
 **Criterios de aceptación**
-- Dado un alta sin `email`, con `email` vacío o mal formado, cuando se envía `POST /api/employees`, entonces responde 400 y no crea nada.
+- Dado un alta sin `corporateEmail`, con `corporateEmail` vacío o mal formado, cuando se envía `POST /api/employees`, entonces responde 400 y no crea nada.
 - Dado un correo con mayúsculas o espacios (`  Ana.Perez@Empresa.PE `), cuando se da de alta, entonces se guarda y se devuelve como `ana.perez@empresa.pe`.
 - Dado un colaborador vigente con `ana.perez@empresa.pe`, cuando se da de alta otro con `ANA.PEREZ@empresa.pe`, entonces responde 409 y no queda ni el empleado ni su registro de auditoría.
 - Dado un colaborador cesado, su correo sigue reservado: un alta o una edición con ese correo responde 409.
 - Dado un colaborador anulado (anulación registral, D4), su correo queda libre: un alta con ese correo responde 201.
 - Dado un `PATCH` con el mismo correo que el colaborador ya tiene, aunque cambien las mayúsculas, entonces no responde 409.
 - Dado un `PATCH` con el correo de otro colaborador vigente o cesado, entonces responde 409.
-- Dado un `PATCH` con `email: null`, entonces responde 400: el correo no se puede quitar.
+- Dado un `PATCH` con `corporateEmail: null`, entonces responde 400: el correo no se puede quitar.
 - Dadas dos altas simultáneas con el mismo correo, una responde 201 y la otra 409; nunca 500.
 - `juan_perez@empresa.pe` y `juanxperez@empresa.pe` son correos distintos.
 
 **Subtareas**
-- [ ] Migración A: `employees.email` NOT NULL; `schema.prisma` y `pnpm prisma generate`.
+- [ ] Migración A: `employees.corporate_email` NOT NULL; `schema.prisma` y `pnpm prisma generate`.
 - [ ] Tipos `string | null` → `string` (entidad, vista, DTO, patch) y fixtures/dev-data con correo.
 - [ ] Zod: `corporateEmail` obligatorio en el alta y no anulable en el PATCH.
 - [ ] Entidad: correo obligatorio y normalizado (`trim` + minúsculas).
-- [ ] Migración B: normalizar los correos existentes y crear `ux_employees_email`.
-- [ ] `DuplicateEmailError` (409) y `findByEmail` en el puerto y el repositorio.
+- [ ] Migración B: normalizar los correos existentes y crear `ux_employees_corporate_email`.
+- [ ] `DuplicateEmailError` (409) y `findByCorporateEmail` en el puerto y el repositorio.
 - [ ] `violatedUniqueIndex`: traducir P2002 por nombre de índice (doc, código, correo).
 - [ ] Verificación previa en CreateEmployee y UpdateEmployee.
 - [ ] Tests unitarios y e2e de los criterios.
 - [ ] Documentación.
 
 **Notas técnicas.**
-- La unicidad la da un índice parcial `ux_employees_email` sobre `lower(email) WHERE deleted_at IS NULL`, la misma regla que DNI y código: cesar no libera el correo, anular sí. Si el colaborador reingresa, sigue siendo el mismo registro (su DNI también está reservado), así que conserva su correo.
+- La unicidad la da un índice parcial `ux_employees_corporate_email` sobre `lower(corporate_email) WHERE deleted_at IS NULL`, la misma regla que DNI y código: cesar no libera el correo, anular sí. Si el colaborador reingresa, sigue siendo el mismo registro (su DNI también está reservado), así que conserva su correo.
 - El índice va fuera de `schema.prisma` (drift §3.3). Las migraciones se crean a mano y se aplican con `prisma migrate deploy`; nunca `db push` ni `migrate dev`.
-- `findByEmail` compara exacto contra el valor ya normalizado. No usa `mode: 'insensitive'`, porque Prisma lo traduce a ILIKE y `_` actúa como comodín.
+- `findByCorporateEmail` compara exacto contra el valor ya normalizado. No usa `mode: 'insensitive'`, porque Prisma lo traduce a ILIKE y `_` actúa como comodín.
 - P2002 se traduce por el nombre del índice en el mensaje original de Postgres, porque `meta.target` no llega con el adapter y la regex del adapter falla con `lc_messages` en español.
 - `personalEmail` no cambia: sigue opcional y sin unicidad.
 
@@ -401,7 +401,7 @@ Total: 86 puntos. Etapa 0: 12. Etapa 1: 35. Etapa 2: 39.
 - [ ] Las dos migraciones aplicadas con `prisma migrate deploy` en la BD local y en la de tests, con el SQL de reversión en la descripción de cada PR.
 - [ ] Unitarios y e2e de todos los criterios en verde, incluido el de concurrencia.
 - [ ] `docs/api/employees.md` documenta el 400 y el 409 de correo.
-- [ ] `diseno_bd_fase0.md` lista `ux_employees_email`; `04-us-020` registra la decisión D7.
+- [ ] `diseno_bd_fase0.md` lista `ux_employees_corporate_email`; `04-us-020` registra la decisión D7.
 - [ ] PRs ≤400 líneas, revisados y mergeados a `develop` con lint, type-check, tests, depcruise y e2e en verde.
 
 ### TASK-08 · Cerrar los cabos sueltos de `auth`

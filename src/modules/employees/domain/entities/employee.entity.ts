@@ -19,7 +19,8 @@ export const DOCUMENT_PATTERNS: Record<DocumentType, RegExp> = {
 };
 const UBIGEO_PATTERN = /^\d{6}$/;
 /** El correo corporativo se guarda y se compara sin espacios y en minúsculas. */
-const normalizeEmail = (email: string): string => email.trim().toLowerCase();
+const normalizeEmail = (corporateEmail: string): string =>
+  corporateEmail.trim().toLowerCase();
 
 /** Longitudes de schema.prisma. Sin esto, POstgres responde 22001 -> 500 opaco */
 const MAX = {
@@ -29,7 +30,7 @@ const MAX = {
   lastNameFather: 60,
   lastNameMother: 60,
   nationality: 40,
-  email: 150,
+  corporateEmail: 150,
   personalEmail: 150,
   phone: 20,
   address: 300,
@@ -48,7 +49,7 @@ export interface EmployeeProps {
   birthDate: Date | null;
   maritalStatus: MaritalStatus | null;
   nationality: string;
-  email: string;
+  corporateEmail: string;
   personalEmail: string | null;
   phone: string | null;
   address: string | null;
@@ -80,7 +81,7 @@ export class Employee {
   readonly birthDate: Date | null;
   readonly maritalStatus: MaritalStatus | null;
   readonly nationality: string;
-  readonly email: string;
+  readonly corporateEmail: string;
   readonly personalEmail: string | null;
   readonly phone: string | null;
   readonly address: string | null;
@@ -106,7 +107,7 @@ export class Employee {
     this.birthDate = props.birthDate;
     this.maritalStatus = props.maritalStatus;
     this.nationality = props.nationality;
-    this.email = props.email;
+    this.corporateEmail = props.corporateEmail;
     this.personalEmail = props.personalEmail;
     this.phone = props.phone;
     this.address = props.address;
@@ -122,7 +123,7 @@ export class Employee {
   static create(props: NewEmployeeProps, id: string, now: Date): Employee {
     const employee = new Employee({
       ...props,
-      email: normalizeEmail(props.email),
+      corporateEmail: normalizeEmail(props.corporateEmail),
       id,
       status: 'ACTIVO',
       terminationDate: null,
@@ -143,8 +144,8 @@ export class Employee {
     const changes = Object.fromEntries(
       Object.entries(patch).filter(([, value]) => value !== undefined),
     ) as EmployeeUpdatePatch;
-    if (changes.email !== undefined) {
-      changes.email = normalizeEmail(changes.email);
+    if (changes.corporateEmail !== undefined) {
+      changes.corporateEmail = normalizeEmail(changes.corporateEmail);
     }
     const candidate = new Employee({ ...this, ...changes });
     candidate.validate();
@@ -187,7 +188,7 @@ export class Employee {
   }
   private assertEmail(): void {
     // El formato lo valida el schema; el dominio garantiza que exista.
-    if (this.email === '') {
+    if (this.corporateEmail === '') {
       throw new InvalidEmployeeDataError(
         'El correo corporativo es obligatorio',
       );
@@ -201,7 +202,7 @@ export class Employee {
       ['lastNameFather', this.lastNameFather],
       ['lastNameMother', this.lastNameMother],
       ['nationality', this.nationality],
-      ['email', this.email],
+      ['corporateEmail', this.corporateEmail],
       ['personalEmail', this.personalEmail],
       ['phone', this.phone],
       ['address', this.address],

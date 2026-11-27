@@ -49,7 +49,7 @@ const cuerpo = (cambios: Record<string, unknown> = {}) => ({
   lastNameFather: MARCA,
   lastNameMother: 'TORRES',
   hireDate: '2026-08-17',
-  email: nuevoCorreo(),
+  corporateEmail: nuevoCorreo(),
   ...cambios,
 });
 
@@ -144,14 +144,14 @@ describe('US-020b: alta, edición y anulación de la ficha del empleado', () => 
       const data = await crear({
         documentNumber: ` ${dni.slice(0, 4)} ${dni.slice(4)} `,
         employeeCode: nuevoCodigo(),
-        email: 'Ana.Torres@Empresa.PE',
+        corporateEmail: 'Ana.Torres@Empresa.PE',
         birthDate: '1990-05-20',
         ubigeoId: UBIGEO.id,
       });
 
       expect(data).toMatchObject({
         documentNumber: dni,
-        email: 'ana.torres@empresa.pe',
+        corporateEmail: 'ana.torres@empresa.pe',
         birthDate: '1990-05-20',
         ubigeoId: UBIGEO.id,
       });
@@ -223,7 +223,7 @@ describe('US-020b: alta, edición y anulación de la ficha del empleado', () => 
         birthDate: null,
         maritalStatus: null,
         nationality: 'PERUANA',
-        email: 'repetido.p2002@e2e-escritura.test',
+        corporateEmail: 'repetido.p2002@e2e-escritura.test',
         personalEmail: null,
         phone: null,
         address: null,
@@ -552,7 +552,7 @@ describe('US-020b: alta, edición y anulación de la ficha del empleado', () => 
           birthDate: null,
           maritalStatus: null,
           nationality: 'PERUANA',
-          email: 'sin.auditoria@e2e-escritura.test',
+          corporateEmail: 'sin.auditoria@e2e-escritura.test',
           personalEmail: null,
           phone: null,
           address: null,

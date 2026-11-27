@@ -26,7 +26,7 @@ export interface EmployeeOutput {
   birthDate: string | null; // YYYY-MM-DD
   maritalStatus: MaritalStatus | null;
   nationality: string | null;
-  email: string;
+  corporateEmail: string;
   personalEmail: string | null;
   phone: string | null;
   address: string | null;
@@ -64,7 +64,7 @@ export function toEmployeeOutput(
     birthDate: toDateOnlyOrNull(view.birthDate),
     maritalStatus: view.maritalStatus,
     nationality: view.nationality,
-    email: view.email,
+    corporateEmail: view.corporateEmail,
     personalEmail: view.personalEmail,
     phone: view.phone,
     address: view.address,
