@@ -14,7 +14,7 @@ const makeView = (over: Partial<EmployeeView> = {}): EmployeeView => ({
   birthDate: new Date('1990-05-10'),
   maritalStatus: 'SOLTERO',
   nationality: 'PERUANA',
-  email: 'maria.quispe@empresa.pe',
+  corporateEmail: 'maria.quispe@empresa.pe',
   personalEmail: null,
   phone: '999111222',
   address: 'AV. AREQUIPA 123',

@@ -30,6 +30,7 @@ export interface IEmployeeRepository {
   findById(id: string): Promise<Employee | null>;
   findByDocument(type: DocumentType, number: string): Promise<Employee | null>;
   findByEmployeeCode(code: string): Promise<Employee | null>;
+  findByCorporateEmail(corporateEmail: string): Promise<Employee | null>;
   create(employe: Employee, audit: AuditEntry): Promise<void>;
   update(
     employee: Employee,

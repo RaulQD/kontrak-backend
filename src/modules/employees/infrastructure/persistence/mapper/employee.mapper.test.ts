@@ -36,13 +36,8 @@ const makeRow = (over: Partial<EmployeeRow> = {}): EmployeeRow => ({
 describe('EmployeeMapper.toView', () => {
   it('copia cada campo público tal cual, incluida una nacionalidad null', () => {
     const row = makeRow({ nationality: null });
-    const { corporateEmail, ...resto } = row;
-
-    // La columna es corporate_email; la vista la expone como `email` (US-020c).
-    expect(EmployeeMapper.toView(row)).toEqual({
-      ...resto,
-      email: corporateEmail,
-    });
+    // La columna es corporate_email
+    expect(EmployeeMapper.toView(row)).toEqual(row);
   });
 
   it('si la fila no trae las columnas sensibles, la vista no tiene esas claves', () => {
@@ -79,7 +74,7 @@ const PROPS: NewEmployeeProps = {
   birthDate: new Date('1990-05-10T00:00:00.000Z'),
   maritalStatus: 'SOLTERO',
   nationality: 'PERUANA',
-  email: 'maria.quispe@apparka.pe',
+  corporateEmail: 'maria.quispe@apparka.pe',
   personalEmail: null,
   phone: '999111222',
   address: 'AV. AREQUIPA 123',
@@ -143,10 +138,10 @@ describe('EmployeeMapper.toPersistence', () => {
   });
 
   it('copia los valores de la entidad, incluidos los null y lo que fija el alta', () => {
-    const { email, ...resto } = PROPS;
+    const { corporateEmail, ...resto } = PROPS;
     expect(data).toEqual({
       ...resto,
-      corporateEmail: email,
+      corporateEmail,
       id: ID,
       status: 'ACTIVO',
       terminationDate: null,
@@ -190,7 +185,10 @@ describe('EmployeeMapper.toEntity', () => {
 describe('EmployeeMapper.toUpdateData', () => {
   it('escribe el correo en corporateEmail, no en email (US-020c)', () => {
     expect(
-      EmployeeMapper.toUpdateData({ email: 'ana@empresa.pe', phone: null }),
+      EmployeeMapper.toUpdateData({
+        corporateEmail: 'ana@empresa.pe',
+        phone: null,
+      }),
     ).toEqual({ corporateEmail: 'ana@empresa.pe', phone: null });
   });
 

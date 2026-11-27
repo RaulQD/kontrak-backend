@@ -18,15 +18,21 @@ import { EmployeeRow, FULL_SELECT, PUBLIC_SELECT } from '../employee.select';
 import { AuditEntry } from '../../../../../shared/audit/audit-entry';
 import { Employee } from '../../../domain/entities/employee.entity';
 import { writeAudit } from '../../../../../platform/audit/audit-writer';
-import { isRecordNotFound, uniqueViolationFields } from '../prisma-error';
+import { isRecordNotFound, violatedUniqueIndex } from '../prisma-error';
 import {
   DuplicateDocumentError,
   DuplicateEmployeeCodeError,
   EmployeeNotFoundError,
+  DuplicateEmailError,
 } from '../../../domain/errors/employee.error';
 
 export class PrismaEmployeeRepository implements IEmployeeRepository {
   constructor(private readonly prisma: PrismaClient) {}
+  async findByCorporateEmail(corporateEmail: string): Promise<Employee | null> {
+    return this.findOne({
+      corporateEmail: corporateEmail.trim().toLowerCase(),
+    });
+  }
 
   async findById(id: string): Promise<Employee | null> {
     return this.findOne({ id });
@@ -167,15 +173,16 @@ export class PrismaEmployeeRepository implements IEmployeeRepository {
     return row ? EmployeeMapper.toEntity(row) : null;
   }
   private translate(error: unknown, employee: Employee): unknown {
-    const fields = uniqueViolationFields(error);
-    if (fields?.includes('employee_code') && employee.employeeCode !== null) {
-      return new DuplicateEmployeeCodeError(employee.employeeCode);
-    }
-    if (fields) {
-      return new DuplicateDocumentError(
-        employee.documentType,
-        employee.documentNumber,
-      );
+    switch (violatedUniqueIndex(error)) {
+      case 'ux_employees_doc':
+        return new DuplicateDocumentError(
+          employee.documentType,
+          employee.documentNumber,
+        );
+      case 'ux_employees_code':
+        return new DuplicateEmployeeCodeError(employee.employeeCode ?? '');
+      case 'ux_employees_corporate_email':
+        return new DuplicateEmailError(employee.corporateEmail);
     }
     if (isRecordNotFound(error)) return new EmployeeNotFoundError(employee.id);
     return error;

@@ -45,7 +45,7 @@ El listado agrega `pagination`, y la anulación responde sin `data`.
 | 401 | `UNAUTHORIZED` | Sin token, token vencido, revocado o de un usuario desactivado |
 | 403 | `FORBIDDEN` | Falta el permiso de la ruta, se intenta un cese por PATCH o se escribe un campo sensible sin `colaborador:leer_sensible` |
 | 404 | `NOT_FOUND` | El colaborador no existe o está anulado |
-| 409 | `CONFLICT` | Documento o código ya registrados; anulación de un colaborador con contratos |
+| 409 | `CONFLICT` | Documento, código o correo ya registrados; anulación de un colaborador con contratos |
 | 422 | `VALIDATION_ERROR` | Una regla del dominio o un ubigeo que no existe |
 
 **Error de validación del schema** (422). Tiene otra forma: lista cada campo con su mensaje.
@@ -77,7 +77,7 @@ Es la misma en el detalle, en cada elemento del listado y en las respuestas de `
 | `birthDate` | `YYYY-MM-DD` \| null | |
 | `maritalStatus` | `SOLTERO` \| `CASADO` \| `DIVORCIADO` \| `CONVIVIENTE` \| `VIUDO` \| null | |
 | `nationality` | string \| null | `PERUANA` por defecto en el alta |
-| `email` | string | Correo corporativo. Siempre tiene valor, en minúsculas |
+| `corporateEmail` | string | Correo corporativo. Siempre tiene valor, en minúsculas. Hasta el PR 1 de US-020c se llamaba `email` |
 | `personalEmail` | string \| null | En minúsculas |
 | `phone`, `address`, `photoUrl` | string \| null | |
 | `ubigeoId` | string \| null | Código INEI de 6 dígitos del distrito |
@@ -139,7 +139,7 @@ Un parámetro desconocido responde 422. Ordena por `createdAt` descendente y, a 
 | `firstNames` | ✓ | Hasta 100 caracteres |
 | `lastNameFather`, `lastNameMother` | ✓ | Hasta 60 caracteres cada uno |
 | `hireDate` | ✓ | `YYYY-MM-DD` |
-| `email` | ✓ | Correo corporativo válido, hasta 150 caracteres. Se quitan los espacios de los extremos y se guarda en minúsculas |
+| `corporateEmail` | ✓ | Correo corporativo válido, hasta 150 caracteres. Se quitan los espacios de los extremos y se guarda en minúsculas |
 | `employeeCode` | | Hasta 20 caracteres |
 | `sex`, `maritalStatus` | | Valores de la tabla de la ficha |
 | `birthDate` | | `YYYY-MM-DD` |
@@ -153,7 +153,8 @@ Un parámetro desconocido responde 422. Ordena por `createdAt` descendente y, a 
 
 - **No se aceptan** `id`, `status`, `terminationDate`, `fullName`, `createdAt`, `updatedAt` ni `deletedAt`: cualquiera de ellos responde 422. El alta siempre queda `ACTIVO`.
 - Un texto opcional vacío (`""`) responde 422. Si el campo no tiene valor, se omite.
-- **Unicidad.** El documento (tipo y número) y el código no pueden repetirse entre colaboradores vigentes o cesados. Los de un colaborador anulado sí se pueden volver a usar.
+- **Unicidad.** El documento (tipo y número), el código y el correo corporativo no pueden repetirse entre colaboradores vigentes o cesados. Los de un colaborador anulado sí se pueden volver a usar.
+- **El correo se compara sin distinguir mayúsculas.** `Maria.Quispe@Empresa.pe` y `maria.quispe@empresa.pe` son el mismo correo. `personalEmail` no es único.
 
 ```http
 POST /api/employees
@@ -166,7 +167,7 @@ Content-Type: application/json
   "lastNameFather": "QUISPE",
   "lastNameMother": "ROJAS",
   "hireDate": "2026-08-17",
-  "email": "maria.quispe@empresa.pe"
+  "corporateEmail": "maria.quispe@empresa.pe"
 }
 ```
 
@@ -179,18 +180,19 @@ Responde 201 con la ficha creada, igual que el detalle: `status: "ACTIVO"`, `nat
 | Ubigeo que no está en el catálogo | 422 `El ubigeo 999999 no existe` |
 | Documento ya registrado | 409 `Ya existe un colaborador con DNI 40506070` |
 | Código ya registrado | 409 `Ya existe un colaborador con el código EMP-001` |
+| Correo ya registrado | 409 `Ya existe un colaborador con el correo maria.quispe@empresa.pe` |
 | Campo sensible sin `colaborador:leer_sensible` | 403 |
 
-Dos altas simultáneas con el mismo documento no generan 500: una responde 201 y la otra 409.
+Dos altas simultáneas con el mismo documento o el mismo correo no generan 500: una responde 201 y la otra 409.
 
 ## `PATCH /api/employees/:id`: edición parcial
 
 Acepta los mismos campos que el alta, todos opcionales.
 
 - **Campo ausente:** no se toca.
-- **`null`:** borra el valor. Solo en `employeeCode`, `sex`, `birthDate`, `maritalStatus`, `personalEmail`, `phone`, `address`, `ubigeoId` y `photoUrl`. El documento, los nombres, `email`, `nationality`, `hireDate` y los campos sensibles se pueden cambiar, pero no borrar.
+- **`null`:** borra el valor. Solo en `employeeCode`, `sex`, `birthDate`, `maritalStatus`, `personalEmail`, `phone`, `address`, `ubigeoId` y `photoUrl`. El documento, los nombres, `corporateEmail`, `nationality`, `hireDate` y los campos sensibles se pueden cambiar, pero no borrar.
 - **Texto vacío (`""`):** 422 `No puede estar vacío: envía null para borrarlo`.
-- **Correo corporativo.** Se cambia, pero no se borra: `null` o `""` en `email` responden 422 `El correo corporativo es obligatorio`.
+- **Correo corporativo.** Se cambia, pero no se borra: `null` o `""` en `corporateEmail` responden 422 `El correo corporativo es obligatorio`.
 - **Cuerpo vacío:** 422 `Debe enviar al menos un campo`.
 
 ```http
@@ -206,7 +208,7 @@ Responde 200 con la ficha actualizada.
 - **Cese.** `status` o `terminationDate` responden **403**: el cese tiene su propio proceso (US-022) y no se hace editando la ficha.
 - **Documento.** Si llegan `documentType` y `documentNumber` juntos, el formato se valida con el campo en `errors`. Si llega solo el número, se valida contra el tipo que ya tiene el colaborador y el 422 no trae `errors`: `El número de documento no tiene el formato válido para DNI`.
 - **Reglas de la ficha.** También se validan al editar. Por ejemplo, mover `hireDate` después del `terminationDate` de un cesado responde 422.
-- **Unicidad.** El documento y el código no pueden ser los de **otro** colaborador (409). Volver a enviar los propios, aunque sea con espacios, no es un conflicto.
+- **Unicidad.** El documento, el código y el correo no pueden ser los de **otro** colaborador (409). Volver a enviar los propios, aunque sea el documento con espacios o el correo en mayúsculas, no es un conflicto.
 - **Sin cambios.** Si los valores enviados son los que ya tenía, responde 200 sin escribir ni auditar, y `updatedAt` no cambia.
 
 ## `DELETE /api/employees/:id`: anulación registral
@@ -219,7 +221,7 @@ La anulación corrige un alta que **no debió existir**: un registro duplicado, 
 
 - Solo fija `deletedAt`. La fila no se borra y `status` y `terminationDate` no cambian.
 - El colaborador deja de aparecer en el listado, y el detalle, la edición y una segunda anulación responden 404.
-- Su documento y su código quedan libres para volver a registrarlos.
+- Su documento, su código y su correo quedan libres para volver a registrarlos.
 - **Con contratos no se anula.** Si tiene al menos un contrato, anulado o no, responde 409 `El colaborador tiene contratos; si dejó de trabajar, regístralo como cese`, y no cambia nada.
 - Requiere `colaborador:cesar`, el mismo permiso del cese: HR_ANALYST puede editar, pero no anular.
 
@@ -239,6 +241,5 @@ Los valores sensibles también quedan en `audit_logs`, porque ahí se registra q
 
 ## Pendiente en otras historias
 
-- **US-020c:** correo corporativo único.
 - **US-004d:** catálogo completo de ubigeos. Hasta entonces solo existen los cargados a mano (`tests/manual/dev-data.ts` crea el `150101`).
 - **US-022:** cese del colaborador.

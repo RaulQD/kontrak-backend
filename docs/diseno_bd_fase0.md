@@ -453,6 +453,30 @@ GRANT  INSERT, SELECT           ON audit_logs TO   <app_role>;
 
 ---
 
+### 3.7 Índices únicos parciales de `employees`
+
+`employees` no es parte de la Fase 0, pero sus índices únicos siguen la misma regla que `users.email` (§3.5): son parciales sobre `deleted_at IS NULL`, así que un colaborador anulado libera sus valores y uno cesado no. Prisma no expresa índices parciales ni de expresión, por eso viven solo en las migraciones y no en `schema.prisma` (ver `docs/scrum/04` §3.3).
+
+```sql
+-- Documento: único en todo el sistema (migración 20260813234937_drop_companies).
+CREATE UNIQUE INDEX ux_employees_doc
+    ON employees (document_type, document_number)
+    WHERE deleted_at IS NULL;
+
+-- Código de empleado (migración 20260817234243_agregar_indice_unico_codigo_empleado).
+CREATE UNIQUE INDEX ux_employees_code
+    ON employees (employee_code)
+    WHERE deleted_at IS NULL;
+
+-- Correo corporativo, sin distinguir mayúsculas (US-020c, migración
+-- 20261126120100_agregar_indice_unico_correo_empleado).
+CREATE UNIQUE INDEX ux_employees_corporate_email
+    ON employees (lower(corporate_email))
+    WHERE deleted_at IS NULL;
+```
+
+La aplicación traduce la violación de cada índice (P2002) a su propio 409 leyendo el nombre del índice en el mensaje de Postgres (`violatedUniqueIndex`, en `modules/employees/infrastructure/persistence/prisma-error.ts`).
+
 ## 4. Modelos Prisma sugeridos (para transcribir)
 
 > Respetan tus convenciones (`@db.Uuid`, `@map` snake_case, `Timestamptz(6)`, `@@map` plural).

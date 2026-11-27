@@ -32,6 +32,14 @@ describe('Objetos SQL de employees fuera de schema.prisma', () => {
     expect(def).toContain('WHERE (deleted_at IS NULL)');
   });
 
+  it('ux_employees_email es único, parcial y sin distinguir mayúsculas (US-020c)', async () => {
+    const def = await indexdef('ux_employees_corporate_email');
+
+    expect(def).toMatch(/^CREATE UNIQUE INDEX/);
+    expect(def).toContain('lower((corporate_email)::text)');
+    expect(def).toContain('WHERE (deleted_at IS NULL)');
+  });
+
   it('existen los CHECK de formato de DNI y de rango de la fecha de cese', async () => {
     const filas = await prisma.$queryRaw<{ conname: string }[]>`
       SELECT conname FROM pg_constraint

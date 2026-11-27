@@ -41,7 +41,7 @@ export const EmployeeMapper = {
       birthDate: row.birthDate,
       maritalStatus: row.maritalStatus,
       nationality: row.nationality,
-      email: row.corporateEmail,
+      corporateEmail: row.corporateEmail,
       personalEmail: row.personalEmail,
       phone: row.phone,
       address: row.address,
@@ -74,7 +74,7 @@ export const EmployeeMapper = {
       birthDate: row.birthDate,
       maritalStatus: row.maritalStatus,
       nationality: row.nationality ?? 'PERUANA',
-      email: row.corporateEmail,
+      corporateEmail: row.corporateEmail,
       personalEmail: row.personalEmail,
       phone: row.phone,
       address: row.address,
@@ -103,7 +103,7 @@ export const EmployeeMapper = {
       birthDate: employee.birthDate,
       maritalStatus: employee.maritalStatus,
       nationality: employee.nationality,
-      corporateEmail: employee.email,
+      corporateEmail: employee.corporateEmail,
       personalEmail: employee.personalEmail,
       phone: employee.phone,
       address: employee.address,
@@ -126,10 +126,10 @@ export const EmployeeMapper = {
    * ejecución ("Unknown argument `email`") y el PATCH respondería 500.
    */
   toUpdateData(patch: EmployeeUpdatePatch): EmployeeUpdateData {
-    const { email, ...rest } = patch;
+    const { corporateEmail, ...rest } = patch;
     return {
       ...rest,
-      ...(email !== undefined && { corporateEmail: email }),
+      ...(corporateEmail !== undefined && { corporateEmail }),
     };
   },
 };

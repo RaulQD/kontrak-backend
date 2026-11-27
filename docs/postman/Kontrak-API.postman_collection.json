@@ -131,6 +131,14 @@
     {
       "key": "annulEmployeeId",
       "value": ""
+    },
+    {
+      "key": "addendumEmployees",
+      "value": ""
+    },
+    {
+      "key": "contractEmployees",
+      "value": ""
     }
   ],
   "item": [
@@ -1031,7 +1039,7 @@
     },
     {
       "name": "4. Colaboradores · alta (US-020b)",
-      "description": "POST /api/employees (US-020b). Ejecuta antes la carpeta 1. Auth.\n\nEl primer request genera un DNI, un CE y un código nuevos en cada corrida, así que puedes ejecutar la carpeta las veces que quieras. Los duplicados reutilizan esos valores.\n\nNo se pueden probar desde Postman (van en los e2e): la carrera entre dos altas simultáneas, la fila de audit_logs, la reutilización del documento de un anulado (no es repetible) y el 403 de D6 (ningún rol del seed tiene colaborador:crear sin colaborador:leer_sensible).\n\nTodo lo que crea esta carpeta lleva el apellido materno POSTMAN. Para borrarlo de tu BD de desarrollo:\nDELETE FROM employees WHERE last_name_mother = 'POSTMAN';",
+      "description": "POST /api/employees (US-020b). Ejecuta antes la carpeta 1. Auth.\n\nEl primer request genera un DNI, un CE y un código nuevos en cada corrida, así que puedes ejecutar la carpeta las veces que quieras. Los duplicados reutilizan esos valores.\n\nNo se pueden probar desde Postman (van en los e2e): la carrera entre dos altas simultáneas, la fila de audit_logs, la reutilización del documento de un anulado (no es repetible) y el 403 de D6 (ningún rol del seed tiene colaborador:crear sin colaborador:leer_sensible) y que un cesado conserve su correo (no hay API de cese).\n\nTodo lo que crea esta carpeta lleva el apellido materno POSTMAN. Para borrarlo de tu BD de desarrollo:\nDELETE FROM employees WHERE last_name_mother = 'POSTMAN';",
       "item": [
         {
           "name": "201 · alta con solo los campos obligatorios",
@@ -1056,7 +1064,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"ana.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"ana.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1121,7 +1129,7 @@
                   "    pm.collectionVariables.set('createdEmployeeUpdatedAt', data.updatedAt);",
                   "  }",
                   "  pm.test('guarda el correo corporativo', () => {",
-                  "    pm.expect(pm.response.json().data.email).to.eql('ana.' + pm.collectionVariables.get('altaDni') + '@postman.test');",
+                  "    pm.expect(pm.response.json().data.corporateEmail).to.eql('ana.' + pm.collectionVariables.get('altaDni') + '@postman.test');",
                   "  });",
                   "}"
                 ]
@@ -1189,7 +1197,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{altaDni2}} \",\n  \"firstNames\": \"ROSA\",\n  \"lastNameFather\": \"HUAMAN\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-01\",\n  \"email\": \"Rosa.{{altaDni2}}@Postman.TEST\",\n  \"employeeCode\": \"{{altaCode}}\",\n  \"sex\": \"FEMENINO\",\n  \"birthDate\": \"1990-05-20\",\n  \"maritalStatus\": \"CASADO\",\n  \"nationality\": \"PERUANA\",\n  \"personalEmail\": \"rosa.personal@gmail.com\",\n  \"phone\": \"987654321\",\n  \"address\": \"AV. AREQUIPA 123\",\n  \"ubigeoId\": \"150101\",\n  \"hasChildrenUnder18\": true,\n  \"essaludLifeInsurance\": true,\n  \"photoUrl\": \"https://example.com/fotos/rosa.jpg\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{altaDni2}} \",\n  \"firstNames\": \"ROSA\",\n  \"lastNameFather\": \"HUAMAN\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-01\",\n  \"corporateEmail\": \"Rosa.{{altaDni2}}@Postman.TEST\",\n  \"employeeCode\": \"{{altaCode}}\",\n  \"sex\": \"FEMENINO\",\n  \"birthDate\": \"1990-05-20\",\n  \"maritalStatus\": \"CASADO\",\n  \"nationality\": \"PERUANA\",\n  \"personalEmail\": \"rosa.personal@gmail.com\",\n  \"phone\": \"987654321\",\n  \"address\": \"AV. AREQUIPA 123\",\n  \"ubigeoId\": \"150101\",\n  \"hasChildrenUnder18\": true,\n  \"essaludLifeInsurance\": true,\n  \"photoUrl\": \"https://example.com/fotos/rosa.jpg\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1211,7 +1219,7 @@
                   "  pm.test('responde 201', () => pm.response.to.have.status(201));",
                   "  const data = pm.response.json().data;",
                   "  pm.test('el documento llega sin espacios', () => pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('altaDni2')));",
-                  "  pm.test('el correo se guarda en minúsculas', () => pm.expect(data.email).to.eql('rosa.' + pm.collectionVariables.get('altaDni2') + '@postman.test'));",
+                  "  pm.test('el correo se guarda en minúsculas', () => pm.expect(data.corporateEmail).to.eql('rosa.' + pm.collectionVariables.get('altaDni2') + '@postman.test'));",
                   "  pm.test('guarda los opcionales', () => {",
                   "    pm.expect(data.employeeCode).to.eql(pm.collectionVariables.get('altaCode'));",
                   "    pm.expect(data.birthDate).to.eql('1990-05-20');",
@@ -1252,7 +1260,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"{{altaCe}}\",\n  \"firstNames\": \"CARLOS\",\n  \"lastNameFather\": \"GOMEZ\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"carlos.{{altaCe}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"{{altaCe}}\",\n  \"firstNames\": \"CARLOS\",\n  \"lastNameFather\": \"GOMEZ\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"carlos.{{altaCe}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1298,7 +1306,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"documento.repetido.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"documento.repetido.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1348,7 +1356,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDniSpaced}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"documento.espacios.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDniSpaced}}\",\n  \"firstNames\": \"OTRA\",\n  \"lastNameFather\": \"PERSONA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"documento.espacios.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1411,7 +1419,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni3}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"codigo.repetido.{{altaDni}}@postman.test\",\n  \"employeeCode\": \"{{altaCode}}\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni3}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"codigo.repetido.{{altaDni}}@postman.test\",\n  \"employeeCode\": \"{{altaCode}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1432,6 +1440,149 @@
                   "    pm.expect(pm.response.json().code).to.eql('CONFLICT');",
                   "  });",
                   "  pm.test('no devuelve datos de colaborador', () => pm.expect(pm.response.json().data).to.be.undefined);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 · correo ya registrado, escrito en mayúsculas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni4}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"ANA.{{altaDni}}@POSTMAN.TEST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 409', () => pm.response.to.have.status(409));",
+                  "  pm.test('mensaje de correo duplicado, con el correo normalizado', () => {",
+                  "    const email = 'ana.' + pm.collectionVariables.get('altaDni') + '@postman.test';",
+                  "    pm.expect(pm.response.json().message).to.eql('Ya existe un colaborador con el correo ' + email);",
+                  "    pm.expect(pm.response.json().code).to.eql('CONFLICT');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "201 · correo juanxperez",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni5}}\",\n  \"firstNames\": \"JUAN\",\n  \"lastNameFather\": \"XPEREZ\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"juanxperez.{{altaDni}}@postman.test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "201 · juan_perez no choca con juanxperez: el _ no es comodín",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni6}}\",\n  \"firstNames\": \"JUAN\",\n  \"lastNameFather\": \"PEREZ\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"juan_perez.{{altaDni}}@postman.test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 201', () => pm.response.to.have.status(201));",
+                  "  pm.test('guarda el correo con el guion bajo', () => {",
+                  "    pm.expect(pm.response.json().data.corporateEmail).to.eql('juan_perez.' + pm.collectionVariables.get('altaDni') + '@postman.test');",
+                  "  });",
                   "}"
                 ]
               }
@@ -1461,7 +1612,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"1234567\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"1234567\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1512,7 +1663,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"4050607A\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"4050607A\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1563,7 +1714,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"12345678\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"CE\",\n  \"documentNumber\": \"12345678\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1614,7 +1765,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"RUC\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"RUC\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1683,10 +1834,10 @@
                   "  pm.test('responde 422', () => pm.response.to.have.status(422));",
                   "  pm.test('un error por cada campo obligatorio', () => {",
                   "    const fields = pm.response.json().errors.map((e) => e.field);",
-                  "    pm.expect(fields).to.include.members(['documentType', 'documentNumber', 'firstNames', 'lastNameFather', 'lastNameMother', 'hireDate', 'email']);",
+                  "    pm.expect(fields).to.include.members(['documentType', 'documentNumber', 'firstNames', 'lastNameFather', 'lastNameMother', 'hireDate', 'corporateEmail']);",
                   "  });",
                   "  pm.test('el correo con su propio mensaje', () => {",
-                  "    const error = pm.response.json().errors.find((e) => e.field === 'email');",
+                  "    const error = pm.response.json().errors.find((e) => e.field === 'corporateEmail');",
                   "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
                   "  });",
                   "}"
@@ -1718,7 +1869,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"id\": \"00000000-0000-4000-8000-000000000000\",\n  \"status\": \"CESADO\",\n  \"terminationDate\": \"2026-09-01\",\n  \"fullName\": \"OTRO NOMBRE\",\n  \"createdAt\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedAt\": \"2026-01-01T00:00:00.000Z\",\n  \"deletedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"id\": \"00000000-0000-4000-8000-000000000000\",\n  \"status\": \"CESADO\",\n  \"terminationDate\": \"2026-09-01\",\n  \"fullName\": \"OTRO NOMBRE\",\n  \"createdAt\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedAt\": \"2026-01-01T00:00:00.000Z\",\n  \"deletedAt\": \"2026-01-01T00:00:00.000Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1770,7 +1921,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-02-31\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-02-31\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1821,7 +1972,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17T00:00:00.000Z\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17T00:00:00.000Z\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1876,7 +2027,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"ubigeoId\": \"15010\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"ubigeoId\": \"15010\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1927,7 +2078,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"ubigeoId\": \"999999\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"ubigeoId\": \"999999\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1977,7 +2128,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no-es-un-correo\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no-es-un-correo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1993,10 +2144,10 @@
                 "exec": [
                   "{",
                   "  pm.test('responde 422', () => pm.response.to.have.status(422));",
-                  "  pm.test('el error indica el campo email', () => {",
+                  "  pm.test('el error indica el campo corporateEmail', () => {",
                   "    const errors = pm.response.json().errors || [];",
-                  "    const error = errors.find((e) => e.field === 'email');",
-                  "    pm.expect(error, 'no hay error para email: ' + JSON.stringify(pm.response.json())).to.exist;",
+                  "    const error = errors.find((e) => e.field === 'corporateEmail');",
+                  "    pm.expect(error, 'no hay error para corporateEmail: ' + JSON.stringify(pm.response.json())).to.exist;",
                   "    pm.expect(error.message).to.eql('El correo no es válido');",
                   "  });",
                   "}"
@@ -2044,10 +2195,10 @@
                 "exec": [
                   "{",
                   "  pm.test('responde 422', () => pm.response.to.have.status(422));",
-                  "  pm.test('el error indica el campo email', () => {",
+                  "  pm.test('el error indica el campo corporateEmail', () => {",
                   "    const errors = pm.response.json().errors || [];",
-                  "    const error = errors.find((e) => e.field === 'email');",
-                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    const error = errors.find((e) => e.field === 'corporateEmail');",
+                  "    pm.expect(error, 'no hay error para corporateEmail: ' + pm.response.text()).to.exist;",
                   "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
                   "  });",
                   "}"
@@ -2079,7 +2230,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"   \"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"   \"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2095,10 +2246,10 @@
                 "exec": [
                   "{",
                   "  pm.test('responde 422', () => pm.response.to.have.status(422));",
-                  "  pm.test('el error indica el campo email', () => {",
+                  "  pm.test('el error indica el campo corporateEmail', () => {",
                   "    const errors = pm.response.json().errors || [];",
-                  "    const error = errors.find((e) => e.field === 'email');",
-                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    const error = errors.find((e) => e.field === 'corporateEmail');",
+                  "    pm.expect(error, 'no hay error para corporateEmail: ' + pm.response.text()).to.exist;",
                   "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
                   "  });",
                   "}"
@@ -2130,7 +2281,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": null\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": null\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2146,10 +2297,10 @@
                 "exec": [
                   "{",
                   "  pm.test('responde 422', () => pm.response.to.have.status(422));",
-                  "  pm.test('el error indica el campo email', () => {",
+                  "  pm.test('el error indica el campo corporateEmail', () => {",
                   "    const errors = pm.response.json().errors || [];",
-                  "    const error = errors.find((e) => e.field === 'email');",
-                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    const error = errors.find((e) => e.field === 'corporateEmail');",
+                  "    pm.expect(error, 'no hay error para corporateEmail: ' + pm.response.text()).to.exist;",
                   "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
                   "  });",
                   "}"
@@ -2181,7 +2332,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"phone\": \"\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\",\n  \"phone\": \"\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2232,7 +2383,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2284,7 +2435,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2330,7 +2481,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2376,7 +2527,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2415,7 +2566,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{altaDni}}\",\n  \"firstNames\": \"ANA LUCIA\",\n  \"lastNameFather\": \"TORRES\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"no.se.crea.{{altaDni}}@postman.test\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2467,7 +2618,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editDni}}\",\n  \"firstNames\": \"LUIS ALBERTO\",\n  \"lastNameFather\": \"RAMOS\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"luis.{{editDni}}@postman.test\",\n  \"employeeCode\": \"{{editCode}}\",\n  \"phone\": \"900000001\",\n  \"address\": \"JR. CUSCO 100\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editDni}}\",\n  \"firstNames\": \"LUIS ALBERTO\",\n  \"lastNameFather\": \"RAMOS\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"luis.{{editDni}}@postman.test\",\n  \"employeeCode\": \"{{editCode}}\",\n  \"phone\": \"900000001\",\n  \"address\": \"JR. CUSCO 100\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2538,7 +2689,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editOtherDni}}\",\n  \"firstNames\": \"OTRO\",\n  \"lastNameFather\": \"COLABORADOR\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"otro.{{editOtherDni}}@postman.test\",\n  \"employeeCode\": \"{{editOtherCode}}\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{editOtherDni}}\",\n  \"firstNames\": \"OTRO\",\n  \"lastNameFather\": \"COLABORADOR\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"otro.{{editOtherDni}}@postman.test\",\n  \"employeeCode\": \"{{editOtherCode}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2841,7 +2992,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{editDni2}} \",\n  \"email\": \"Luis.{{editDni2}}@Postman.TEST\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \" {{editDni2}} \",\n  \"corporateEmail\": \"Luis.{{editDni2}}@Postman.TEST\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2859,8 +3010,56 @@
                   "  pm.test('responde 200', () => pm.response.to.have.status(200));",
                   "  const data = pm.response.json().data;",
                   "  pm.test('documento nuevo sin espacios', () => pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('editDni2')));",
-                  "  pm.test('correo en minúsculas', () => pm.expect(data.email).to.eql('luis.' + pm.collectionVariables.get('editDni2') + '@postman.test'));",
+                  "  pm.test('correo en minúsculas', () => pm.expect(data.corporateEmail).to.eql('luis.' + pm.collectionVariables.get('editDni2') + '@postman.test'));",
                   "  if (pm.response.code === 200) pm.collectionVariables.set('editUpdatedAt', pm.response.json().data.updatedAt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "200 · el propio correo en mayúsculas no es duplicado ni escribe",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"corporateEmail\": \"LUIS.{{editDni2}}@POSTMAN.TEST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 200', () => pm.response.to.have.status(200));",
+                  "  pm.test('no escribió: updatedAt no cambió', () => {",
+                  "    pm.expect(pm.response.json().data.updatedAt).to.eql(pm.collectionVariables.get('editUpdatedAt'));",
+                  "  });",
                   "}"
                 ]
               }
@@ -3157,6 +3356,56 @@
                   "  pm.test('code y mensaje', () => {",
                   "    pm.expect(pm.response.json().code).to.eql('CONFLICT');",
                   "    pm.expect(pm.response.json().message).to.eql('Ya existe un colaborador con el código ' + pm.collectionVariables.get('editOtherCode'));",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 · correo de otro colaborador, escrito en mayúsculas",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/employees/{{editEmployeeId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hrAdminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"corporateEmail\": \"OTRO.{{editOtherDni}}@POSTMAN.TEST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  pm.test('responde 409', () => pm.response.to.have.status(409));",
+                  "  pm.test('mensaje de correo duplicado, con el correo normalizado', () => {",
+                  "    const email = 'otro.' + pm.collectionVariables.get('editOtherDni') + '@postman.test';",
+                  "    pm.expect(pm.response.json().message).to.eql('Ya existe un colaborador con el correo ' + email);",
+                  "    pm.expect(pm.response.json().code).to.eql('CONFLICT');",
                   "  });",
                   "}"
                 ]
@@ -3541,7 +3790,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": null\n}",
+              "raw": "{\n  \"corporateEmail\": null\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3557,10 +3806,10 @@
                 "exec": [
                   "{",
                   "  pm.test('responde 422', () => pm.response.to.have.status(422));",
-                  "  pm.test('el error indica el campo email', () => {",
+                  "  pm.test('el error indica el campo corporateEmail', () => {",
                   "    const errors = pm.response.json().errors || [];",
-                  "    const error = errors.find((e) => e.field === 'email');",
-                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    const error = errors.find((e) => e.field === 'corporateEmail');",
+                  "    pm.expect(error, 'no hay error para corporateEmail: ' + pm.response.text()).to.exist;",
                   "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
                   "  });",
                   "}"
@@ -3592,7 +3841,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"\"\n}",
+              "raw": "{\n  \"corporateEmail\": \"\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3608,10 +3857,10 @@
                 "exec": [
                   "{",
                   "  pm.test('responde 422', () => pm.response.to.have.status(422));",
-                  "  pm.test('el error indica el campo email', () => {",
+                  "  pm.test('el error indica el campo corporateEmail', () => {",
                   "    const errors = pm.response.json().errors || [];",
-                  "    const error = errors.find((e) => e.field === 'email');",
-                  "    pm.expect(error, 'no hay error para email: ' + pm.response.text()).to.exist;",
+                  "    const error = errors.find((e) => e.field === 'corporateEmail');",
+                  "    pm.expect(error, 'no hay error para corporateEmail: ' + pm.response.text()).to.exist;",
                   "    pm.expect(error.message).to.eql('El correo corporativo es obligatorio');",
                   "  });",
                   "}"
@@ -4031,7 +4280,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"rosa.anulada.{{annulDni}}@postman.test\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"rosa.anulada.{{annulDni}}@postman.test\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4483,7 +4732,7 @@
           ]
         },
         {
-          "name": "201 · el documento y el código del anulado se pueden volver a usar",
+          "name": "201 · el documento, el código y el correo del anulado se pueden volver a usar",
           "request": {
             "method": "POST",
             "header": [
@@ -4505,7 +4754,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"email\": \"rosa.anulada.{{annulDni}}@postman.test\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
+              "raw": "{\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"{{annulDni}}\",\n  \"firstNames\": \"ROSA ELENA\",\n  \"lastNameFather\": \"ANULADA\",\n  \"lastNameMother\": \"POSTMAN\",\n  \"hireDate\": \"2026-08-17\",\n  \"corporateEmail\": \"rosa.anulada.{{annulDni}}@postman.test\",\n  \"employeeCode\": \"{{annulCode}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4527,6 +4776,9 @@
                   "    pm.expect(data.documentNumber).to.eql(pm.collectionVariables.get('annulDni'));",
                   "    pm.expect(data.employeeCode).to.eql(pm.collectionVariables.get('annulCode'));",
                   "    pm.expect(data.id).to.not.eql(pm.collectionVariables.get('annulEmployeeId'));",
+                  "  });",
+                  "  pm.test('mismo correo', () => {",
+                  "    pm.expect(pm.response.json().data.corporateEmail).to.eql('rosa.anulada.' + pm.collectionVariables.get('annulDni') + '@postman.test');",
                   "  });",
                   "}"
                 ]
@@ -4631,29 +4883,653 @@
     },
     {
       "name": "8. Legacy (sin autenticación)",
-      "description": "Estas rutas no piden token. Necesitan un Excel real.",
+      "description": "Rutas del sistema anterior: **no piden token** y responden archivos (ZIP, PDF, Excel, CSV, PNG). Sus validaciones responden 400, no 422.\n\nGeneran los PDF con Puppeteer: cada request tarda unos segundos. Si solo quieres la regresión de la API nueva, corre las carpetas 0 a 7.",
       "item": [
         {
-          "name": "Subir Excel de empleados",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "auth": {
-              "type": "noauth"
-            },
-            "url": "{{baseUrl}}/excel/upload",
-            "body": {
-              "mode": "formdata",
-              "formdata": [
+          "name": "8.1 Adendas",
+          "description": "Flujo para generar adendas:\n\n1. **Leer el Excel de adendas**: en Body → form-data elige tu .xlsx en el campo `excel`. Las filas leídas quedan en la variable `addendumEmployees`.\n2. **Generar las adendas (ZIP)**: manda esas filas y descarga el ZIP, con una carpeta por tipo de adenda y un PDF por DNI.\n\nSi no lees un Excel, el paso 2 usa dos adendas de ejemplo (una de cada tipo).\n\nColumnas que reconoce el Excel (fila 1, fechas DD/MM/AAAA): DIVISION, Numero Documento (DNI de 8 dígitos), TRABAJADOR, fecha de ingreso, INICIO, FECHA FIN, INICIO ADENDA, FIN ADENDA, Cargo, playa, Unidad, tipo de contrato (POR INICIO O INCREMENTO DE ACTIVIDAD o DE SUPLENCIA), Suplencia de: (solo en suplencia), salario, salario en letras, dirección, provincia, distrito, departamento.\n\nOjo: hoy el validador exige **Unidad** e **INICIO** en los dos tipos de adenda, aunque el mensaje diga «para adendas de suplencia».",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  if (!pm.collectionVariables.get('addendumEmployees')) {",
+                  "    pm.collectionVariables.set('addendumEmployees', JSON.stringify([{\"division\": \"OPERACIONES\", \"worker\": \"QUISPE MAMANI ROSA\", \"documentNumber\": \"70112233\", \"contractType\": \"POR INICIO O INCREMENTO DE ACTIVIDAD\", \"entryDate\": \"01/03/2026\", \"start\": \"01/03/2026\", \"end\": \"31/08/2026\", \"startAddendum\": \"01/09/2026\", \"endAddendum\": \"30/11/2026\", \"address\": \"AV. AREQUIPA 1234\", \"province\": \"LIMA\", \"district\": \"MIRAFLORES\", \"department\": \"LIMA\", \"salary\": 1200, \"salaryInWords\": \"MIL DOSCIENTOS Y 00/100 SOLES\", \"subDivisionOrParking\": \"PLAYA SAN ISIDRO\", \"position\": \"OPERADOR DE PLAYA\", \"unit\": \"UNIDAD LIMA\"}, {\"division\": \"OPERACIONES\", \"worker\": \"HUAMAN TORRES LUIS\", \"documentNumber\": \"70445566\", \"contractType\": \"DE SUPLENCIA\", \"entryDate\": \"15/04/2026\", \"start\": \"15/04/2026\", \"end\": \"15/10/2026\", \"startAddendum\": \"16/10/2026\", \"endAddendum\": \"15/01/2027\", \"address\": \"JR. HUALLAGA 456\", \"province\": \"LIMA\", \"district\": \"LIMA\", \"department\": \"LIMA\", \"salary\": 1300, \"salaryInWords\": \"MIL TRESCIENTOS Y 00/100 SOLES\", \"subDivisionOrParking\": \"PLAYA MIRAFLORES\", \"position\": \"CAJERO\", \"replacementFor\": \"PEREZ GOMEZ ANA\", \"unit\": \"UNIDAD LIMA\"}]));",
+                  "    console.log('addendumEmployees: no hay un Excel leído, se usan los datos de adendas de ejemplo');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "item": [
+            {
+              "name": "1 · Leer el Excel de adendas",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/addendum/upload",
+                "description": "Devuelve `data.totalRecords` y `data.employees`. Las filas quedan en `addendumEmployees` para el paso 2.",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "excel",
+                      "type": "file",
+                      "src": [],
+                      "description": "Elige aquí tu Excel (.xlsx)"
+                    }
+                  ]
+                }
+              },
+              "event": [
                 {
-                  "key": "excel",
-                  "type": "file",
-                  "src": []
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  if (pm.response.code === 201) {",
+                      "    pm.test('leyó el Excel de adendas (201)', () => {",
+                      "      const data = pm.response.json().data;",
+                      "      pm.expect(data.employees).to.be.an('array').that.is.not.empty;",
+                      "      pm.collectionVariables.set('addendumEmployees', JSON.stringify(data.employees));",
+                      "      console.log('Filas leídas: ' + data.employees.length);",
+                      "    });",
+                      "  } else {",
+                      "    // Sin archivo elegido (por ejemplo, en Run collection) o con errores en el Excel.",
+                      "    pm.test('no leyó el Excel: 400 con el motivo', () => {",
+                      "      pm.response.to.have.status(400);",
+                      "      console.log(pm.response.text());",
+                      "    });",
+                      "  }",
+                      "}"
+                    ]
+                  }
                 }
               ]
             },
-            "description": "En Body > form-data, elige tu archivo en el campo `excel`. El arreglo data.employees de la respuesta es el body de /contracts/download-zip, /contracts/preview, /excel/download-lawlife, /excel/download-sctr y /excel/download-photocheck."
-          }
+            {
+              "name": "2 · Generar las adendas (ZIP)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/addendum/process",
+                "description": "Manda las filas que leyó el paso 1 (o las de ejemplo) y responde `adendas.zip`.\n\nPara guardar el archivo: en Postman, flecha junto a **Send** → **Send and Download**, o después del envío **Save response → Save to a file**.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{{addendumEmployees}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 200 con un ZIP', () => {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/zip');",
+                      "    pm.expect(pm.response.responseSize).to.be.above(0);",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Generar adendas de ejemplo (sin Excel)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/addendum/process",
+                "description": "Dos adendas ficticias, una de cada tipo. Edita el cuerpo para generar las tuyas sin Excel.\n\nPara guardar el archivo: en Postman, flecha junto a **Send** → **Send and Download**, o después del envío **Save response → Save to a file**.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\n  {\n    \"division\": \"OPERACIONES\",\n    \"worker\": \"QUISPE MAMANI ROSA\",\n    \"documentNumber\": \"70112233\",\n    \"contractType\": \"POR INICIO O INCREMENTO DE ACTIVIDAD\",\n    \"entryDate\": \"01/03/2026\",\n    \"start\": \"01/03/2026\",\n    \"end\": \"31/08/2026\",\n    \"startAddendum\": \"01/09/2026\",\n    \"endAddendum\": \"30/11/2026\",\n    \"address\": \"AV. AREQUIPA 1234\",\n    \"province\": \"LIMA\",\n    \"district\": \"MIRAFLORES\",\n    \"department\": \"LIMA\",\n    \"salary\": 1200,\n    \"salaryInWords\": \"MIL DOSCIENTOS Y 00/100 SOLES\",\n    \"subDivisionOrParking\": \"PLAYA SAN ISIDRO\",\n    \"position\": \"OPERADOR DE PLAYA\",\n    \"unit\": \"UNIDAD LIMA\"\n  },\n  {\n    \"division\": \"OPERACIONES\",\n    \"worker\": \"HUAMAN TORRES LUIS\",\n    \"documentNumber\": \"70445566\",\n    \"contractType\": \"DE SUPLENCIA\",\n    \"entryDate\": \"15/04/2026\",\n    \"start\": \"15/04/2026\",\n    \"end\": \"15/10/2026\",\n    \"startAddendum\": \"16/10/2026\",\n    \"endAddendum\": \"15/01/2027\",\n    \"address\": \"JR. HUALLAGA 456\",\n    \"province\": \"LIMA\",\n    \"district\": \"LIMA\",\n    \"department\": \"LIMA\",\n    \"salary\": 1300,\n    \"salaryInWords\": \"MIL TRESCIENTOS Y 00/100 SOLES\",\n    \"subDivisionOrParking\": \"PLAYA MIRAFLORES\",\n    \"position\": \"CAJERO\",\n    \"replacementFor\": \"PEREZ GOMEZ ANA\",\n    \"unit\": \"UNIDAD LIMA\"\n  }\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 200 con un ZIP', () => {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/zip');",
+                      "    pm.expect(pm.response.responseSize).to.be.above(0);",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "400 · lote vacío",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/addendum/process",
+                "description": "El validador legacy responde 400 (no 422) con `errors`.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "[]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 400', () => pm.response.to.have.status(400));",
+                      "  pm.test('indica body', () => {",
+                      "    const errors = pm.response.json().errors || [];",
+                      "    const error = errors.find((e) => e.field === 'body');",
+                      "    pm.expect(error, pm.response.text()).to.exist;",
+                      "    pm.expect(error.message).to.eql(\"La lista de empleados no puede estar vacía.\");",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "400 · suplencia sin «Suplencia de»",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/addendum/process",
+                "description": "Una adenda DE SUPLENCIA necesita `replacementFor`.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\n  {\n    \"division\": \"OPERACIONES\",\n    \"worker\": \"HUAMAN TORRES LUIS\",\n    \"documentNumber\": \"70445566\",\n    \"contractType\": \"DE SUPLENCIA\",\n    \"entryDate\": \"15/04/2026\",\n    \"start\": \"15/04/2026\",\n    \"end\": \"15/10/2026\",\n    \"startAddendum\": \"16/10/2026\",\n    \"endAddendum\": \"15/01/2027\",\n    \"address\": \"JR. HUALLAGA 456\",\n    \"province\": \"LIMA\",\n    \"district\": \"LIMA\",\n    \"department\": \"LIMA\",\n    \"salary\": 1300,\n    \"salaryInWords\": \"MIL TRESCIENTOS Y 00/100 SOLES\",\n    \"subDivisionOrParking\": \"PLAYA MIRAFLORES\",\n    \"position\": \"CAJERO\",\n    \"unit\": \"UNIDAD LIMA\"\n  }\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 400', () => pm.response.to.have.status(400));",
+                      "  pm.test('indica body.0.replacementFor', () => {",
+                      "    const errors = pm.response.json().errors || [];",
+                      "    const error = errors.find((e) => e.field === 'body.0.replacementFor');",
+                      "    pm.expect(error, pm.response.text()).to.exist;",
+                      "    pm.expect(error.message).to.eql(\"El campo 'SUPLENCIA DE' es obligatorio para adendas de suplencia\");",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "8.2 Contratos",
+          "description": "1. **Leer el Excel de colaboradores**: elige tu .xlsx en el campo `excel`. Las filas quedan en `contractEmployees` y las usan también los formatos de 8.3.\n2. **Generar los contratos (ZIP)**: un PDF por colaborador, en carpetas por tipo de contrato.\n\nSi no lees un Excel, se usan dos colaboradores de ejemplo (PLANILLA y SUBSIDIO). Tipos válidos: PLANILLA, PART TIME, SUBSIDIO, APE, PRACTICANTE (máximo 50 por lote).",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  if (!pm.collectionVariables.get('contractEmployees')) {",
+                  "    pm.collectionVariables.set('contractEmployees', JSON.stringify([{\"name\": \"ROSA\", \"lastNameFather\": \"QUISPE\", \"lastNameMother\": \"MAMANI\", \"dni\": \"70112233\", \"birthDate\": \"12/05/1995\", \"sex\": \"F\", \"email\": \"rosa.quispe@ejemplo.pe\", \"phone\": \"987654321\", \"address\": \"AV. AREQUIPA 1234\", \"province\": \"LIMA\", \"district\": \"MIRAFLORES\", \"department\": \"LIMA\", \"salary\": 1200, \"salaryInWords\": \"MIL DOSCIENTOS Y 00/100 SOLES\", \"position\": \"OPERADOR DE PLAYA\", \"entryDate\": \"01/03/2026\", \"endDate\": \"31/08/2026\", \"subDivisionOrParking\": \"PLAYA SAN ISIDRO\", \"division\": \"OPERACIONES\", \"sctr\": \"PACIFICO\", \"contractType\": \"PLANILLA\"}, {\"name\": \"LUIS\", \"lastNameFather\": \"HUAMAN\", \"lastNameMother\": \"TORRES\", \"dni\": \"70445566\", \"birthDate\": \"03/11/1990\", \"sex\": \"M\", \"email\": \"luis.huaman@ejemplo.pe\", \"phone\": \"912345678\", \"address\": \"JR. HUALLAGA 456\", \"province\": \"LIMA\", \"district\": \"LIMA\", \"department\": \"LIMA\", \"salary\": 1300, \"salaryInWords\": \"MIL TRESCIENTOS Y 00/100 SOLES\", \"position\": \"CAJERO\", \"entryDate\": \"15/04/2026\", \"endDate\": \"15/10/2026\", \"subDivisionOrParking\": \"PLAYA MIRAFLORES\", \"division\": \"OPERACIONES\", \"sctr\": \"PACIFICO\", \"contractType\": \"SUBSIDIO\", \"replacementFor\": \"PEREZ GOMEZ ANA\", \"reasonForSubstitution\": \"DESCANSO MEDICO\", \"timeForCompany\": \"3 MESES\", \"workingCondition\": \"TEMPORAL\", \"probationaryPeriod\": \"3 MESES\"}]));",
+                  "    console.log('contractEmployees: no hay un Excel leído, se usan los colaboradores de ejemplo');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "item": [
+            {
+              "name": "1 · Leer el Excel de colaboradores",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/excel/upload",
+                "description": "Devuelve `data.employees`. Las filas quedan en `contractEmployees`.",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "excel",
+                      "type": "file",
+                      "src": [],
+                      "description": "Elige aquí tu Excel (.xlsx)"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  if (pm.response.code === 201) {",
+                      "    pm.test('leyó el Excel de colaboradores (201)', () => {",
+                      "      const data = pm.response.json().data;",
+                      "      pm.expect(data.employees).to.be.an('array').that.is.not.empty;",
+                      "      pm.collectionVariables.set('contractEmployees', JSON.stringify(data.employees));",
+                      "      console.log('Filas leídas: ' + data.employees.length);",
+                      "    });",
+                      "  } else {",
+                      "    // Sin archivo elegido (por ejemplo, en Run collection) o con errores en el Excel.",
+                      "    pm.test('no leyó el Excel: 400 con el motivo', () => {",
+                      "      pm.response.to.have.status(400);",
+                      "      console.log(pm.response.text());",
+                      "    });",
+                      "  }",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "2 · Generar los contratos (ZIP)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/contracts/download-zip",
+                "description": "Responde `contratos-DD-MM-AAAA.zip`.\n\nPara guardar el archivo: en Postman, flecha junto a **Send** → **Send and Download**, o después del envío **Save response → Save to a file**.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{{contractEmployees}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 200 con un ZIP', () => {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/zip');",
+                      "    pm.expect(pm.response.responseSize).to.be.above(0);",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Vista previa de un contrato (PDF)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/contracts/preview",
+                "description": "Un solo colaborador (un objeto, no un arreglo). Responde el PDF en línea.\n\nPara guardar el archivo: en Postman, flecha junto a **Send** → **Send and Download**, o después del envío **Save response → Save to a file**.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"ROSA\",\n  \"lastNameFather\": \"QUISPE\",\n  \"lastNameMother\": \"MAMANI\",\n  \"dni\": \"70112233\",\n  \"birthDate\": \"12/05/1995\",\n  \"sex\": \"F\",\n  \"email\": \"rosa.quispe@ejemplo.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"AV. AREQUIPA 1234\",\n  \"province\": \"LIMA\",\n  \"district\": \"MIRAFLORES\",\n  \"department\": \"LIMA\",\n  \"salary\": 1200,\n  \"salaryInWords\": \"MIL DOSCIENTOS Y 00/100 SOLES\",\n  \"position\": \"OPERADOR DE PLAYA\",\n  \"entryDate\": \"01/03/2026\",\n  \"endDate\": \"31/08/2026\",\n  \"subDivisionOrParking\": \"PLAYA SAN ISIDRO\",\n  \"division\": \"OPERACIONES\",\n  \"sctr\": \"PACIFICO\",\n  \"contractType\": \"PLANILLA\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 200 con un PDF', () => {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf');",
+                      "    pm.expect(pm.response.responseSize).to.be.above(0);",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "400 · lote vacío",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/contracts/download-zip",
+                "description": "El validador legacy responde 400 (no 422) con `errors`.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "[]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 400', () => pm.response.to.have.status(400));",
+                      "  pm.test('indica body', () => {",
+                      "    const errors = pm.response.json().errors || [];",
+                      "    const error = errors.find((e) => e.field === 'body');",
+                      "    pm.expect(error, pm.response.text()).to.exist;",
+                      "    pm.expect(error.message).to.eql(\"Debes seleccionar al menos un empleado para generar el ZIP.\");",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "8.3 Formatos (SCTR, Vida Ley, Fotocheck)",
+          "description": "Usan las filas de `contractEmployees` (el Excel leído en 8.2) o los colaboradores de ejemplo.",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "{",
+                  "  if (!pm.collectionVariables.get('contractEmployees')) {",
+                  "    pm.collectionVariables.set('contractEmployees', JSON.stringify([{\"name\": \"ROSA\", \"lastNameFather\": \"QUISPE\", \"lastNameMother\": \"MAMANI\", \"dni\": \"70112233\", \"birthDate\": \"12/05/1995\", \"sex\": \"F\", \"email\": \"rosa.quispe@ejemplo.pe\", \"phone\": \"987654321\", \"address\": \"AV. AREQUIPA 1234\", \"province\": \"LIMA\", \"district\": \"MIRAFLORES\", \"department\": \"LIMA\", \"salary\": 1200, \"salaryInWords\": \"MIL DOSCIENTOS Y 00/100 SOLES\", \"position\": \"OPERADOR DE PLAYA\", \"entryDate\": \"01/03/2026\", \"endDate\": \"31/08/2026\", \"subDivisionOrParking\": \"PLAYA SAN ISIDRO\", \"division\": \"OPERACIONES\", \"sctr\": \"PACIFICO\", \"contractType\": \"PLANILLA\"}, {\"name\": \"LUIS\", \"lastNameFather\": \"HUAMAN\", \"lastNameMother\": \"TORRES\", \"dni\": \"70445566\", \"birthDate\": \"03/11/1990\", \"sex\": \"M\", \"email\": \"luis.huaman@ejemplo.pe\", \"phone\": \"912345678\", \"address\": \"JR. HUALLAGA 456\", \"province\": \"LIMA\", \"district\": \"LIMA\", \"department\": \"LIMA\", \"salary\": 1300, \"salaryInWords\": \"MIL TRESCIENTOS Y 00/100 SOLES\", \"position\": \"CAJERO\", \"entryDate\": \"15/04/2026\", \"endDate\": \"15/10/2026\", \"subDivisionOrParking\": \"PLAYA MIRAFLORES\", \"division\": \"OPERACIONES\", \"sctr\": \"PACIFICO\", \"contractType\": \"SUBSIDIO\", \"replacementFor\": \"PEREZ GOMEZ ANA\", \"reasonForSubstitution\": \"DESCANSO MEDICO\", \"timeForCompany\": \"3 MESES\", \"workingCondition\": \"TEMPORAL\", \"probationaryPeriod\": \"3 MESES\"}]));",
+                  "    console.log('contractEmployees: no hay un Excel leído, se usan los colaboradores de ejemplo');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "item": [
+            {
+              "name": "SCTR (xlsx)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/excel/download-sctr",
+                "description": "Responde `FORMATO_SCTR.xlsx`.\n\nPara guardar el archivo: en Postman, flecha junto a **Send** → **Send and Download**, o después del envío **Save response → Save to a file**.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{{contractEmployees}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 200 con un Excel', () => {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('spreadsheetml');",
+                      "    pm.expect(pm.response.responseSize).to.be.above(0);",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Vida Ley (xlsx)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/excel/download-lawlife",
+                "description": "Responde `VIDA_LEY_TRAMA_INV_URB_OP.xlsx`.\n\nPara guardar el archivo: en Postman, flecha junto a **Send** → **Send and Download**, o después del envío **Save response → Save to a file**.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{{contractEmployees}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 200 con un Excel', () => {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('spreadsheetml');",
+                      "    pm.expect(pm.response.responseSize).to.be.above(0);",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Fotocheck (csv)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/excel/download-photocheck",
+                "description": "Responde `Fotocheck.csv`.\n\nPara guardar el archivo: en Postman, flecha junto a **Send** → **Send and Download**, o después del envío **Save response → Save to a file**.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{{contractEmployees}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 200 con un CSV', () => {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/csv');",
+                      "    pm.expect(pm.response.responseSize).to.be.above(0);",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Imagen de la tabla (png)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "auth": {
+                  "type": "noauth"
+                },
+                "url": "{{baseUrl}}/excel/excel-to-image",
+                "description": "Es un GET con cuerpo (así está la ruta legacy). Responde un PNG con la tabla de colaboradores.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{{contractEmployees}}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "{",
+                      "  pm.test('responde 200 con un PNG', () => {",
+                      "    pm.response.to.have.status(200);",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('image/png');",
+                      "    pm.expect(pm.response.responseSize).to.be.above(0);",
+                      "  });",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              }
+            }
+          ]
         }
       ]
     }
