@@ -442,11 +442,11 @@ Total: 86 puntos. Etapa 0: 12. Etapa 1: 35. Etapa 2: 39.
 - Un test afirma el conteo de distritos del archivo fuente.
 
 **Definición de Hecho**
-- [ ] Archivo de datos versionado, con su fuente y fecha de descarga anotadas.
-- [ ] Seed ejecutado dos veces seguidas sin error.
-- [ ] Tests de conteo y del código `150101` en la suite.
-- [ ] El `global-setup` de e2e sigue pasando con el seed ampliado.
-- [ ] PR revisado y mergeado a `develop`, con `lint`, `type-check`, tests, `depcruise` y e2e en verde.
+- [x] Archivo de datos versionado, con su fuente y fecha de descarga anotadas.
+- [x] Seed ejecutado dos veces seguidas sin error.
+- [x] Tests de conteo y del código `150101` en la suite.
+- [x] El `global-setup` de e2e sigue pasando con el seed ampliado.
+- [x] PR revisado y mergeado a `develop`, con `lint`, `type-check`, tests, `depcruise` y e2e en verde.
 
 ### US-031 · Datos del empleador
 

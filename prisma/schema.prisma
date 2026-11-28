@@ -365,3 +365,16 @@ model LegalParameters {
   @@index([code, validFrom(sort: Desc)], map: "ix_legal_parameters_code_vigencia")
   @@map("legal_parameters")
 }
+
+model Employer {
+  id                Int          @id @default(1) @db.SmallInt
+  ruc               String       @db.Char(11)
+  legalName         String       @map("legal_name") @db.Char(100)
+  address           String       @db.Char(60)
+  legalRepName      String       @map("legal_rep_name") @db.Char(150)
+  legalRepDocType   DocumentType @map("legal_rep_doc_type")
+  legalRepDocNumber String       @map("legal_rep_doc_number") @db.Char(12)
+  updatedAt         DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@map("employer")
+}
