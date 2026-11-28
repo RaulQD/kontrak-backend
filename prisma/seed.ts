@@ -6,6 +6,8 @@ import { PERMISSIONS } from '../src/shared/constants/permissions';
 // actual. Al sembrarlo, la BD pasa a ser la fuente de verdad y
 // `risk-level.helper.ts` debería leer de aquí en vez de la constante.
 import { SCTR_RISK_LEVELS } from '../src/domain/excel/constants/positions';
+
+import { seedUbigeo } from './seed-ubigeo';
 // ═══════════════════════════════════════════════════════════
 // 1. CATÁLOGO DE ROLES
 // ═══════════════════════════════════════════════════════════
@@ -403,6 +405,10 @@ async function seedPositions() {
   }
   console.info(`✅ ${entries.length} puestos (con nivel de riesgo SCTR)`);
 }
+async function seedUbigeoCatalog() {
+  const total = await seedUbigeo(prisma);
+  console.info(`✅ ${total} ubigeos (catálogo INEI 2026)`);
+}
 
 async function main() {
   console.info('🌱 Iniciando seed...');
@@ -415,6 +421,7 @@ async function main() {
   await seedBranches();
   await seedDivisions();
   await seedPositions();
+  await seedUbigeoCatalog();
   console.info('✅ Seed completado');
 }
 

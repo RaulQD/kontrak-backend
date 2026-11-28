@@ -2,7 +2,7 @@
   "info": {
     "name": "Kontrak API (local)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Pruebas de la API de Kontrak en local.\n\nAntes de empezar:\n1. Postgres corriendo (el tuyo local, o docker compose up -d db)\n2. pnpm prisma migrate deploy && pnpm seed\n   (US-020c: si la migración del correo falla porque hay colaboradores sin correo,\n   borra antes los que creó Postman: DELETE FROM employees WHERE last_name_mother = 'POSTMAN';\n   y vuelve a correr el paso 3 para que los de prueba tengan correo)\n3. pnpm tsx tests/manual/dev-data.ts  (usuarios por rol, colaboradores de prueba y el ubigeo 150101)\n4. pnpm dev\n5. En la pestaña Variables de esta colección, pon tu BOOTSTRAP_ADMIN_PASSWORD en el\n   valor ACTUAL (Current value) de `password`. Así no se exporta ni se sincroniza.\n\nEjecuta primero la carpeta 1. Auth: cada login guarda su token en una variable.\nCon Run collection se ejecuta todo en orden y ves cada test en verde o rojo."
+    "description": "Pruebas de la API de Kontrak en local.\n\nAntes de empezar:\n1. Postgres corriendo (el tuyo local, o docker compose up -d db)\n2. pnpm prisma migrate deploy && pnpm seed\n   (US-020c: si la migración del correo falla porque hay colaboradores sin correo,\n   borra antes los que creó Postman: DELETE FROM employees WHERE last_name_mother = 'POSTMAN';\n   y vuelve a correr el paso 3 para que los de prueba tengan correo)\n3. pnpm tsx tests/manual/dev-data.ts  (usuarios por rol y colaboradores de prueba; el ubigeo lo carga el seed)\n4. pnpm dev\n5. En la pestaña Variables de esta colección, pon tu BOOTSTRAP_ADMIN_PASSWORD en el\n   valor ACTUAL (Current value) de `password`. Así no se exporta ni se sincroniza.\n\nEjecuta primero la carpeta 1. Auth: cada login guarda su token en una variable.\nCon Run collection se ejecuta todo en orden y ves cada test en verde o rojo."
   },
   "auth": {
     "type": "noauth"
@@ -1204,7 +1204,7 @@
                 }
               }
             },
-            "description": "Requiere que exista el ubigeo 150101 (lo crea tests/manual/dev-data.ts mientras US-004d no cargue el catálogo)."
+            "description": "Usa el ubigeo 150101, que carga pnpm prisma db seed (catálogo INEI, US-004d)."
           },
           "event": [
             {
@@ -1214,7 +1214,7 @@
                 "exec": [
                   "{",
                   "  if (pm.response.code === 422 && /ubigeo/.test(pm.response.text())) {",
-                  "    pm.test('falta el ubigeo 150101: corre pnpm tsx tests/manual/dev-data.ts', () => pm.expect.fail(pm.response.text()));",
+                  "    pm.test('falta el ubigeo 150101: corre pnpm prisma db seed', () => pm.expect.fail(pm.response.text()));",
                   "  }",
                   "  pm.test('responde 201', () => pm.response.to.have.status(201));",
                   "  const data = pm.response.json().data;",
@@ -3245,7 +3245,7 @@
                 }
               }
             },
-            "description": "Requiere el ubigeo 150101 (lo crea tests/manual/dev-data.ts)."
+            "description": "Usa el ubigeo 150101, que carga pnpm prisma db seed."
           },
           "event": [
             {
@@ -3255,7 +3255,7 @@
                 "exec": [
                   "{",
                   "  if (pm.response.code === 422 && /ubigeo/.test(pm.response.text())) {",
-                  "    pm.test('falta el ubigeo 150101: corre pnpm tsx tests/manual/dev-data.ts', () => pm.expect.fail(pm.response.text()));",
+                  "    pm.test('falta el ubigeo 150101: corre pnpm prisma db seed', () => pm.expect.fail(pm.response.text()));",
                   "  }",
                   "  pm.test('responde 200', () => pm.response.to.have.status(200));",
                   "  pm.test('ubigeoId guardado', () => pm.expect(pm.response.json().data.ubigeoId).to.eql('150101'));",

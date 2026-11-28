@@ -1,10 +1,9 @@
 /**
  * Datos para probar a mano los endpoints (api.http) en tu base de DESARROLLO.
  *
- * Crea un usuario por rol, unos pocos colaboradores y el ubigeo 150101 (para
- * probar el alta con ubigeo hasta que US-004d cargue el catálogo). Se puede correr las veces
- * que quieras: solo toca sus propias filas (emails *@kontrak.local y códigos
- * DEV-EMP-…), así que no pisa datos tuyos.
+ * Crea un usuario por rol y unos pocos colaboradores. El catálogo de ubigeo lo
+ * carga `pnpm prisma db seed` (US-004d). Se puede correr las veces que quieras:
+ * solo toca sus propias filas (emails *@kontrak.local y códigos DEV-EMP-…).
  *
  * Uso:  pnpm tsx tests/manual/dev-data.ts
  * Contraseña de los usuarios: la misma de BOOTSTRAP_ADMIN_PASSWORD en tu .env.
@@ -133,14 +132,6 @@ const EMPLOYEES: Prisma.EmployeeCreateManyInput[] = [
   }),
 ];
 
-// Solo se crea si falta: si ya cargaste el catálogo real, no se toca.
-const DEV_UBIGEO = {
-  id: '150101',
-  department: 'LIMA',
-  province: 'LIMA',
-  district: 'LIMA',
-};
-
 const main = async (): Promise<void> => {
   const passwordHash = await bcrypt.hash(guard(), 10);
 
@@ -155,12 +146,6 @@ const main = async (): Promise<void> => {
   });
   await prisma.employee.createMany({ data: EMPLOYEES });
 
-  await prisma.ubigeo.upsert({
-    where: { id: DEV_UBIGEO.id },
-    update: {},
-    create: DEV_UBIGEO,
-  });
-
   console.info('\nColaboradores:');
   for (const e of EMPLOYEES) {
     const anulado = e.deletedAt ? '  (anulado)' : '';
@@ -168,7 +153,6 @@ const main = async (): Promise<void> => {
       `  ${e.id}  ${e.firstNames} ${e.lastNameFather}  ${e.status}${anulado}`,
     );
   }
-  console.info(`\nUbigeo de prueba: ${DEV_UBIGEO.id} (${DEV_UBIGEO.district})`);
 };
 
 main()

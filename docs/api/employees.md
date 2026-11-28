@@ -241,5 +241,4 @@ Los valores sensibles también quedan en `audit_logs`, porque ahí se registra q
 
 ## Pendiente en otras historias
 
-- **US-004d:** catálogo completo de ubigeos. Hasta entonces solo existen los cargados a mano (`tests/manual/dev-data.ts` crea el `150101`).
 - **US-022:** cese del colaborador.
