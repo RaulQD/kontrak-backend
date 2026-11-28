@@ -128,11 +128,10 @@ const LEGAL_PARAMETERS = [
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Identidad del empleador. NO se persiste: hoy su fuente de verdad son las
- * plantillas de contrato (src/domain/contracts/templates/templates.ts), donde
- * el RUC y el domicilio están embebidos en el texto legal. Se conserva aquí
- * como dato estructurado porque `EMPLOYER.address` alimenta la sede semilla y
- * porque es el único lugar del repositorio donde estos campos están separados.
+ * Valores iniciales del empleador (US-031). El seed solo crea la fila si falta:
+ * después se edita con PUT /api/organization/employer y el seed no la pisa.
+ * Las plantillas de contrato siguen con estos datos embebidos hasta US-012.
+ * `EMPLOYER.address` también alimenta la sede semilla.
  */
 const EMPLOYER = {
   ruc: '20603381697',
@@ -140,8 +139,9 @@ const EMPLOYER = {
   address:
     'Calle Dean Valdivia N° 148 Int. 1401 Urb. Jardín (Edificio Platinium), San Isidro, Lima',
   legalRepName: 'Catherine Susan Chang López',
-  legalRepDoc: '42933662',
-};
+  legalRepDocType: 'DNI',
+  legalRepDocNumber: '42933662',
+} as const;
 
 // ⚠️ PROVISIONALES. El repositorio no contiene el catálogo real de sedes
 //    ni de divisiones — en el Excel ambos son texto libre. Reemplazar con
@@ -410,6 +410,14 @@ async function seedUbigeoCatalog() {
   console.info(`✅ ${total} ubigeos (catálogo INEI 2026)`);
 }
 
+async function seedEmployer() {
+  await prisma.employer.upsert({
+    where: { id: 1 },
+    update: {},
+    create: { id: 1, ...EMPLOYER },
+  });
+}
+
 async function main() {
   console.info('🌱 Iniciando seed...');
   await seedRoles();
@@ -422,6 +430,7 @@ async function main() {
   await seedDivisions();
   await seedPositions();
   await seedUbigeoCatalog();
+  await seedEmployer();
   console.info('✅ Seed completado');
 }
 
