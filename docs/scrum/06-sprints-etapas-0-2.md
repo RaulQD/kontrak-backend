@@ -379,16 +379,16 @@ Total: 86 puntos. Etapa 0: 12. Etapa 1: 35. Etapa 2: 39.
 - `juan_perez@empresa.pe` y `juanxperez@empresa.pe` son correos distintos.
 
 **Subtareas**
-- [ ] Migración A: `employees.corporate_email` NOT NULL; `schema.prisma` y `pnpm prisma generate`.
-- [ ] Tipos `string | null` → `string` (entidad, vista, DTO, patch) y fixtures/dev-data con correo.
-- [ ] Zod: `corporateEmail` obligatorio en el alta y no anulable en el PATCH.
-- [ ] Entidad: correo obligatorio y normalizado (`trim` + minúsculas).
-- [ ] Migración B: normalizar los correos existentes y crear `ux_employees_corporate_email`.
-- [ ] `DuplicateEmailError` (409) y `findByCorporateEmail` en el puerto y el repositorio.
-- [ ] `violatedUniqueIndex`: traducir P2002 por nombre de índice (doc, código, correo).
-- [ ] Verificación previa en CreateEmployee y UpdateEmployee.
-- [ ] Tests unitarios y e2e de los criterios.
-- [ ] Documentación.
+- [x] Migración A: `employees.corporate_email` NOT NULL; `schema.prisma` y `pnpm prisma generate`.
+- [x] Tipos `string | null` → `string` (entidad, vista, DTO, patch) y fixtures/dev-data con correo.
+- [x] Zod: `corporateEmail` obligatorio en el alta y no anulable en el PATCH.
+- [x] Entidad: correo obligatorio y normalizado (`trim` + minúsculas).
+- [x] Migración B: normalizar los correos existentes y crear `ux_employees_corporate_email`.
+- [x] `DuplicateEmailError` (409) y `findByCorporateEmail` en el puerto y el repositorio.
+- [x] `violatedUniqueIndex`: traducir P2002 por nombre de índice (doc, código, correo).
+- [x] Verificación previa en CreateEmployee y UpdateEmployee.
+- [x] Tests unitarios y e2e de los criterios.
+- [x] Documentación.
 
 **Notas técnicas.**
 - La unicidad la da un índice parcial `ux_employees_corporate_email` sobre `lower(corporate_email) WHERE deleted_at IS NULL`, la misma regla que DNI y código: cesar no libera el correo, anular sí. Si el colaborador reingresa, sigue siendo el mismo registro (su DNI también está reservado), así que conserva su correo.
@@ -398,11 +398,11 @@ Total: 86 puntos. Etapa 0: 12. Etapa 1: 35. Etapa 2: 39.
 - `personalEmail` no cambia: sigue opcional y sin unicidad.
 
 **Definición de Hecho**
-- [ ] Las dos migraciones aplicadas con `prisma migrate deploy` en la BD local y en la de tests, con el SQL de reversión en la descripción de cada PR.
-- [ ] Unitarios y e2e de todos los criterios en verde, incluido el de concurrencia.
-- [ ] `docs/api/employees.md` documenta el 400 y el 409 de correo.
-- [ ] `diseno_bd_fase0.md` lista `ux_employees_corporate_email`; `04-us-020` registra la decisión D7.
-- [ ] PRs ≤400 líneas, revisados y mergeados a `develop` con lint, type-check, tests, depcruise y e2e en verde.
+- [x] Las dos migraciones aplicadas con `prisma migrate deploy` en la BD local y en la de tests, con el SQL de reversión en la descripción de cada PR.
+- [x] Unitarios y e2e de todos los criterios en verde, incluido el de concurrencia.
+- [x] `docs/api/employees.md` documenta el 400 y el 409 de correo.
+- [x] `diseno_bd_fase0.md` lista `ux_employees_corporate_email`; `04-us-020` registra la decisión D7.
+- [x] PRs ≤400 líneas, revisados y mergeados a `develop` con lint, type-check, tests, depcruise y e2e en verde. PR #45 superó el límite: 582 líneas de código, por el cambio de nombre a `corporateEmail`.
 
 ### TASK-08 · Cerrar los cabos sueltos de `auth`
 
@@ -421,10 +421,10 @@ Total: 86 puntos. Etapa 0: 12. Etapa 1: 35. Etapa 2: 39.
 **Notas técnicas.** Implica una lectura por clave primaria en `authenticate` (`tokensRevokedAt`, `isActive`), comparada con el `iat` del token. Para un sistema interno con decenas de usuarios el costo es despreciable.
 
 **Definición de Hecho**
-- [ ] e2e de los tres casos en verde.
-- [ ] `docs/auth/jwt.md` describe la revocación inmediata.
-- [ ] Los e2e existentes de `auth` pasan sin cambios.
-- [ ] PR revisado y mergeado a `develop`, con `lint`, `type-check`, tests, `depcruise` y e2e en verde.
+- [x] e2e de los tres casos en verde.
+- [x] `docs/auth/jwt.md` describe la revocación inmediata.
+- [x] Los e2e existentes de `auth` pasan sin cambios.
+- [x] PR revisado y mergeado a `develop`, con `lint`, `type-check`, tests, `depcruise` y e2e en verde.
 
 ### US-004d · Seed del catálogo de ubigeo
 

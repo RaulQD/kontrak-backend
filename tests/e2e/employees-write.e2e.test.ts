@@ -29,13 +29,7 @@ const email = (rol: Rol) =>
  * la tabla sin colaboradores ajenos a su fixture.
  */
 const MARCA = 'E2E-ESCRITURA';
-const UBIGEO = {
-  id: '150101',
-  department: 'LIMA',
-  province: 'LIMA',
-  district: 'LIMA',
-};
-
+const UBIGEO = { id: '150101' };
 // DNIs 610000xx: no chocan con el fixture de lectura (70000001…, 40506070) ni contienen "4050".
 let secuencia = 0;
 const nuevoDni = () => String(61000000 + ++secuencia);
@@ -98,12 +92,6 @@ describe('US-020b: alta, edición y anulación de la ficha del empleado', () => 
   beforeAll(async () => {
     app = buildApp();
     await borrarFilasDeEsteArchivo();
-    // El catálogo de ubigeo llega con US-004d; mientras tanto, solo el que se usa aquí.
-    await prisma.ubigeo.upsert({
-      where: { id: UBIGEO.id },
-      update: {},
-      create: UBIGEO,
-    });
     for (const rol of ROLES) {
       userIds[rol] = await crearUsuarioConRol(email(rol), rol);
       tokens[rol] = await loginToken(app, email(rol));
